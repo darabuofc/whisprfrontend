@@ -1,0 +1,193 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- Base --- */
+:root { color-scheme: dark; }
+html, body {
+  @apply bg-base-900 text-gray-100;
+}
+.container {
+  @apply max-w-6xl mx-auto;
+}
+.card {
+  @apply bg-base-700 border border-gray-800 rounded-2xl shadow;
+}
+.btn {
+  @apply inline-flex items-center gap-2 rounded-2xl px-4 py-2 
+         border border-gray-700 transition;
+}
+.btn-primary {
+  /* bg-accent-pink/10 → use accent blue theme instead */
+  background-color: rgb(0 229 255 / 0.10);
+}
+.btn-primary:hover {
+  background-color: rgb(0 229 255 / 0.20);
+}
+.input {
+  @apply rounded-xl px-3 py-2 outline-none;
+  background-color: rgb(20 20 20 / 1); /* base-800 */
+  border: 1px solid rgb(31 41 55 / 1); /* gray-800 */
+}
+.input:focus {
+  box-shadow: 0 0 0 2px rgb(0 229 255 / 0.4);
+}
+
+/* --- Safe-area --- */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* --- Glass navbar --- */
+.glass-nav {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 30px rgba(2, 8, 23, 0.35);
+}
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* --- Nav buttons --- */
+.btn-nav {
+  @apply relative rounded-xl px-3 py-2 text-sm text-gray-200 transition;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.btn-nav:hover {
+  background-color: rgba(255, 255, 255, 0.10);
+  color: #fff;
+}
+
+/* Active nav item */
+.btn-nav--active {
+  @apply shadow;
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgb(0 229 255 / 0.6);
+}
+.btn-nav--active::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 1px;
+  border-radius: 9999px;
+  background-image: linear-gradient(
+    90deg,
+    rgba(0,229,255,0) 0%,
+    rgba(0,229,255,0.9) 50%,
+    rgba(139,92,246,0) 100%
+  );
+}
+
+/* --- Mobile buttons --- */
+.btn-icon {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+.btn-icon:active {
+  background-color: rgba(255, 255, 255, 0.10);
+}
+
+
+/* Slightly lighter glass for mobile */
+@media (max-width: 768px) {
+  .glass-nav { backdrop-filter: blur(8px); }
+}
+
+/* Glassy input */
+.input-modern {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+.input-modern:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+}
+
+/* ---------- Glass Card ---------- */
+.glass-card {
+  @apply rounded-2xl p-6 border border-white/10;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 30px rgba(2, 8, 23, 0.4);
+}
+
+/* ---------- Floating Label Inputs ---------- */
+.form-group {
+  @apply relative mb-6;
+}
+.input-modern {
+  @apply w-full rounded-xl px-3 pt-5 pb-2 text-gray-100 bg-white/5 border border-white/10 focus:outline-none;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+.input-modern:focus {
+  @apply border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.6)];
+}
+.label-modern {
+  @apply absolute left-3 top-3 text-gray-400 text-sm transition-all pointer-events-none;
+  background: transparent;
+  padding: 0 4px;
+}
+/* Float label when filled or focused */
+.input-modern:focus + .label-modern,
+.input-modern:not(:placeholder-shown) + .label-modern,
+.input-modern:valid + .label-modern {
+  @apply text-cyan-400 text-xs -translate-y-3;
+  background: rgba(2, 8, 23, 0.85);
+  border-radius: 4px;
+}
+
+/* ---------- Step Titles ---------- */
+.step-title {
+  @apply text-lg font-semibold text-gray-100 mb-4;
+}
+
+/* ---------- Buttons ---------- */
+.btn-nav {
+  @apply px-4 py-2 rounded-lg bg-white/10 text-gray-200 hover:bg-white/20 transition;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #00e5ff, #8b5cf6);
+  color: #000;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 15px rgba(0,229,255,0.6);
+}
+
+/* ---------- Input Error (Validation) ---------- */
+.input-error {
+  border-color: #f87171 !important; /* red-400 */
+  animation: shake 0.3s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ---------- Date/Time Picker ---------- */
+input[type="date"].input-modern,
+input[type="time"].input-modern {
+  color-scheme: dark; /* dark picker theme */
+}
+
