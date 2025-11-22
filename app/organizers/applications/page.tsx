@@ -1,8 +1,0 @@
-export default function OrganizerApplicationsPage() {
-  return (
-    <div className="card p-6">
-      <h1 className="text-xl font-semibold text-accent-pink mb-2">Organizer — Applications</h1>
-      <p className="text-gray-400 text-sm">Build this page to review groups and accept/reject.</p>
-    </div>
-  );
-}
