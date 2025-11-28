@@ -46,7 +46,7 @@ export default function WhisprHero() {
             className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
             style={{ textShadow: "0 0 20px rgba(193,255,114,0.25)" }}
           >
-            Access the underground without the chaos.
+            Access the underground.
           </motion.h1>
 
           <motion.p
@@ -55,8 +55,7 @@ export default function WhisprHero() {
             transition={{ duration: 1, delay: 0.2 }}
             className="max-w-xl text-lg leading-relaxed text-white/75 sm:text-xl sm:leading-8 lg:max-w-2xl"
           >
-            Whispr bridges the rooms people whisper about—guest lists, payouts, and seamless check-ins
-            that feel premium for both attendees and organizers.
+            Without all the extra chaos.
           </motion.p>
 
           <motion.div
@@ -87,11 +86,11 @@ export default function WhisprHero() {
           >
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
               <p className="text-sm uppercase tracking-[0.2em] text-white/50">For Hosts</p>
-              <p className="mt-2 text-base text-white/80">Built-in fraud checks, instant guest list edits, and cashless payouts.</p>
+              <p className="mt-2 text-base text-white/80">We take care of the groundwork so you can shape the experience.</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
               <p className="text-sm uppercase tracking-[0.2em] text-white/50">For Guests</p>
-              <p className="mt-2 text-base text-white/80">One tap entries, live ticket wallets, and curated drops before anyone else.</p>
+              <p className="mt-2 text-base text-white/80">Fast entry. Live tickets. First access.</p>
             </div>
           </motion.div>
         </div>
@@ -111,38 +110,24 @@ export default function WhisprHero() {
               <div className="border-b border-white/10 px-6 py-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/50">Tonight</p>
-                    <p className="text-xl font-semibold">After Hours: Neon Vault</p>
+                    <p className="text-sm uppercase tracking-[0.24em] text-white/50">13th December</p>
+                    <p className="text-xl font-semibold">Winter Festival</p>
                   </div>
                   <span className="rounded-full bg-lime-300/20 px-3 py-1 text-xs font-semibold text-lime-200">
-                    92% full
+                    gatr
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-white/60">Brooklyn · 11:30 PM · QR + Face ID</p>
+                <p className="mt-2 text-sm text-white/60">Karachi · 06:00 PM · Exclusively on whispr.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 px-6 py-5">
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Live Check-ins</p>
-                  <p className="mt-2 text-3xl font-semibold text-white">
-                    184<span className="text-sm text-lime-200"> / 220</span>
-                  </p>
-                  <p className="text-xs text-lime-200/80">+32 in last 10 min</p>
-                </div>
-                <div className="rounded-2xl border border-white/5 bg-white/5 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/50">Fraud Block</p>
-                  <p className="mt-2 text-3xl font-semibold text-white">7</p>
-                  <p className="text-xs text-red-200/80">Flagged & stopped</p>
-                </div>
-              </div>
+              
 
               <div className="flex items-center justify-between border-t border-white/10 px-6 py-4 text-sm text-white/70">
                 <span className="inline-flex items-center gap-2">
                   <span className="h-2 w-2 rounded-full bg-lime-300 shadow-[0_0_10px_#C1FF72]" />
-                  Real-time sync to wallets
-                </span>
+Tickets are now live.                </span>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
-                  Secure
+                  PKR 12,000
                 </span>
               </div>
             </div>

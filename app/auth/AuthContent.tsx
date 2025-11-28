@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Ticket, Bell, Sparkles, Shield, Lock } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 
 type Role = "attendee" | "organizer";
@@ -130,7 +131,7 @@ export default function AuthPage() {
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#050505] via-[#0a0015] to-[#1a001a] text-white"
+      className="relative min-h-screen overflow-hidden bg-[#040404] text-white"
       style={
         {
           ["--accent" as any]: accent,
@@ -139,76 +140,69 @@ export default function AuthPage() {
       }
     >
       {/* ---------- HYBRID BACKGROUND (Glow + Noise) ---------- */}
-      <div aria-hidden className="pointer-events-none absolute inset-0">
-        {/* Motion blobs. Clipped to viewport to avoid horizontal scroll. */}
-        {!prefersReduced && (
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {!prefersReduced ? (
           <>
             <motion.div
-              className="absolute left-[-15vw] top-[-20vh] h-[85vw] w-[85vw] rounded-full blur-[180px]"
+              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[150px]"
               style={{
                 background:
-                  "radial-gradient(50% 50% at 50% 50%, rgba(180,114,255,0.28) 0%, transparent 70%)",
-                willChange: "transform, opacity",
+                  "radial-gradient(circle at 30% 30%, rgba(180,114,255,0.45), transparent 60%)",
               }}
-              animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.75, 0.55] }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute right-[-10vw] top-[15vh] h-[70vw] w-[70vw] rounded-full blur-[160px]"
-              style={{
-                background:
-                  "radial-gradient(50% 50% at 50% 50%, rgba(193,255,114,0.22) 0%, transparent 70%)",
-                willChange: "transform, opacity",
-              }}
-              animate={{ scale: [1, 1.05, 1], opacity: [0.4, 0.65, 0.4] }}
+              animate={{ scale: [1, 1.06, 1], opacity: [0.45, 0.7, 0.45] }}
               transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
             />
+            <motion.div
+              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[170px]"
+              style={{
+                background:
+                  "radial-gradient(circle at 60% 60%, rgba(193,255,114,0.4), transparent 65%)",
+              }}
+              animate={{ scale: [1, 1.05, 1], opacity: [0.35, 0.6, 0.35] }}
+              transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+            />
           </>
-        )}
-
-        {/* Static fallback for reduced motion users */}
-        {prefersReduced && (
+        ) : (
           <>
             <div
-              className="absolute left-[-15vw] top-[-20vh] h-[85vw] w-[85vw] rounded-full blur-[180px]"
+              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[150px]"
               style={{
                 background:
-                  "radial-gradient(50% 50% at 50% 50%, rgba(180,114,255,0.25) 0%, transparent 70%)",
+                  "radial-gradient(circle at 30% 30%, rgba(180,114,255,0.35), transparent 60%)",
               }}
             />
             <div
-              className="absolute right-[-10vw] top-[15vh] h-[70vw] w-[70vw] rounded-full blur-[160px]"
+              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[170px]"
               style={{
                 background:
-                  "radial-gradient(50% 50% at 50% 50%, rgba(193,255,114,0.18) 0%, transparent 70%)",
+                  "radial-gradient(circle at 60% 60%, rgba(193,255,114,0.32), transparent 65%)",
               }}
             />
           </>
         )}
-
-        {/* Noise overlay */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.07] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-[radial-gradient(45%_40%_at_50%_40%,rgba(255,255,255,0.04),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.08] mix-blend-overlay" />
       </div>
 
       {/* ---------- MAIN GRID (starts behind fixed navbar) ---------- */}
       <main className="relative z-10 grid min-h-[100svh] grid-cols-1 overflow-x-hidden md:grid-cols-[1.1fr_0.9fr]">
         {/* LEFT — Marketing copy */}
         <section className="relative hidden items-center pl-10 pr-6 md:flex lg:pl-14 lg:pr-10">
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] tracking-wide text-white/70">
+          <div className="relative z-10 max-w-2xl space-y-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-white/70 shadow-[0_0_30px_rgba(193,255,114,0.15)]">
               <Sparkles className="h-3.5 w-3.5" />
               {roleContent.tag}
             </span>
 
-            <div key={role} className="animate-[fadeSlide_0.5s_ease-out]">
-              <h1 className="mt-5 font-extrabold tracking-tight text-5xl/tight lg:text-6xl/tight">
+            <div key={role} className="animate-[fadeSlide_0.5s_ease-out] space-y-6">
+              <h1 className="font-semibold tracking-tight text-5xl/tight lg:text-6xl/tight" style={{ textShadow: "0 0 25px rgba(193,255,114,0.22)" }}>
                 {roleContent.h1a} <span className="text-[color:var(--accent)]">{roleContent.h1b}</span>
               </h1>
-              <p className="mt-4 max-w-xl text-white/70">{roleContent.p}</p>
+              <p className="max-w-xl text-lg text-white/75">{roleContent.p}</p>
 
-              <ul className="mt-7 grid gap-3 text-sm text-white/80">
+              <ul className="grid gap-3 text-sm text-white/80 sm:grid-cols-2">
                 {roleContent.bullets.map(({ icon: Icon, text }, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
+                  <li key={idx} className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/5 px-3 py-2">
                     <Icon className="h-4 w-4 text-[color:var(--accent)]" />
                     {text}
                   </li>
@@ -219,11 +213,11 @@ export default function AuthPage() {
         </section>
 
         {/* RIGHT — Auth card */}
-        <section className="relative flex items-center justify-center px-6 py-10 md:px-10 md:py-8 lg:px-14">
+        <section className="relative flex items-center justify-center px-6 py-12 md:px-10 lg:px-14">
           {/* side glow (stays inside, no spill) */}
           <div aria-hidden className="pointer-events-none absolute inset-0 md:left-1/2">
             <div
-              className="absolute inset-0 translate-x-8 blur-2xl opacity-60"
+              className="absolute inset-0 translate-x-10 blur-3xl opacity-70"
               style={{
                 background:
                   "radial-gradient(40% 35% at 65% 50%, var(--accent-weak), transparent 60%)",
@@ -233,14 +227,14 @@ export default function AuthPage() {
 
           <div
             className={[
-              "relative w-full max-w-sm",
+              "relative w-full max-w-md",
               shake ? "animate-[shake_0.42s_cubic-bezier(.36,.07,.19,.97)_both]" : "",
             ].join(" ")}
           >
             {/* rim glow */}
             <div
               aria-hidden
-              className="absolute -inset-0.5 rounded-3xl blur-2xl opacity-70"
+              className="absolute -inset-0.5 rounded-[28px] blur-3xl opacity-80"
               style={{
                 background:
                   "conic-gradient(from 200deg at 50% 50%, var(--accent-weak), rgba(255,255,255,0.05), var(--accent-weak))",
@@ -249,7 +243,17 @@ export default function AuthPage() {
             />
 
             {/* card */}
-            <div className="relative rounded-3xl border border-white/10 bg-white/5 p-7 backdrop-blur-xl md:p-8">
+            <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-7 backdrop-blur-xl md:p-8">
+              <div className="mb-6 flex items-center justify-between">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60">
+                  <span className="h-2 w-2 rounded-full bg-[color:var(--accent)] shadow-[0_0_12px_var(--accent)]" />
+                  Whispr Access
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/60">
+                  Secure
+                </span>
+              </div>
+
               {/* logo */}
               <div className="mb-5 flex items-center justify-center">
                 <div className="relative">
@@ -260,8 +264,15 @@ export default function AuthPage() {
                         "radial-gradient(50% 60% at 50% 50%, var(--accent-weak), transparent)",
                     }}
                   />
-                  <div className="relative grid h-11 w-11 place-items-center rounded-xl border border-white/15 bg-white/5">
-                    <span className="text-base font-bold tracking-wider">W</span>
+                  <div className="relative grid h-12 w-12 place-items-center rounded-xl border border-white/15 bg-white/5">
+                    <Image
+                      src="/favicon.svg"
+                      alt="Whispr"
+                      width={28}
+                      height={28}
+                      className="h-7 w-7"
+                      priority
+                    />
                   </div>
                 </div>
               </div>
@@ -270,7 +281,7 @@ export default function AuthPage() {
               <div
                 role="tablist"
                 aria-label="Choose role"
-                className="mb-4 grid grid-cols-2 rounded-xl border border-white/10 bg-white/5 p-1"
+                className="mb-4 grid grid-cols-2 rounded-full border border-white/10 bg-white/5 p-1"
               >
                 {(["attendee", "organizer"] as Role[]).map((r) => {
                   const active = role === r;
@@ -283,8 +294,10 @@ export default function AuthPage() {
                       type="button"
                       onClick={() => setRole(r)}
                       className={[
-                        "relative rounded-lg px-4 py-2 text-xs font-semibold tracking-wide transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
-                        active ? "bg-[color:var(--accent)] text-black" : "text-white/70 hover:text-white",
+                        "relative rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
+                        active
+                          ? "bg-[color:var(--accent)] text-black shadow-[0_10px_30px_-12px_var(--accent)]"
+                          : "text-white/70 hover:text-white",
                       ].join(" ")}
                     >
                       {r === "attendee" ? "Attendee" : "Organizer"}
@@ -397,10 +410,10 @@ export default function AuthPage() {
                   type="submit"
                   disabled={loading}
                   className={[
-                    "group relative mt-2 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl px-4 py-3 text-sm font-semibold transition",
+                    "group relative mt-2 inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-5 py-3 text-sm font-semibold transition",
                     loading
                       ? "cursor-not-allowed bg-white/10 text-white/60"
-                      : "bg-[color:var(--accent)] text-black hover:brightness-95 active:translate-y-[1px] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]",
+                      : "bg-[color:var(--accent)] text-black shadow-[0_15px_45px_-15px_rgba(193,255,114,0.7)] hover:brightness-95 active:translate-y-[1px]",
                   ].join(" ")}
                 >
                   <span className="relative z-10">
@@ -453,6 +466,16 @@ export default function AuthPage() {
                   </>
                 )}
               </p>
+
+              <div className="mt-4 flex items-center justify-between text-xs text-white/55">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_10px_var(--accent)]" />
+                  {role === "attendee" ? "Guest access flow" : "Organizer cockpit"}
+                </span>
+                <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60">
+                  Live
+                </span>
+              </div>
             </div>
           </div>
         </section>

@@ -1,10 +1,14 @@
 // app/layout.tsx
 import "@/styles/globals.css";
 import Navbar from "@/components/layout/Navbar";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Whispr",
   description: "Gated ticketing and event management platform",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Whispr">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#c1ff72" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#b472ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#040404" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c1ff72"/>
+      <stop offset="100%" stop-color="#b472ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" fill="#040404"/>
+  <circle cx="32" cy="32" r="30" fill="url(#glow)" opacity="0.9"/>
+  <path
+    d="M16 18.5h6.2l5.4 20.6h0.1l5.1-14.6h3.4l5.3 14.6h0.1l5-20.6H52l-6.5 27h-4.9l-5.3-14.2h-0.1L29 45.5h-4.9z"
+    fill="url(#shine)"
+    stroke="#0d0d0d"
+    stroke-width="0.6"
+    stroke-linejoin="round"
+  />
+</svg>
