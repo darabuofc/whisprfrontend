@@ -14,14 +14,16 @@ export default function AuthPage() {
   const router = useRouter();
   const prefersReduced = useReducedMotion();
   const searchParams = useSearchParams(); // 👈 added
-  const initialRole = (searchParams.get("role") as Role) || "attendee";
-  const initialMode = (searchParams.get("mode") as Mode) || "signin";
+  const roleParam = searchParams.get("role");
+  const modeParam = searchParams.get("mode");
+  const initialRole: Role = roleParam === "organizer" ? "organizer" : "attendee";
+  const initialMode: Mode = modeParam === "register" ? "register" : "signin";
 
 
 
   // UI state
-  const [role, setRole] = useState<Role>("attendee");
-  const [mode, setMode] = useState<Mode>("signin");
+  const [role, setRole] = useState<Role>(initialRole);
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +43,12 @@ export default function AuthPage() {
     document.documentElement.style.setProperty("--accent", accent);
     document.documentElement.style.setProperty("--accent-weak", accentWeak);
   }, [accent, accentWeak]);
+
+  // Sync state with URL params when navigating between roles/modes
+  useEffect(() => {
+    setRole(initialRole);
+    setMode(initialMode);
+  }, [initialRole, initialMode]);
 
   const roleContent =
     role === "attendee"
