@@ -1,8 +1,8 @@
 "use client";
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -12,8 +12,10 @@ import {
   LogIn,
   CheckCircle2,
   Copy,
-  Users2,
   Share2,
+  Ticket,
+  Sparkles,
+  Shield,
 } from "lucide-react";
 import {
   getEventById,
@@ -56,11 +58,16 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [modalStep, setModalStep] = useState<"single" | "couple" | "join" | "success">(
+    "single"
+  );
   const [selectedPass, setSelectedPass] = useState<Pass | null>(null);
   const [joinCode, setJoinCode] = useState("");
-  const [modalStep, setModalStep] = useState<"select" | "join" | "success">("select");
   const [createdJoinCode, setCreatedJoinCode] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const passesRef = useRef<HTMLDivElement | null>(null);
+  const paymentRef = useRef<HTMLDivElement | null>(null);
 
   // ─── Fetch event & passes ─────────────────────────────
   useEffect(() => {
@@ -89,14 +96,16 @@ export default function EventDetailPage() {
 
       if (joinCode) {
         setModalStep("success");
+        setShowModal(true);
       } else {
-        setSuccessMsg("Registration successful! 🎉");
+        setSuccessMsg("Registration successful!");
         setShowModal(false);
       }
 
       setEvent((prev) =>
         prev ? { ...prev, user_registered: true, registration: res.registration } : prev
       );
+      setShowPayment(false);
     } catch (err: any) {
       setSuccessMsg(`Registration failed: ${err.message}`);
       setShowModal(false);
@@ -125,11 +134,48 @@ export default function EventDetailPage() {
     if (event?.user_registered) return;
     setSelectedPass(pass);
     setJoinCode("");
-    setModalStep("select");
+    setShowPayment(false);
+    setSuccessMsg(null);
+    setCreatedJoinCode(null);
 
     const type = pass.type?.toLowerCase() || "";
-    if (type === "single") handleRegister(pass.id);
-    else setShowModal(true);
+    const isCouple = type.includes("couple") || pass.joinable || pass.max_members > 1;
+    setModalStep(isCouple ? "couple" : "single");
+    setShowModal(true);
+  };
+
+  const handleShare = async () => {
+    if (!event) return;
+    const shareData = {
+      title: event.name,
+      text: event.description || "Join me at this Whispr event.",
+      url: typeof window !== "undefined" ? window.location.href : "",
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setSuccessMsg("Event shared");
+      } catch {
+        /* ignore */
+      }
+    } else {
+      navigator.clipboard
+        .writeText(shareData.url)
+        .then(() => setSuccessMsg("Link copied"))
+        .catch(() => setSuccessMsg("Unable to copy link"));
+    }
+  };
+
+  const scrollToPasses = () => {
+    passesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleContinueToPayment = () => {
+    if (!selectedPass) return;
+    setShowModal(false);
+    setShowPayment(true);
+    setTimeout(() => paymentRef.current?.scrollIntoView({ behavior: "smooth" }), 120);
   };
 
   // ─── Loading states ─────────────────────────────
@@ -155,136 +201,269 @@ export default function EventDetailPage() {
 
   // ─── Main Layout ─────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0b0b0f] via-[#13131a] to-[#0b0b0f] text-white font-satoshi relative">
+    <div className="relative min-h-screen overflow-hidden bg-[#040404] text-white font-satoshi">
+      {/* Background glows */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(180,114,255,0.4),transparent_55%)]" />
+        <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(200,255,90,0.45),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(45%_40%_at_50%_45%,rgba(255,255,255,0.05),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.08] mix-blend-overlay" />
+      </div>
+
       {/* Header */}
-      <div className="relative">
-        <img
-          src={event.cover || "/event-placeholder.jpg"}
-          alt={event.name}
-          className="w-full h-[260px] object-cover opacity-90"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0f] via-[#0b0b0f]/70 to-transparent" />
-        <button
-          onClick={() => router.back()}
-          className="absolute top-5 left-5 bg-black/40 backdrop-blur-md p-2 rounded-full border border-white/10 hover:border-[#C1FF72]/40 transition"
-        >
-          <ArrowLeft size={20} />
-        </button>
+      <div className="relative overflow-hidden">
+        <div className="h-[320px] w-full">
+          <img
+            src={event.cover || "/event-placeholder.jpg"}
+            alt={event.name}
+            className="h-full w-full object-cover opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040404] via-[#040404]/70 to-transparent" />
+        </div>
+
+        <div className="absolute inset-0 flex flex-col justify-between px-6 py-5">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.back()}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+            >
+              <Share2 size={18} />
+            </button>
+          </div>
+
+          <div className="max-w-4xl space-y-3">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl font-semibold leading-tight sm:text-4xl md:text-[40px]"
+              style={{ textShadow: "0 0 30px rgba(200,255,90,0.25)" }}
+            >
+              {event.name}
+            </motion.h1>
+
+            <div className="flex flex-wrap items-center gap-3 text-sm text-white/75">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                <Calendar size={14} /> {event.date || "Date TBA"}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                <MapPin size={14} /> {event.venue || "Venue TBA"}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
+                <User size={14} /> {event.organizer || "Organizer TBA"}
+              </span>
+            </div>
+
+            <p className="max-w-2xl text-sm leading-relaxed text-white/80">
+              {event.description || "Details are being finalized. Check back soon."}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
-      <motion.div
-        initial={{ opacity: 0, y: 25 }}
+      <motion.main
+        initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="px-6 py-8 max-w-md mx-auto"
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className="relative z-10 mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-12 pt-10"
       >
-        <h1 className="text-2xl font-semibold mb-2">{event.name}</h1>
-        <div className="flex items-center gap-2 text-sm text-neutral-400 mb-1">
-          <Calendar size={14} /> <span>{event.date || "Date TBA"}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-neutral-400 mb-4">
-          <MapPin size={14} /> <span>{event.venue || "Venue TBA"}</span>
-        </div>
-        <p className="text-neutral-300 text-sm leading-relaxed mb-6">
-          {event.description || "No description provided yet."}
-        </p>
-        <div className="flex items-center gap-2 text-sm text-neutral-400 mb-10">
-          <User size={14} /> <span>{event.organizer || "Organizer TBA"}</span>
+        {/* Quick actions */}
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-[0_20px_80px_-40px_rgba(0,0,0,0.8)] backdrop-blur">
+          {[
+            { label: "Get Passes", icon: Ticket, action: scrollToPasses },
+            { label: "Venue Map", icon: MapPin, action: () => setSuccessMsg("Map coming soon") },
+            { label: "Lineup", icon: Sparkles, action: () => setSuccessMsg("Lineup drops soon") },
+            { label: "Event Rules", icon: Shield, action: () => setSuccessMsg("Rules will be shared pre-event") },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={item.action}
+              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 transition hover:border-[#C8FF5A]/60 hover:text-white"
+            >
+              <item.icon
+                size={16}
+                className="text-[#C8FF5A] transition group-hover:drop-shadow-[0_0_12px_rgba(200,255,90,0.55)]"
+              />
+              {item.label}
+            </button>
+          ))}
         </div>
 
-        {/* Pass selection */}
-        {!event.user_registered && passes.length > 0 && (
-          <div className="space-y-3 mb-10">
-            {passes.map((p) => (
-              <motion.button
-                key={p.id}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => handlePassSelect(p)}
-                className="w-full p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-left hover:border-[#C1FF72]/40 transition-all"
+        {/* Payment sheet */}
+        {showPayment && selectedPass && !event.user_registered && (
+          <motion.div
+            ref={paymentRef}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_25px_120px_-40px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-white/60">Checkout</p>
+                <h3 className="mt-1 text-2xl font-semibold" style={{ textShadow: "0 0 18px rgba(200,255,90,0.2)" }}>
+                  {selectedPass.name}
+                </h3>
+                <p className="text-sm text-white/70 capitalize">{selectedPass.type}</p>
+              </div>
+              <span className="rounded-full bg-[#C8FF5A]/20 px-4 py-1 text-sm font-semibold text-[#C8FF5A] shadow-[0_0_20px_rgba(200,255,90,0.35)]">
+                {selectedPass.price ? `PKR ${selectedPass.price}` : "Free"}
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/5 bg-black/30 p-4">
+              <div className="flex items-center justify-between text-sm text-white/80">
+                <span>Pass total</span>
+                <span className="font-semibold text-[#C8FF5A]">
+                  {selectedPass.price ? `PKR ${selectedPass.price}` : "Free"}
+                </span>
+              </div>
+              <p className="mt-2 text-xs text-white/60">
+                Your Whispr profile will be used. No extra details required.
+              </p>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={() => handleRegister(selectedPass.id)}
+                disabled={registering}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.7)] transition hover:scale-[1.01]"
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{p.name}</h3>
-                    <p className="text-xs text-neutral-400 capitalize">
-                      {p.type}
-                    </p>
-                  </div>
-                  <span className="text-[#C1FF72] text-sm">
-                    {p.price ? `Rs ${p.price}` : "Free"}
-                  </span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
+                {registering ? "Processing..." : "Confirm & Pay"}
+              </button>
+              <button
+                onClick={() => setShowPayment(false)}
+                className="text-sm text-white/60 underline underline-offset-4 transition hover:text-white"
+              >
+                Change pass
+              </button>
+            </div>
+          </motion.div>
         )}
+
+        {/* Pass selection */}
+        <div ref={passesRef} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-white/60">Passes</p>
+              <h2 className="text-2xl font-semibold">Choose your entry</h2>
+            </div>
+            {!event.user_registered && (
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+                Live now
+              </span>
+            )}
+          </div>
+
+          {!event.user_registered && passes.length > 0 && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {passes.map((p) => (
+                <motion.button
+                  key={p.id}
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => handlePassSelect(p)}
+                  className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 text-left shadow-[0_20px_80px_-40px_rgba(0,0,0,0.7)] transition hover:border-[#C8FF5A]/60 hover:shadow-[0_25px_90px_-50px_rgba(200,255,90,0.45)]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-semibold">{p.name}</h3>
+                      <p className="text-sm text-white/60 capitalize">{p.description || p.type}</p>
+                      {p.max_members > 1 && (
+                        <p className="text-xs text-white/50">Includes {p.max_members} entries</p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <div className="rounded-full bg-[#C8FF5A]/15 px-3 py-1 text-sm font-semibold text-[#C8FF5A]">
+                        {p.price ? `PKR ${p.price}` : "Free"}
+                      </div>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/50">
+                        {p.type}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-white/70">
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-[#C8FF5A] shadow-[0_0_10px_rgba(200,255,90,0.8)]" />
+                      Tap to select
+                    </span>
+                    <span className="text-[#C8FF5A]">Select →</span>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          )}
+
+          {!event.user_registered && passes.length === 0 && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/70">
+              No passes are available yet.
+            </div>
+          )}
+        </div>
 
         {/* Already registered / Group Info */}
         {event.user_registered && (
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="border border-white/10 rounded-xl p-5 mb-8 bg-white/[0.02]"
+            className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_25px_90px_-50px_rgba(0,0,0,0.8)] backdrop-blur"
           >
-            <h3 className="text-white font-semibold text-lg mb-3">
-              You’re Registered
+            <h3 className="text-lg font-semibold" style={{ textShadow: "0 0 18px rgba(200,255,90,0.2)" }}>
+              You’re in.
             </h3>
-
             {event.registration ? (
-              <>
-                <p className="text-sm text-neutral-400 mb-2">
-                  Pass:{" "}
-                  <span className="text-white">
-                    {event.registration.pass?.name}
-                  </span>
-                </p>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center justify-between text-sm text-white/70">
+                  <span>Pass</span>
+                  <span className="font-semibold text-white">{event.registration.pass?.name}</span>
+                </div>
 
                 {event.registration.join_code && (
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="text-xs text-neutral-400">Join Code</p>
-                      <p
+                  <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/30 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.16em] text-white/60">Join Code</p>
+                        <p
+                          onClick={() =>
+                            navigator.clipboard.writeText(event.registration?.join_code || "")
+                          }
+                          className="font-mono text-[#C8FF5A] transition hover:text-white"
+                        >
+                          {event.registration.join_code}
+                        </p>
+                      </div>
+                      <button
                         onClick={() =>
-                          navigator.clipboard.writeText(
-                            event.registration?.join_code || ""
-                          )
+                          navigator.clipboard.writeText(event.registration?.join_code || "")
                         }
-                        className="font-mono text-[#C1FF72] cursor-pointer hover:text-lime-400 transition"
+                        className="rounded-full border border-white/15 px-3 py-1 text-xs text-white/70 transition hover:border-[#C8FF5A]/60"
                       >
-                        {event.registration.join_code}
-                      </p>
+                        <Copy size={12} />
+                      </button>
                     </div>
                     <button
                       onClick={() =>
-                        navigator.clipboard.writeText(
-                          event.registration?.join_code || ""
+                        window.open(
+                          `https://wa.me/?text=Join%20my%20Whispr%20event%20group%20with%20this%20code:%20${event.registration?.join_code ?? ""}`,
+                          "_blank"
                         )
                       }
-                      className="flex items-center gap-1 text-xs text-neutral-400 border border-white/10 rounded-md px-3 py-1 hover:border-[#C1FF72]/40 transition"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C8FF5A]/40 px-4 py-2 text-sm font-medium text-[#C8FF5A] transition hover:bg-[#C8FF5A]/10"
                     >
-                      <Copy size={12} /> Copy
+                      <Share2 size={14} />
+                      Invite via WhatsApp
                     </button>
                   </div>
                 )}
-
-
-                {event.registration.join_code && (
-                  <button
-                    onClick={() =>
-                      window.open(
-`https://wa.me/?text=Join%20my%20Whispr%20event%20group%20with%20this%20code:%20${event.registration?.join_code ?? ''}`
-                      )
-                    }
-                    className="w-full bg-[#C1FF72]/10 border border-[#C1FF72]/30 text-[#C1FF72] py-2 rounded-lg text-sm hover:bg-[#C1FF72]/20 transition flex items-center justify-center gap-1"
-                  >
-                    <Share2 size={14} /> Invite via WhatsApp
-                  </button>
-                )}
-              </>
+              </div>
             ) : (
-              <p className="text-sm text-neutral-400">
-                You’re registered for this event. Enjoy!
-              </p>
+              <p className="mt-2 text-sm text-white/70">You’re registered for this event. Enjoy!</p>
             )}
           </motion.div>
         )}
@@ -294,12 +473,12 @@ export default function EventDetailPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-6 p-4 rounded-lg bg-[#C1FF72]/10 border border-[#C1FF72]/30 text-center text-[#C1FF72] text-sm"
+            className="rounded-2xl border border-[#C8FF5A]/30 bg-[#C8FF5A]/10 px-4 py-3 text-center text-sm text-[#C8FF5A]"
           >
             {successMsg}
           </motion.div>
         )}
-      </motion.div>
+      </motion.main>
 
       {/* ─── Modal ───────────────────────────── */}
       <AnimatePresence>
@@ -308,100 +487,109 @@ export default function EventDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
           >
             <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-[#0b0b0f] border border-white/10 rounded-2xl p-6 w-80 text-center"
+              initial={{ scale: 0.94, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.94, opacity: 0 }}
+              className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-6 text-center shadow-[0_25px_120px_-40px_rgba(0,0,0,0.8)] backdrop-blur-xl"
             >
-              {/* STEP: SELECT */}
-              {modalStep === "select" && (
+              {modalStep === "single" && (
                 <>
-                  <h2 className="text-lg font-semibold mb-2 text-white">
+                  <h2 className="text-xl font-semibold" style={{ textShadow: "0 0 18px rgba(200,255,90,0.2)" }}>
                     {selectedPass.name}
                   </h2>
-                  <p className="text-sm text-neutral-400 mb-5">
-                    This is a {selectedPass.type.toLowerCase()} pass.
+                  <p className="mt-2 text-sm text-white/70">
+                    Your Whispr profile will be used for this pass.
                   </p>
-                  <p className="text-xs text-neutral-500 mb-4">
-                    Would you like to create a new group or join an existing one?
-                  </p>
-                  <button
-                    onClick={() => handleRegister(selectedPass.id)}
-                    disabled={registering}
-                    className="w-full bg-[#C1FF72] text-black font-medium py-2 rounded-lg hover:bg-[#b3ff5f] transition"
-                  >
-                    {registering ? "Registering..." : "Create New"}
-                  </button>
-                  <button
-                    onClick={() => setModalStep("join")}
-                    className="w-full mt-3 flex items-center justify-center gap-1 text-sm text-neutral-300 hover:text-white"
-                  >
-                    <LogIn size={14} /> Join Existing
-                  </button>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="mt-5 text-xs text-neutral-500 underline"
-                  >
-                    Cancel
-                  </button>
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={handleContinueToPayment}
+                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.7)] transition hover:scale-[1.01]"
+                    >
+                      Continue to Payment
+                    </button>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="w-full text-sm text-white/60 underline underline-offset-4 transition hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </>
               )}
 
-              {/* STEP: JOIN */}
+              {modalStep === "couple" && (
+                <>
+                  <h2 className="text-xl font-semibold" style={{ textShadow: "0 0 18px rgba(200,255,90,0.2)" }}>
+                    Couple Pass
+                  </h2>
+                  <p className="mt-2 text-sm text-white/70">
+                    Includes 2 entries. One person starts the pass and invites their partner.
+                  </p>
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={() => handleRegister(selectedPass.id)}
+                      disabled={registering}
+                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.7)] transition hover:scale-[1.01]"
+                    >
+                      {registering ? "Starting..." : "Start Couple Pass"}
+                    </button>
+                    <button
+                      onClick={() => setModalStep("join")}
+                      className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white/80 transition hover:border-[#C8FF5A]/60"
+                    >
+                      Join Partner’s Link
+                    </button>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="w-full text-sm text-white/60 underline underline-offset-4 transition hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
+
               {modalStep === "join" && (
                 <>
-                  <p className="text-sm text-neutral-400 mb-3">
-                    Enter your group’s join code below.
-                  </p>
+                  <p className="text-sm text-white/70">Enter your group’s join code.</p>
                   <input
                     type="text"
                     placeholder="REG-COU-XXXXX"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-center text-white mb-4 focus:outline-none focus:ring-1 focus:ring-[#C1FF72]"
+                    className="mt-4 w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-center text-white focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]"
                   />
-                  <button
-                    onClick={handleJoin}
-                    disabled={registering}
-                    className="w-full bg-[#C1FF72] text-black font-medium py-2 rounded-lg hover:bg-[#b3ff5f] transition"
-                  >
-                    {registering ? "Joining..." : "Join Group"}
-                  </button>
-                  <button
-                    onClick={() => setModalStep("select")}
-                    className="w-full text-sm text-neutral-400 mt-3 underline"
-                  >
-                    Back
-                  </button>
+                  <div className="mt-5 space-y-3">
+                    <button
+                      onClick={handleJoin}
+                      disabled={registering}
+                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.7)] transition hover:scale-[1.01]"
+                    >
+                      {registering ? "Joining..." : "Join Partner"}
+                    </button>
+                    <button
+                      onClick={() => setModalStep("couple")}
+                      className="w-full text-sm text-white/60 underline underline-offset-4 transition hover:text-white"
+                    >
+                      Back
+                    </button>
+                  </div>
                 </>
               )}
 
-              {/* STEP: SUCCESS */}
               {modalStep === "success" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <CheckCircle2
-                    className="mx-auto mb-3 text-[#C1FF72]"
-                    size={40}
-                  />
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    Registration Successful!
-                  </h3>
+                <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
+                  <CheckCircle2 className="mx-auto mb-3 text-[#C8FF5A]" size={42} />
+                  <h3 className="text-xl font-semibold text-white mb-2">Registration successful</h3>
                   {createdJoinCode && (
-                    <>
-                      <p className="text-sm text-neutral-400 mb-1">
-                        Share this code with your group:
-                      </p>
+                    <div className="space-y-3">
+                      <p className="text-sm text-white/70">Share this code with your partner:</p>
                       <p
-                        onClick={() =>
-                          navigator.clipboard.writeText(createdJoinCode)
-                        }
-                        className="font-mono text-[#C1FF72] mb-4 cursor-pointer hover:text-lime-400 transition"
+                        onClick={() => navigator.clipboard.writeText(createdJoinCode)}
+                        className="font-mono text-[#C8FF5A] transition hover:text-white"
                       >
                         {createdJoinCode}
                       </p>
@@ -412,15 +600,16 @@ export default function EventDetailPage() {
                             "_blank"
                           )
                         }
-                        className="flex items-center justify-center gap-1 w-full text-sm text-[#C1FF72] border border-[#C1FF72]/30 rounded-lg py-2 hover:bg-[#C1FF72]/10 transition mb-3"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C8FF5A]/40 px-4 py-2 text-sm font-medium text-[#C8FF5A] transition hover:bg-[#C8FF5A]/10"
                       >
-                        <Share2 size={14} /> Share via WhatsApp
+                        <Share2 size={14} />
+                        Share via WhatsApp
                       </button>
-                    </>
+                    </div>
                   )}
                   <button
                     onClick={() => setShowModal(false)}
-                    className="w-full bg-[#C1FF72] text-black font-medium py-2 rounded-lg hover:bg-[#b3ff5f] transition"
+                    className="mt-5 w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.7)] transition hover:scale-[1.01]"
                   >
                     Done
                   </button>
