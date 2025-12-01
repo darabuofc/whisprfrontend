@@ -210,25 +210,35 @@ export default function EventDetailPage() {
         <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.08] mix-blend-overlay" />
       </div>
 
-      {/* Header */}
-      <div className="relative overflow-hidden">
-        <div className="h-[320px] w-full">
-          <img
-            src={event.cover || "/event-placeholder.jpg"}
-            alt={event.name}
-            className="h-full w-full object-cover opacity-90"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#040404] via-[#040404]/70 to-transparent" />
-        </div>
-
-        <div className="absolute inset-0 flex flex-col justify-between px-6 py-5">
+      <motion.main
+        initial={{ opacity: 0, y: 22 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className="relative z-10 mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-12 pt-10"
+      >
+        {/* Instagram-style post */}
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_22px_100px_-50px_rgba(0,0,0,0.85)] backdrop-blur">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.back()}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
-            >
-              <ArrowLeft size={18} />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.back()}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-white/60">Event</p>
+                <motion.h1
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="text-2xl font-semibold sm:text-3xl"
+                  style={{ textShadow: "0 0 20px rgba(200,255,90,0.2)" }}
+                >
+                  {event.name}
+                </motion.h1>
+              </div>
+            </div>
             <button
               onClick={handleShare}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
@@ -236,44 +246,40 @@ export default function EventDetailPage() {
               <Share2 size={18} />
             </button>
           </div>
-
-          <div className="max-w-4xl space-y-3">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-3xl font-semibold leading-tight sm:text-4xl md:text-[40px]"
-              style={{ textShadow: "0 0 30px rgba(200,255,90,0.25)" }}
-            >
-              {event.name}
-            </motion.h1>
-
-            <div className="flex flex-wrap items-center gap-3 text-sm text-white/75">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
-                <Calendar size={14} /> {event.date || "Date TBA"}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
-                <MapPin size={14} /> {event.venue || "Venue TBA"}
-              </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1">
-                <User size={14} /> {event.organizer || "Organizer TBA"}
-              </span>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+            <div className="aspect-square w-full overflow-hidden bg-black/30">
+              <img
+                src={event.cover || "/event-placeholder.jpg"}
+                alt={event.name}
+                className="h-full w-full object-cover"
+              />
             </div>
-
-            <p className="max-w-2xl text-sm leading-relaxed text-white/80">
-              {event.description || "Details are being finalized. Check back soon."}
-            </p>
+            <div className="space-y-3 px-4 py-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  <Calendar size={14} /> {event.date || "Date TBA"}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  <MapPin size={14} /> {event.venue || "Venue TBA"}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                  <User size={14} /> {event.organizer || "Organizer TBA"}
+                </span>
+              </div>
+              <p className="text-sm leading-relaxed text-white/80">
+                {event.description || "Details are being finalized. Check back soon."}
+              </p>
+              <div className="flex items-center justify-between text-sm text-white/70">
+                <span className="inline-flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#C8FF5A] shadow-[0_0_10px_rgba(200,255,90,0.8)]" />
+                  Tap Get Passes below to join
+                </span>
+                <Ticket size={16} className="text-[#C8FF5A]" />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <motion.main
-        initial={{ opacity: 0, y: 22 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.05 }}
-        className="relative z-10 mx-auto flex max-w-5xl flex-col gap-8 px-6 pb-12 pt-10"
-      >
         {/* Quick actions */}
         <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-[0_20px_80px_-40px_rgba(0,0,0,0.8)] backdrop-blur">
           {[
