@@ -15,7 +15,9 @@ export const api = axios.create({
 // Auto-attach JWT
 api.interceptors.request.use((config) => {
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    typeof window !== "undefined"
+      ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+      : null;
 
   if (token) {
     config.headers = config.headers ?? {};
@@ -157,13 +159,21 @@ export async function register(phone: string, password: string) {
 
 export async function verifyOtp(phone: string, otp: string) {
   const res = await api.post<VerifyOtpResponse>("/auth/verify-otp", { phone, otp });
-  if (res.data.token) localStorage.setItem("token", res.data.token);
+  if (res.data.token) {
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("whispr_token", res.data.token);
+    localStorage.setItem("whispr_role", "attendee");
+  }
   return res.data;
 }
 
 export async function login(phone: string, password: string) {
   const res = await api.post<LoginResponse>("/login", { phone, password });
-  if (res.data.token) localStorage.setItem("token", res.data.token);
+  if (res.data.token) {
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("whispr_token", res.data.token);
+    localStorage.setItem("whispr_role", "attendee");
+  }
   return res.data;
 }
 

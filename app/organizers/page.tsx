@@ -42,6 +42,8 @@ export default function OrganizersAuth() {
 
       if (mode === "signin") {
         localStorage.setItem("token", data.token);
+        localStorage.setItem("whispr_token", data.token);
+        localStorage.setItem("whispr_role", "organizer");
         router.push("/organizers/dashboard");
       } else {
         // after register → auto login or just flip back to signin

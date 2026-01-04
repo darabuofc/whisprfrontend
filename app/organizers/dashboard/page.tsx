@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getOrganizer, getEvents, createDraftEvent } from "@/lib/api"; // helper functions
 import { Plus, Calendar } from "lucide-react";
 
@@ -15,12 +16,35 @@ interface Event {
 }
 
 export default function OrganizerDashboard() {
+  const router = useRouter();
   const [organizer, setOrganizer] = useState<any>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+        : null;
+    const role = typeof window !== "undefined" ? localStorage.getItem("whispr_role") : null;
+
+    if (!token) {
+      router.replace("/auth?role=organizer");
+      return;
+    }
+
+    if (role && role !== "organizer") {
+      router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
+      return;
+    }
+
+    setAuthorized(true);
+  }, [router]);
 
   // Fetch organizer + events on mount
   useEffect(() => {
+    if (!authorized) return;
     const fetchData = async () => {
       try {
         const org = await getOrganizer(); // /me endpoint (JWT)
@@ -34,7 +58,7 @@ export default function OrganizerDashboard() {
       }
     };
     fetchData();
-  }, []);
+  }, [authorized]);
 
   const handleCreateEvent = async () => {
     try {
@@ -46,6 +70,7 @@ export default function OrganizerDashboard() {
     }
   };
 
+  if (!authorized) return <div className="p-8">Checking access...</div>;
   if (loading) return <div className="p-8">Loading dashboard...</div>;
 
   return (

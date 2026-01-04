@@ -4,8 +4,8 @@ export const dynamicParams = true;  // ✅ explicitly allow params
 export const revalidate = 0;        // ✅ disable caching for static export
 
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   Calendar,
   MapPin,
@@ -20,7 +20,30 @@ import {
 
 export default function EventPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+        : null;
+    const role = typeof window !== "undefined" ? localStorage.getItem("whispr_role") : null;
+
+    if (!token) {
+      router.replace("/auth?role=organizer");
+      return;
+    }
+    if (role && role !== "organizer") {
+      router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
+      return;
+    }
+
+    setAuthorized(true);
+  }, [router]);
+
+  if (!authorized) return <div className="p-8 text-white">Checking access...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white p-6">

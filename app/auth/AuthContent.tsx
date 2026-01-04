@@ -1,31 +1,28 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Ticket, Bell, Sparkles, Shield, Lock } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
-
-type Role = "attendee" | "organizer";
-type Mode = "signin" | "register";
+type AuthMode = "attendee" | "organizer";
+type AuthStage = "signin" | "register";
 
 export default function AuthPage() {
   const router = useRouter();
   const prefersReduced = useReducedMotion();
-  const searchParams = useSearchParams(); // 👈 added
+  const searchParams = useSearchParams();
   const roleParam = searchParams.get("role");
-  const modeParam = searchParams.get("mode");
-  const initialRole: Role = roleParam === "organizer" ? "organizer" : "attendee";
-  const initialMode: Mode = modeParam === "register" ? "register" : "signin";
-
-
+  const stageParam = searchParams.get("mode");
+  const initialMode: AuthMode = roleParam === "organizer" ? "organizer" : "attendee";
+  const initialStage: AuthStage = stageParam === "register" ? "register" : "signin";
 
   // UI state
-  const [role, setRole] = useState<Role>(initialRole);
-  const [mode, setMode] = useState<Mode>(initialMode);
+  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const [stage, setStage] = useState<AuthStage>(initialStage);
   const [fullName, setFullName] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -34,10 +31,10 @@ export default function AuthPage() {
   const [shake, setShake] = useState(false);
 
   // Brand accent by role
-  const accent = useMemo(() => (role === "attendee" ? "#c1ff72" : "#b472ff"), [role]);
+  const accent = useMemo(() => (mode === "attendee" ? "#c1ff72" : "#b472ff"), [mode]);
   const accentWeak = useMemo(
-    () => (role === "attendee" ? "rgba(193,255,114,0.16)" : "rgba(180,114,255,0.16)"),
-    [role]
+    () => (mode === "attendee" ? "rgba(193,255,114,0.16)" : "rgba(180,114,255,0.16)"),
+    [mode]
   );
 
   useEffect(() => {
@@ -47,12 +44,12 @@ export default function AuthPage() {
 
   // Sync state with URL params when navigating between roles/modes
   useEffect(() => {
-    setRole(initialRole);
     setMode(initialMode);
-  }, [initialRole, initialMode]);
+    setStage(initialStage);
+  }, [initialMode, initialStage]);
 
   const roleContent =
-    role === "attendee"
+    mode === "attendee"
       ? {
           tag: "Discover exclusive experiences",
           h1a: "Find the nights",
@@ -76,6 +73,94 @@ export default function AuthPage() {
           ] as const,
         };
 
+  const persistSession = (token: string, role: AuthMode) => {
+    localStorage.setItem("whispr_token", token);
+    // keep legacy key for existing API helper compatibility
+    localStorage.setItem("token", token);
+    localStorage.setItem("whispr_role", role);
+  };
+
+  const submitOrganizerFlow = async () => {
+    if (stage === "register" && (!fullName.trim() || !organizationName.trim())) {
+      throw new Error("Please add your full name and organization.");
+    }
+
+    const base = process.env.NEXT_PUBLIC_API_URL;
+    if (!base) throw new Error("Configuration error: NEXT_PUBLIC_API_URL is not set.");
+
+    if (stage === "register") {
+      const res = await fetch(`${base}/organizer/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName.trim(),
+          organization_name: organizationName.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 409) throw new Error("An account with this email already exists");
+        if (res.status === 422) throw new Error(data?.message || "Please fix the highlighted fields");
+        if (res.status >= 500) throw new Error("Something went wrong. Please try again.");
+        throw new Error(data?.message || "Something went wrong. Please try again.");
+      }
+
+      const token = data?.token;
+      if (!token) throw new Error("Something went wrong. Please try again.");
+      persistSession(token, "organizer");
+      router.replace("/organizers/dashboard");
+      return;
+    }
+
+    // Organizer sign in
+    const res = await fetch(`${base}/organizers/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 422) throw new Error(data?.message || "Please check your email and password");
+      if (res.status >= 500) throw new Error("Something went wrong. Please try again.");
+      throw new Error(data?.message || "Something went wrong. Please try again.");
+    }
+    if (!data?.token) throw new Error("Something went wrong. Please try again.");
+    persistSession(data.token, "organizer");
+    router.replace("/organizers/dashboard");
+  };
+
+  const submitAttendeeFlow = async () => {
+    const base = process.env.NEXT_PUBLIC_API_URL;
+    if (!base) throw new Error("Configuration error: NEXT_PUBLIC_API_URL is not set.");
+
+    const endpoint = stage === "signin" ? "/attendees/login" : "/attendees/register";
+    const body =
+      stage === "signin"
+        ? { email: email.trim(), password }
+        : { full_name: fullName.trim(), email: email.trim(), password };
+
+    const res = await fetch(`${base}${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || "Something went wrong. Please try again.");
+
+    if (stage === "signin") {
+      if (data?.token) persistSession(data.token, "attendee");
+      data.attendee?.is_onboarded
+        ? router.replace("/attendees/dashboard")
+        : router.replace("/attendees/onboarding");
+    } else {
+      setStage("signin");
+    }
+  };
+
   // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,42 +169,9 @@ export default function AuthPage() {
     setLoading(true);
     setError("");
 
-    const endpoint =
-      mode === "signin"
-        ? `/${role === "attendee" ? "attendees" : "organizers"}/login`
-        : `/${role === "attendee" ? "attendees" : "organizers"}/register`;
-
-    const body =
-      mode === "signin"
-        ? { email: email.trim(), password }
-        : { full_name: fullName.trim(), email: email.trim(), password };
-
     try {
-      const base = process.env.NEXT_PUBLIC_API_URL;
-      if (!base) throw new Error("Configuration error: NEXT_PUBLIC_API_URL is not set.");
-
-      const res = await fetch(`${base}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || "Request failed");
-
-      if (mode === "signin") {
-        localStorage.setItem("token", data.token);
-        if (role === "attendee") {
-          data.attendee?.is_onboarded
-            ? router.replace("/attendees/dashboard")
-            : router.replace("/attendees/onboarding");
-        } else {
-          router.replace("/organizers/dashboard");
-        }
-      } else {
-        if (role === "attendee") setMode("signin");
-        else router.push("/organizers/thank-you");
-      }
+      if (mode === "organizer") await submitOrganizerFlow();
+      else await submitAttendeeFlow();
     } catch (err: any) {
       setError(err?.message ?? "Something went wrong");
       setShake(true);
@@ -194,7 +246,7 @@ export default function AuthPage() {
               {roleContent.tag}
             </span>
 
-            <div key={role} className="animate-[fadeSlide_0.5s_ease-out] space-y-6">
+            <div key={mode} className="animate-[fadeSlide_0.5s_ease-out] space-y-6">
               <h1 className="font-semibold tracking-tight text-5xl/tight lg:text-6xl/tight" style={{ textShadow: "0 0 25px rgba(193,255,114,0.22)" }}>
                 {roleContent.h1a} <span className="text-[color:var(--accent)]">{roleContent.h1b}</span>
               </h1>
@@ -283,8 +335,8 @@ export default function AuthPage() {
                 aria-label="Choose role"
                 className="mb-4 grid grid-cols-2 rounded-full border border-white/10 bg-white/5 p-1"
               >
-                {(["attendee", "organizer"] as Role[]).map((r) => {
-                  const active = role === r;
+                {(["attendee", "organizer"] as AuthMode[]).map((r) => {
+                  const active = mode === r;
                   return (
                     <button
                       key={r}
@@ -292,7 +344,7 @@ export default function AuthPage() {
                       aria-selected={active}
                       aria-controls={`panel-${r}`}
                       type="button"
-                      onClick={() => setRole(r)}
+                      onClick={() => setMode(r)}
                       className={[
                         "relative rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
                         active
@@ -306,16 +358,16 @@ export default function AuthPage() {
                 })}
               </div>
 
-              <h2 className="mb-3 text-center text-[13px] text-white/70" id={`panel-${role}`}>
-                {role === "attendee"
+              <h2 className="mb-3 text-center text-[13px] text-white/70" id={`panel-${mode}`}>
+                {mode === "attendee"
                   ? "Step into your next experience."
-                  : "Own every detail of your event."}
+                  : "For event organizers & promoters"}
               </h2>
 
               {/* mode tabs */}
               <div className="mb-4 flex justify-center gap-6" role="tablist" aria-label="Mode">
-                {(["signin", "register"] as Mode[]).map((m) => {
-                  const active = mode === m;
+                {(["signin", "register"] as AuthStage[]).map((m) => {
+                  const active = stage === m;
                   return (
                     <button
                       key={m}
@@ -323,7 +375,7 @@ export default function AuthPage() {
                       aria-selected={active}
                       aria-controls={`form-${m}`}
                       type="button"
-                      onClick={() => setMode(m)}
+                      onClick={() => setStage(m)}
                       className="relative px-2 py-1 text-sm font-medium text-white/70 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                     >
                       {m === "signin" ? "Sign In" : "Register"}
@@ -337,8 +389,8 @@ export default function AuthPage() {
               </div>
 
               {/* form */}
-              <form onSubmit={handleSubmit} id={`form-${mode}`} className="space-y-3">
-                {mode === "register" && (
+              <form onSubmit={handleSubmit} id={`form-${stage}`} className="space-y-3">
+                {stage === "register" && (
                   <div className="group">
                     <label
                       htmlFor="fullName"
@@ -353,6 +405,25 @@ export default function AuthPage() {
                       onChange={(e) => setFullName(e.target.value)}
                       required
                       placeholder="Jane Doe"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
+                    />
+                  </div>
+                )}
+                {stage === "register" && mode === "organizer" && (
+                  <div className="group">
+                    <label
+                      htmlFor="organizationName"
+                      className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-white/60"
+                    >
+                      Organization Name
+                    </label>
+                    <input
+                      id="organizationName"
+                      type="text"
+                      value={organizationName}
+                      onChange={(e) => setOrganizationName(e.target.value)}
+                      required={mode === "organizer"}
+                      placeholder="Club Collective"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
                     />
                   </div>
@@ -388,11 +459,11 @@ export default function AuthPage() {
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                      autoComplete={stage === "signin" ? "current-password" : "new-password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder={mode === "signin" ? "Your password" : "Create a strong password"}
+                      placeholder={stage === "signin" ? "Your password" : "Create a strong password"}
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
                     />
                     <button
@@ -418,10 +489,10 @@ export default function AuthPage() {
                 >
                   <span className="relative z-10">
                     {loading
-                      ? mode === "signin"
+                      ? stage === "signin"
                         ? "Signing you in..."
                         : "Creating account..."
-                      : mode === "signin"
+                      : stage === "signin"
                         ? "Sign In"
                         : "Register"}
                   </span>
@@ -442,12 +513,12 @@ export default function AuthPage() {
               )}
 
               <p className="mt-5 text-center text-sm text-white/65">
-                {mode === "signin" ? (
+                {stage === "signin" ? (
                   <>
                     New here?{" "}
                     <button
                       type="button"
-                      onClick={() => setMode("register")}
+                      onClick={() => setStage("register")}
                       className="text-[color:var(--accent)] underline-offset-4 hover:underline"
                     >
                       Create an account
@@ -458,7 +529,7 @@ export default function AuthPage() {
                     Already have an account?{" "}
                     <button
                       type="button"
-                      onClick={() => setMode("signin")}
+                      onClick={() => setStage("signin")}
                       className="text-[color:var(--accent)] underline-offset-4 hover:underline"
                     >
                       Sign In
@@ -470,7 +541,7 @@ export default function AuthPage() {
               <div className="mt-4 flex items-center justify-between text-xs text-white/55">
                 <span className="inline-flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_10px_var(--accent)]" />
-                  {role === "attendee" ? "Guest access flow" : "Organizer cockpit"}
+                  {mode === "attendee" ? "Guest access flow" : "Organizer cockpit"}
                 </span>
                 <span className="rounded-full bg-white/10 px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-white/60">
                   Live

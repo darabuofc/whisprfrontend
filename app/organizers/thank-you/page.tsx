@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -12,6 +14,30 @@ import {
 } from "lucide-react";
 
 export default function ThankYou() {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState(false);
+
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+        : null;
+    const role = typeof window !== "undefined" ? localStorage.getItem("whispr_role") : null;
+
+    if (!token) {
+      router.replace("/auth?role=organizer");
+      return;
+    }
+    if (role && role !== "organizer") {
+      router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
+      return;
+    }
+
+    setAuthorized(true);
+  }, [router]);
+
+  if (!authorized) return <div className="p-8 text-white">Checking access...</div>;
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white font-satoshi">
       {/* Atmosphere */}

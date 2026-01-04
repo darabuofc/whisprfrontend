@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
@@ -13,7 +13,10 @@ interface Pass {
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 async function postWithAuth(url: string, data: any = {}) {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+      : null;
   if (!token) throw new Error("No JWT token found");
   return axios.post(`${API_BASE}${url}`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -26,6 +29,7 @@ export default function EventOnboardingPage() {
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [eventData, setEventData] = useState({
@@ -41,6 +45,7 @@ export default function EventOnboardingPage() {
     setError(null);
 
     try {
+      if (!authorized) return;
       setLoading(true);
 
       if (step === 1) {
@@ -96,6 +101,29 @@ export default function EventOnboardingPage() {
       setLoading(false);
     }
   };
+
+  // Require organizer role + token
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
+        : null;
+    const role = typeof window !== "undefined" ? localStorage.getItem("whispr_role") : null;
+
+    if (!token) {
+      router.replace("/auth?role=organizer");
+      return;
+    }
+
+    if (role && role !== "organizer") {
+      router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
+      return;
+    }
+
+    setAuthorized(true);
+  }, [router]);
+
+  if (!authorized) return <div className="p-8 text-white">Checking access...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white flex flex-col items-center py-12">
