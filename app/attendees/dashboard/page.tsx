@@ -334,11 +334,11 @@ function ExploreTab({
             router.push(`/attendees/applications/${r.registration?.id}`);
         }
 
+        // CSS hover keeps this card on the compositor thread; JS-driven hover was causing input lag.
         return (
-          <motion.div
+          <div
             key={event.id}
-            whileHover={{ scale: 1.02 }}
-            className="group rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:border-[#C1FF72]/30 hover:shadow-[0_0_30px_rgba(193,255,114,0.1)] transition-all"
+            className="group rounded-2xl overflow-hidden bg-white/[0.03] backdrop-blur-sm border border-white/10 hover:border-[#C1FF72]/30 hover:shadow-[0_0_30px_rgba(193,255,114,0.1)] transition-all transform-gpu hover:scale-[1.02]"
           >
             <div className="relative h-40 overflow-hidden">
               <img
@@ -372,7 +372,7 @@ function ExploreTab({
                 {ctaLabel}
               </button>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

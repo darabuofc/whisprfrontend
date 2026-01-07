@@ -369,13 +369,12 @@ export default function EventDetailPage() {
 
           {!event.user_registered && passes.length > 0 && (
             <div className="grid gap-4 sm:grid-cols-2">
+              {/* CSS hover/active avoids per-frame JS animations on pointer movement. */}
               {passes.map((p) => (
-                <motion.button
+                <button
                   key={p.id}
-                  whileHover={{ y: -2, scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
                   onClick={() => handlePassSelect(p)}
-                  className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 text-left shadow-[0_20px_80px_-40px_rgba(0,0,0,0.7)] transition hover:border-[#C8FF5A]/60 hover:shadow-[0_25px_90px_-50px_rgba(200,255,90,0.45)]"
+                  className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 text-left shadow-[0_20px_80px_-40px_rgba(0,0,0,0.7)] transition hover:border-[#C8FF5A]/60 hover:shadow-[0_25px_90px_-50px_rgba(200,255,90,0.45)] transform-gpu hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
@@ -401,7 +400,7 @@ export default function EventDetailPage() {
                     </span>
                     <span className="text-[#C8FF5A]">Select →</span>
                   </div>
-                </motion.button>
+                </button>
               ))}
             </div>
           )}

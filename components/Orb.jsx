@@ -190,6 +190,16 @@ export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = tru
 
     const mesh = new Mesh(gl, { geometry, program });
 
+    let targetHover = 0;
+    let lastTime = 0;
+    let currentRot = 0;
+    const rotationSpeed = 0.3;
+
+    let bounds = null;
+    const syncBounds = () => {
+      bounds = container.getBoundingClientRect();
+    };
+
     function resize() {
       if (!container) return;
       const dpr = window.devicePixelRatio || 1;
@@ -199,40 +209,37 @@ export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = tru
       gl.canvas.style.width = width + 'px';
       gl.canvas.style.height = height + 'px';
       program.uniforms.iResolution.value.set(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height);
+      syncBounds();
     }
     window.addEventListener('resize', resize);
     resize();
 
-    let targetHover = 0;
-    let lastTime = 0;
-    let currentRot = 0;
-    const rotationSpeed = 0.3;
-
+    // Avoid forced reflow on every mousemove by caching bounds and updating on scroll/resize.
     const handleMouseMove = e => {
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const width = rect.width;
-      const height = rect.height;
+      if (!bounds) syncBounds();
+      const x = e.clientX - bounds.left;
+      const y = e.clientY - bounds.top;
+      const width = bounds.width;
+      const height = bounds.height;
       const size = Math.min(width, height);
       const centerX = width / 2;
       const centerY = height / 2;
       const uvX = ((x - centerX) / size) * 2.0;
       const uvY = ((y - centerY) / size) * 2.0;
 
-      if (Math.sqrt(uvX * uvX + uvY * uvY) < 0.8) {
-        targetHover = 1;
-      } else {
-        targetHover = 0;
-      }
+      targetHover = Math.sqrt(uvX * uvX + uvY * uvY) < 0.8 ? 1 : 0;
     };
 
     const handleMouseLeave = () => {
       targetHover = 0;
     };
 
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseleave', handleMouseLeave);
+    if (!forceHoverState) {
+      syncBounds();
+      container.addEventListener('mousemove', handleMouseMove, { passive: true });
+      container.addEventListener('mouseleave', handleMouseLeave);
+      window.addEventListener('scroll', syncBounds, { passive: true });
+    }
 
     let rafId;
     const update = t => {
@@ -258,8 +265,11 @@ export default function Orb({ hue = 0, hoverIntensity = 0.2, rotateOnHover = tru
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener('resize', resize);
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseleave', handleMouseLeave);
+      if (!forceHoverState) {
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('mouseleave', handleMouseLeave);
+        window.removeEventListener('scroll', syncBounds);
+      }
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
