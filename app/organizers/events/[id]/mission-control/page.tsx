@@ -9,13 +9,15 @@ import OpsSummaryCard from "./components/OpsSummaryCard";
 import AlertsPanel from "./components/AlertsPanel";
 import ActivityFeed from "./components/ActivityFeed";
 
+type EventStatus = "Draft" | "Live" | "Today" | "Ended";
 type TabType = "overview" | "approvals" | "attendees" | "ops" | "settings";
+
 
 // Mock data
 const data = {
   event: {
     name: "GATR Winter Fest",
-    status: "Live" as const,
+    status: "Live" as EventStatus,
     date: "Feb 14, 2026",
     time: "7:00 PM",
     venue: "Port Grand, Karachi",
