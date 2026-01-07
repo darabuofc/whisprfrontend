@@ -1,11 +1,7 @@
 "use client";
-export const dynamic = "force-dynamic";
-export const dynamicParams = true;  // ✅ explicitly allow params
-export const revalidate = 0;        // ✅ disable caching for static export
-
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Calendar,
   MapPin,
@@ -18,32 +14,44 @@ import {
   DollarSign,
 } from "lucide-react";
 
-export default function EventPage() {
-  const { id } = useParams();
+export default function EventPageClient() {
   const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
+
   const [activeTab, setActiveTab] = useState("overview");
   const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // 🔐 Auth gate
   useEffect(() => {
     const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
-        : null;
-    const role = typeof window !== "undefined" ? localStorage.getItem("whispr_role") : null;
+      localStorage.getItem("whispr_token") || localStorage.getItem("token");
+    const role = localStorage.getItem("whispr_role");
 
     if (!token) {
       router.replace("/auth?role=organizer");
       return;
     }
+
     if (role && role !== "organizer") {
       router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
       return;
     }
 
     setAuthorized(true);
+    setLoading(false);
   }, [router]);
 
-  if (!authorized) return <div className="p-8 text-white">Checking access...</div>;
+  if (loading) {
+    return <div className="p-8 text-white">Checking access...</div>;
+  }
+
+  if (!authorized) {
+    return null;
+  }
+
+  // Later: you will fetch real event data using `id` here.
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white p-6">
@@ -78,31 +86,11 @@ export default function EventPage() {
 
       {/* Meta Badges */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
-        <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-          <Ticket className="text-cyan-400 mb-2" size={20} />
-          <span className="text-lg font-bold">120</span>
-          <p className="text-gray-400 text-sm">Tickets Sold</p>
-        </div>
-        <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-          <DollarSign className="text-green-400 mb-2" size={20} />
-          <span className="text-lg font-bold">$3,600</span>
-          <p className="text-gray-400 text-sm">Revenue</p>
-        </div>
-        <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-          <Users className="text-purple-400 mb-2" size={20} />
-          <span className="text-lg font-bold">105</span>
-          <p className="text-gray-400 text-sm">Attendees</p>
-        </div>
-        <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-          <Ticket className="text-yellow-400 mb-2" size={20} />
-          <span className="text-lg font-bold">150</span>
-          <p className="text-gray-400 text-sm">Capacity</p>
-        </div>
-        <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-          <BarChart2 className="text-pink-400 mb-2" size={20} />
-          <span className="text-lg font-bold">80%</span>
-          <p className="text-gray-400 text-sm">Sold</p>
-        </div>
+        <Stat icon={<Ticket size={20} />} label="Tickets Sold" value="120" />
+        <Stat icon={<DollarSign size={20} />} label="Revenue" value="$3,600" />
+        <Stat icon={<Users size={20} />} label="Attendees" value="105" />
+        <Stat icon={<Ticket size={20} />} label="Capacity" value="150" />
+        <Stat icon={<BarChart2 size={20} />} label="Sold" value="80%" />
       </div>
 
       {/* Tabs */}
@@ -124,116 +112,34 @@ export default function EventPage() {
 
       {/* Tab Content */}
       <div className="mt-6">
-        {activeTab === "overview" && (
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-2">Event Details</h2>
-              <p className="text-gray-300">
-                The most electrifying neon rave of 2025. Come party with the best DJs in town.
-              </p>
-            </div>
-            <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-              <h2 className="text-lg font-bold mb-2">Quick Actions</h2>
-              <div className="flex flex-wrap gap-2">
-                <button className="px-3 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500">Duplicate Event</button>
-                <button className="px-3 py-2 rounded-lg bg-yellow-600 hover:bg-yellow-500">Unpublish</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === "passes" && (
-          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4">Pass Types</h2>
-            <table className="w-full text-left text-sm">
-              <thead className="text-gray-400">
-                <tr>
-                  <th className="pb-2">Type</th>
-                  <th className="pb-2">Price</th>
-                  <th className="pb-2">Available</th>
-                  <th className="pb-2">Sold</th>
-                  <th className="pb-2">Remaining</th>
-                  <th className="pb-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t border-gray-800">
-                  <td className="py-2">Group</td>
-                  <td>$100</td>
-                  <td>20</td>
-                  <td>15</td>
-                  <td>5</td>
-                  <td>
-                    <button className="text-cyan-400 hover:underline">Edit</button>
-                  </td>
-                </tr>
-                <tr className="border-t border-gray-800">
-                  <td className="py-2">Couple</td>
-                  <td>$50</td>
-                  <td>40</td>
-                  <td>35</td>
-                  <td>5</td>
-                  <td>
-                    <button className="text-cyan-400 hover:underline">Edit</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === "attendees" && (
-          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4">Attendees</h2>
-            <table className="w-full text-left text-sm">
-              <thead className="text-gray-400">
-                <tr>
-                  <th className="pb-2">Name</th>
-                  <th className="pb-2">Email</th>
-                  <th className="pb-2">Pass</th>
-                  <th className="pb-2">Registered</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-t border-gray-800">
-                  <td className="py-2">Ali Khan</td>
-                  <td>ali@email.com</td>
-                  <td>Couple</td>
-                  <td>Oct 20</td>
-                </tr>
-                <tr className="border-t border-gray-800">
-                  <td className="py-2">Sara Ahmed</td>
-                  <td>sara@email.com</td>
-                  <td>Single Female</td>
-                  <td>Oct 21</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
-          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4">Sales & Analytics</h2>
-            <p className="text-gray-400">📊 Charts will go here (tickets over time, revenue by type).</p>
-          </div>
-        )}
-
+        {activeTab === "overview" && <Card title="Event Details" text="The most electrifying neon rave of 2025." />}
+        {activeTab === "analytics" && <Card title="Analytics" text="Charts will go here." />}
         {activeTab === "marketing" && (
-          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4">Marketing</h2>
-            <p className="text-gray-400">🔗 Share link: <span className="text-cyan-400">https://whispr.app/events/{id}</span></p>
-            <p className="text-gray-400 mt-2">📱 QR Code, social share buttons will go here.</p>
-          </div>
+          <Card title="Marketing" text={`Share link: https://whispr.app/events/${id}`} />
         )}
-
         {activeTab === "settings" && (
-          <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4">Settings</h2>
-            <button className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg">Cancel Event</button>
-          </div>
+          <button className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg">Cancel Event</button>
         )}
       </div>
+    </div>
+  );
+}
+
+function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
+      <div className="text-cyan-400 mb-2">{icon}</div>
+      <span className="text-lg font-bold">{value}</span>
+      <p className="text-gray-400 text-sm">{label}</p>
+    </div>
+  );
+}
+
+function Card({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
+      <h2 className="text-lg font-bold mb-2">{title}</h2>
+      <p className="text-gray-300">{text}</p>
     </div>
   );
 }
