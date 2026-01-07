@@ -18,7 +18,7 @@ export default function OrganizerEventsPage() {
       router.replace("/auth?role=organizer");
       return;
     }
-    if (role && role !== \"organizer\") {
+    if (role && role !== "organizer") {
       router.replace(role === "attendee" ? "/attendees/dashboard" : "/auth");
       return;
     }
