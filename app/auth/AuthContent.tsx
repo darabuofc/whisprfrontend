@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Ticket, Bell, Sparkles, Shield, Lock } from "lucide-react";
@@ -29,6 +29,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   // Brand accent by role
   const accent = useMemo(() => (mode === "attendee" ? "#c1ff72" : "#b472ff"), [mode]);
@@ -48,39 +49,42 @@ export default function AuthPage() {
     setStage(initialStage);
   }, [initialMode, initialStage]);
 
-  const roleContent =
-    mode === "attendee"
-      ? {
-          tag: "Discover exclusive experiences",
-          h1a: "Find the nights",
-          h1b: "that matter.",
-          p: "Join gated events, keep your passes in one place, and step into the rooms that aren’t for everyone.",
-          bullets: [
-            { icon: Ticket, text: "Instant access to your tickets & passes" },
-            { icon: Bell, text: "Get on lists, stay in the loop" },
-            { icon: Sparkles, text: "Unlock hidden experiences" },
-          ] as const,
-        }
-      : {
-          tag: "For organizers who care about control",
-          h1a: "Build, gate, and run",
-          h1b: "unforgettable nights.",
-          p: "Own your events end-to-end — ticketing, guest lists, on-site scanning, and payouts without chaos.",
-          bullets: [
-            { icon: Shield, text: "Fraud-resistant QR validation" },
-            { icon: Lock, text: "Role-based access & gating" },
-            { icon: Sparkles, text: "Branded, seamless flows" },
-          ] as const,
-        };
+  const roleContent = useMemo(
+    () =>
+      mode === "attendee"
+        ? {
+            tag: "Discover exclusive experiences",
+            h1a: "Find the nights",
+            h1b: "that matter.",
+            p: "Join gated events, keep your passes in one place, and step into the rooms that aren't for everyone.",
+            bullets: [
+              { icon: Ticket, text: "Instant access to your tickets & passes" },
+              { icon: Bell, text: "Get on lists, stay in the loop" },
+              { icon: Sparkles, text: "Unlock hidden experiences" },
+            ] as const,
+          }
+        : {
+            tag: "For organizers who care about control",
+            h1a: "Build, gate, and run",
+            h1b: "unforgettable nights.",
+            p: "Own your events end-to-end — ticketing, guest lists, on-site scanning, and payouts without chaos.",
+            bullets: [
+              { icon: Shield, text: "Fraud-resistant QR validation" },
+              { icon: Lock, text: "Role-based access & gating" },
+              { icon: Sparkles, text: "Branded, seamless flows" },
+            ] as const,
+          },
+    [mode]
+  );
 
-  const persistSession = (token: string, role: AuthMode) => {
+  const persistSession = useCallback((token: string, role: AuthMode) => {
     localStorage.setItem("whispr_token", token);
     // keep legacy key for existing API helper compatibility
     localStorage.setItem("token", token);
     localStorage.setItem("whispr_role", role);
-  };
+  }, []);
 
-  const submitOrganizerFlow = async () => {
+  const submitOrganizerFlow = useCallback(async () => {
     if (stage === "register" && (!fullName.trim() || !organizationName.trim())) {
       throw new Error("Please add your full name and organization.");
     }
@@ -130,9 +134,9 @@ export default function AuthPage() {
     if (!data?.token) throw new Error("Something went wrong. Please try again.");
     persistSession(data.token, "organizer");
     router.replace("/organizers/dashboard");
-  };
+  }, [stage, fullName, organizationName, email, password, router, persistSession]);
 
-  const submitAttendeeFlow = async () => {
+  const submitAttendeeFlow = useCallback(async () => {
     const base = process.env.NEXT_PUBLIC_API_URL;
     if (!base) throw new Error("Configuration error: NEXT_PUBLIC_API_URL is not set.");
 
@@ -159,10 +163,10 @@ export default function AuthPage() {
     } else {
       setStage("signin");
     }
-  };
+  }, [stage, fullName, email, password, router, persistSession]);
 
   // Submit handler
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
 
@@ -179,7 +183,7 @@ export default function AuthPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, mode, submitOrganizerFlow, submitAttendeeFlow]);
 
   return (
     <div
@@ -196,35 +200,45 @@ export default function AuthPage() {
         {!prefersReduced ? (
           <>
             <motion.div
-              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[150px]"
+              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[80px]"
               style={{
                 background:
                   "radial-gradient(circle at 30% 30%, rgba(180,114,255,0.45), transparent 60%)",
+                willChange: "transform, opacity",
               }}
-              animate={{ scale: [1, 1.06, 1], opacity: [0.45, 0.7, 0.45] }}
-              transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+              animate={
+                isInputFocused
+                  ? { scale: 1, opacity: 0.45 }
+                  : { scale: [1, 1.06, 1], opacity: [0.45, 0.7, 0.45] }
+              }
+              transition={{ duration: 14, repeat: isInputFocused ? 0 : Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[170px]"
+              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[80px]"
               style={{
                 background:
                   "radial-gradient(circle at 60% 60%, rgba(193,255,114,0.4), transparent 65%)",
+                willChange: "transform, opacity",
               }}
-              animate={{ scale: [1, 1.05, 1], opacity: [0.35, 0.6, 0.35] }}
-              transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+              animate={
+                isInputFocused
+                  ? { scale: 1, opacity: 0.35 }
+                  : { scale: [1, 1.05, 1], opacity: [0.35, 0.6, 0.35] }
+              }
+              transition={{ duration: 16, repeat: isInputFocused ? 0 : Infinity, ease: "easeInOut" }}
             />
           </>
         ) : (
           <>
             <div
-              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[150px]"
+              className="absolute -left-1/4 -top-1/5 h-[60vh] w-[70vw] rounded-full blur-[80px]"
               style={{
                 background:
                   "radial-gradient(circle at 30% 30%, rgba(180,114,255,0.35), transparent 60%)",
               }}
             />
             <div
-              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[170px]"
+              className="absolute -right-1/3 bottom-[-10%] h-[65vh] w-[75vw] rounded-full blur-[80px]"
               style={{
                 background:
                   "radial-gradient(circle at 60% 60%, rgba(193,255,114,0.32), transparent 65%)",
@@ -403,6 +417,8 @@ export default function AuthPage() {
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      onFocus={() => setIsInputFocused(true)}
+                      onBlur={() => setIsInputFocused(false)}
                       required
                       placeholder="Jane Doe"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
@@ -422,6 +438,8 @@ export default function AuthPage() {
                       type="text"
                       value={organizationName}
                       onChange={(e) => setOrganizationName(e.target.value)}
+                      onFocus={() => setIsInputFocused(true)}
+                      onBlur={() => setIsInputFocused(false)}
                       required={mode === "organizer"}
                       placeholder="Club Collective"
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
@@ -442,6 +460,8 @@ export default function AuthPage() {
                     autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
                     required
                     placeholder="you@domain.com"
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
@@ -462,6 +482,8 @@ export default function AuthPage() {
                       autoComplete={stage === "signin" ? "current-password" : "new-password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setIsInputFocused(true)}
+                      onBlur={() => setIsInputFocused(false)}
                       required
                       placeholder={stage === "signin" ? "Your password" : "Create a strong password"}
                       className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-11 text-sm outline-none placeholder:text-white/35 transition-[box-shadow,border-color] focus:border-white/20 focus:shadow-[0_0_0_4px_var(--accent-weak)]"
