@@ -2,25 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import EventHeader from "./components/EventHeader";
-import HealthStrip from "./components/HealthStrip";
-import Tabs from "./components/Tabs";
-import OpsSummaryCard from "./components/OpsSummaryCard";
-import AlertsPanel from "./components/AlertsPanel";
-import ActivityFeed from "./components/ActivityFeed";
+import StatusStrip from "./components/StatusStrip";
+import CommandRail from "./components/CommandRail";
+import SystemLog, { LogEntry } from "./components/SystemLog";
+import OperationsQueue, { QueueItem } from "./components/OperationsQueue";
+import MetricsGrid from "./components/MetricsGrid";
+import AlertsSection, { Alert } from "./components/AlertsSection";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
-type TabType = "overview" | "approvals" | "attendees" | "ops" | "settings";
-
+type ViewType = "queue" | "approvals" | "attendees" | "log" | "settings";
 
 // Mock data
 const data = {
   event: {
     name: "GATR Winter Fest",
     status: "Live" as EventStatus,
-    date: "Feb 14, 2026",
-    time: "7:00 PM",
-    venue: "Port Grand, Karachi",
   },
   stats: {
     approved: 342,
@@ -29,36 +25,35 @@ const data = {
     checkedIn: 0,
     daysLeft: 12,
   },
-  ops: {
-    pendingApprovals: 7,
-    avgApprovalTime: "3 min",
-  },
-  alerts: [{ id: 1, text: "5 registrations pending > 15 minutes" }],
-  activity: [
-    {
-      id: 1,
-      type: "submission" as const,
-      text: "Ali submitted registration",
-      timestamp: "2 min ago",
-    },
-    {
-      id: 2,
-      type: "approval" as const,
-      text: "You approved Sara",
-      timestamp: "5 min ago",
-    },
-    {
-      id: 3,
-      type: "checkin" as const,
-      text: "2 people checked in",
-      timestamp: "12 min ago",
-    },
-    {
-      id: 4,
-      type: "rejection" as const,
-      text: "Ahmed was rejected",
-      timestamp: "18 min ago",
-    },
+  queueItems: [
+    { id: "1847", name: "Ali Hassan", type: "Individual" as const, status: "PENDING" as const },
+    { id: "1846", name: "Sara Ahmed", type: "Couple" as const, status: "PENDING" as const },
+    { id: "1845", name: "Ahmed Khan", type: "Group" as const, status: "FLAGGED" as const },
+    { id: "1844", name: "Fatima Ali", type: "Individual" as const, status: "PENDING" as const },
+    { id: "1843", name: "Omar Siddiqui", type: "Couple" as const, status: "PENDING" as const },
+    { id: "1842", name: "Zainab Malik", type: "Individual" as const, status: "PENDING" as const },
+    { id: "1841", name: "Bilal Sheikh", type: "Group" as const, status: "PENDING" as const },
+  ],
+  alerts: [
+    { id: "1", message: "3 submissions > 24h pending", severity: "warning" as const },
+    { id: "2", message: "CNIC validation service degraded", severity: "warning" as const },
+  ],
+  logEntries: [
+    { timestamp: "21:34:07", type: "NEW_REGISTRATION" as const, details: "Ali Hassan" },
+    { timestamp: "21:32:11", type: "NEW_REGISTRATION" as const, details: "Sara Ahmed" },
+    { timestamp: "21:29:03", type: "APPROVED" as const, details: "Fatima (Couple Pass)" },
+    { timestamp: "21:26:44", type: "CHECKIN" as const, details: "2 attendees" },
+    { timestamp: "21:25:01", type: "REJECTED" as const, details: "Invalid CNIC" },
+    { timestamp: "21:22:15", type: "NEW_REGISTRATION" as const, details: "Ahmed Khan" },
+    { timestamp: "21:19:33", type: "APPROVED" as const, details: "Omar Siddiqui" },
+    { timestamp: "21:17:22", type: "FLAG" as const, details: "Duplicate submission detected" },
+    { timestamp: "21:15:08", type: "CHECKIN" as const, details: "5 attendees" },
+    { timestamp: "21:12:45", type: "APPROVED" as const, details: "Batch approval: 3 entries" },
+    { timestamp: "21:10:11", type: "NEW_REGISTRATION" as const, details: "Zainab Malik" },
+    { timestamp: "21:08:33", type: "REJECTED" as const, details: "Incomplete form" },
+    { timestamp: "21:05:22", type: "SYSTEM" as const, details: "Backup completed" },
+    { timestamp: "21:03:11", type: "NEW_REGISTRATION" as const, details: "Bilal Sheikh" },
+    { timestamp: "21:01:05", type: "APPROVED" as const, details: "Hassan Ali" },
   ],
 };
 
@@ -67,9 +62,14 @@ export default function MissionControlPage() {
   const params = useParams();
   const id = params?.id as string;
 
-  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [activeView, setActiveView] = useState<ViewType>("queue");
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [queueItems, setQueueItems] = useState<QueueItem[]>(data.queueItems);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>(data.logEntries);
+  const [lastSync, setLastSync] = useState(
+    new Date().toLocaleTimeString("en-US", { hour12: false })
+  );
 
   // Auth gate
   useEffect(() => {
@@ -91,10 +91,21 @@ export default function MissionControlPage() {
     setLoading(false);
   }, [router]);
 
+  // Update last sync time every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLastSync(new Date().toLocaleTimeString("en-US", { hour12: false }));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
-        <div className="text-white text-lg">Loading mission control...</div>
+      <div className="min-h-screen bg-[#0A0226] flex items-center justify-center">
+        <div className="text-[#6B7280] text-[14px] font-mono uppercase tracking-wider">
+          LOADING MISSION CONTROL...
+        </div>
       </div>
     );
   }
@@ -103,133 +114,141 @@ export default function MissionControlPage() {
     return null;
   }
 
-  const isToday = data.event.status === "Today";
-
   // Handler functions
-  const handlePublish = () => {
-    console.log("Publishing event...");
+  const handleApprove = (id: string) => {
+    console.log("Approving:", id);
+    // Remove from queue
+    setQueueItems((prev) => prev.filter((item) => item.id !== id));
+    // Add to log
+    const item = queueItems.find((q) => q.id === id);
+    if (item) {
+      const newEntry: LogEntry = {
+        timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
+        type: "APPROVED",
+        details: item.name,
+      };
+      setLogEntries((prev) => [newEntry, ...prev]);
+    }
   };
 
-  const handlePause = () => {
-    console.log("Pausing event...");
+  const handleReject = (id: string) => {
+    console.log("Rejecting:", id);
+    // Remove from queue
+    setQueueItems((prev) => prev.filter((item) => item.id !== id));
+    // Add to log
+    const item = queueItems.find((q) => q.id === id);
+    if (item) {
+      const newEntry: LogEntry = {
+        timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
+        type: "REJECTED",
+        details: item.name,
+      };
+      setLogEntries((prev) => [newEntry, ...prev]);
+    }
   };
 
-  const handleShare = () => {
-    console.log("Sharing event...");
+  const handleViewChange = (view: ViewType) => {
+    setActiveView(view);
   };
 
-  const handleEdit = () => {
-    console.log("Editing event...");
-  };
-
-  const handleDuplicate = () => {
-    console.log("Duplicating event...");
-  };
-
-  const handleCancel = () => {
-    console.log("Canceling event...");
-  };
-
-  const handleGoToApprovals = () => {
-    setActiveTab("approvals");
-  };
-
-  const handleFixAlert = (alertId: number) => {
-    console.log("Fixing alert:", alertId);
-  };
-
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
-  };
+  const metrics = [
+    { label: "APPROVED", value: data.stats.approved, status: "normal" as const },
+    {
+      label: "PENDING",
+      value: data.stats.pending,
+      status: data.stats.pending > 0 ? ("warning" as const) : ("normal" as const),
+    },
+    { label: "REJECTED", value: data.stats.rejected, status: "normal" as const },
+    { label: "AVG APPROVAL", value: "4.2min", status: "normal" as const },
+    { label: "CHECKIN RATE", value: "94%", status: "success" as const },
+    { label: "ACTIVE OPS", value: queueItems.length, status: "normal" as const },
+    { label: "CAPACITY", value: "87%", status: "success" as const },
+    { label: "UPTIME", value: "99.8%", status: "success" as const },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
-      {/* Event Header */}
-      <EventHeader
-        name={data.event.name}
+    <div className="min-h-screen bg-[#0A0226]">
+      {/* Status Strip */}
+      <StatusStrip
+        eventName={data.event.name}
         status={data.event.status}
-        date={data.event.date}
-        time={data.event.time}
-        venue={data.event.venue}
-        onPublish={handlePublish}
-        onPause={handlePause}
-        onShare={handleShare}
-        onEdit={handleEdit}
-        onDuplicate={handleDuplicate}
-        onCancel={handleCancel}
+        attendeesCount={data.stats.approved}
+        pendingCount={data.stats.pending}
+        rejectedCount={data.stats.rejected}
+        daysLeft={data.stats.daysLeft}
+        lastSync={lastSync}
       />
 
-      {/* Health Strip */}
-      <HealthStrip stats={data.stats} isToday={isToday} />
+      {/* Command Rail */}
+      <CommandRail activeView={activeView} onViewChange={handleViewChange} />
 
-      {/* Tabs */}
-      <Tabs
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        isToday={isToday}
-      />
+      {/* System Log */}
+      <SystemLog entries={logEntries} />
 
-      {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <OpsSummaryCard
-                ops={data.ops}
-                onGoToApprovals={handleGoToApprovals}
+      {/* Main Canvas */}
+      <div className="fixed left-16 right-64 top-12 bottom-0 overflow-y-auto">
+        <div className="p-6 space-y-6">
+          {activeView === "queue" && (
+            <>
+              {/* Operations Queue */}
+              <OperationsQueue
+                items={queueItems}
+                onApprove={handleApprove}
+                onReject={handleReject}
               />
-              <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+
+              {/* Alerts Section */}
+              <AlertsSection alerts={data.alerts} />
+
+              {/* Metrics Grid */}
+              <MetricsGrid metrics={metrics} />
+            </>
+          )}
+
+          {activeView === "approvals" && (
+            <div className="border border-[#1A1A1A] p-8 text-center">
+              <h2 className="text-[16px] font-medium text-[#E5E7EB] mb-4 uppercase tracking-wider">
+                Approvals View
+              </h2>
+              <p className="text-[14px] text-[#6B7280]">
+                Full approvals interface will be implemented here
+              </p>
             </div>
+          )}
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              <ActivityFeed activities={data.activity} />
+          {activeView === "attendees" && (
+            <div className="border border-[#1A1A1A] p-8 text-center">
+              <h2 className="text-[16px] font-medium text-[#E5E7EB] mb-4 uppercase tracking-wider">
+                Attendees Management
+              </h2>
+              <p className="text-[14px] text-[#6B7280]">
+                Attendees management will be implemented here
+              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === "approvals" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Approvals Tab
-            </h2>
-            <p className="text-gray-400">
-              Approvals interface will be implemented here
-            </p>
-          </div>
-        )}
+          {activeView === "log" && (
+            <div className="border border-[#1A1A1A] p-8 text-center">
+              <h2 className="text-[16px] font-medium text-[#E5E7EB] mb-4 uppercase tracking-wider">
+                Full System Log
+              </h2>
+              <p className="text-[14px] text-[#6B7280]">
+                Detailed system log with filtering will be implemented here
+              </p>
+            </div>
+          )}
 
-        {activeTab === "attendees" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Attendees Tab
-            </h2>
-            <p className="text-gray-400">
-              Attendees management will be implemented here
-            </p>
-          </div>
-        )}
-
-        {activeTab === "ops" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Ops Mode</h2>
-            <p className="text-gray-400">
-              Live operations dashboard will be implemented here
-            </p>
-          </div>
-        )}
-
-        {activeTab === "settings" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Event Settings
-            </h2>
-            <p className="text-gray-400">
-              Event configuration will be implemented here
-            </p>
-          </div>
-        )}
+          {activeView === "settings" && (
+            <div className="border border-[#1A1A1A] p-8 text-center">
+              <h2 className="text-[16px] font-medium text-[#E5E7EB] mb-4 uppercase tracking-wider">
+                Event Settings
+              </h2>
+              <p className="text-[14px] text-[#6B7280]">
+                Event configuration will be implemented here
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
