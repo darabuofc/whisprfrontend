@@ -93,8 +93,8 @@ export default function MissionControlPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
-        <div className="text-white text-lg">Loading mission control...</div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-neutral-900 text-lg font-medium">Loading mission control...</div>
       </div>
     );
   }
@@ -143,7 +143,7 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div className="min-h-screen bg-neutral-50">
       {/* Event Header */}
       <EventHeader
         name={data.event.name}
@@ -170,11 +170,11 @@ export default function MissionControlPage() {
       />
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               <OpsSummaryCard
                 ops={data.ops}
                 onGoToApprovals={handleGoToApprovals}
@@ -183,49 +183,49 @@ export default function MissionControlPage() {
             </div>
 
             {/* Right Column */}
-            <div className="space-y-6">
+            <div className="space-y-8">
               <ActivityFeed activities={data.activity} />
             </div>
           </div>
         )}
 
         {activeTab === "approvals" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Approvals Tab
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Approvals interface will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "attendees" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Attendees Tab
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Attendees management will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "ops" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Ops Mode</h2>
-            <p className="text-gray-400">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Ops Mode</h2>
+            <p className="text-neutral-500">
               Live operations dashboard will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "settings" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Event Settings
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Event configuration will be implemented here
             </p>
           </div>

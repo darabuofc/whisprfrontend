@@ -15,31 +15,31 @@ export default function OpsSummaryCard({
   onGoToApprovals,
 }: OpsSummaryCardProps) {
   return (
-    <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 hover:bg-gray-900/70 transition-all">
+    <div className="bg-white rounded-2xl shadow-sm p-6 transition-all">
       <div className="flex items-start justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Action Required</h3>
-        <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-          <Clock className="text-amber-400" size={20} />
+        <h3 className="text-xl font-semibold text-neutral-900">Action Required</h3>
+        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+          <Clock className="text-blue-600" size={20} />
         </div>
       </div>
 
-      <div className="space-y-4 mb-6">
-        <div className="flex items-center justify-between py-3 border-b border-gray-800">
+      <div className="space-y-5 mb-6">
+        <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-            <span className="text-sm text-gray-300">Pending approvals</span>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+            <span className="text-sm text-neutral-600">Pending approvals</span>
           </div>
-          <span className="text-2xl font-bold text-white">
+          <span className="text-3xl font-semibold text-neutral-900">
             {ops.pendingApprovals}
           </span>
         </div>
 
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between py-3 border-t border-neutral-100">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="text-green-400" size={16} />
-            <span className="text-sm text-gray-300">Avg approval time</span>
+            <CheckCircle2 className="text-neutral-500" size={18} />
+            <span className="text-sm text-neutral-600">Avg approval time</span>
           </div>
-          <span className="text-lg font-semibold text-gray-400">
+          <span className="text-lg font-medium text-neutral-700">
             {ops.avgApprovalTime}
           </span>
         </div>
@@ -47,7 +47,7 @@ export default function OpsSummaryCard({
 
       <button
         onClick={onGoToApprovals}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition-colors group"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all active:scale-[0.98] shadow-sm group"
       >
         Go to Approvals
         <ArrowRight

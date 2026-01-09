@@ -16,13 +16,13 @@ export default function AlertsPanel({ alerts, onFix }: AlertsPanelProps) {
   }
 
   return (
-    <div className="bg-gray-900/50 border border-amber-500/30 rounded-xl p-6 hover:bg-gray-900/70 transition-all">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">
+    <div className="bg-white rounded-2xl shadow-sm p-6 ring-2 ring-orange-100 transition-all">
+      <div className="flex items-start justify-between mb-5">
+        <h3 className="text-xl font-semibold text-neutral-900">
           Alerts & Attention
         </h3>
-        <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-          <AlertTriangle className="text-amber-400" size={20} />
+        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+          <AlertTriangle className="text-orange-600" size={20} />
         </div>
       </div>
 
@@ -30,18 +30,18 @@ export default function AlertsPanel({ alerts, onFix }: AlertsPanelProps) {
         {alerts.map((alert) => (
           <div
             key={alert.id}
-            className="flex items-center justify-between gap-4 p-4 bg-gray-800/50 border border-gray-700 rounded-lg hover:border-amber-500/30 transition-colors"
+            className="flex items-center justify-between gap-4 p-4 bg-orange-50/50 rounded-xl transition-all"
           >
             <div className="flex items-start gap-3 flex-1">
               <AlertTriangle
-                className="text-amber-400 mt-0.5 flex-shrink-0"
+                className="text-orange-600 mt-0.5 flex-shrink-0"
                 size={18}
               />
-              <p className="text-sm text-gray-200">{alert.text}</p>
+              <p className="text-sm text-neutral-700">{alert.text}</p>
             </div>
             <button
               onClick={() => onFix?.(alert.id)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 rounded-lg text-sm font-medium transition-colors whitespace-nowrap group"
+              className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg text-sm font-medium transition-all active:scale-95 whitespace-nowrap group"
             >
               Fix
               <ArrowRight

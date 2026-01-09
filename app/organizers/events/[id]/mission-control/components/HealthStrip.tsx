@@ -15,38 +15,38 @@ interface HealthStripProps {
 
 export default function HealthStrip({ stats, isToday }: HealthStripProps) {
   return (
-    <div className="bg-gray-900/50 border-b border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+    <div className="bg-white border-b border-neutral-200/60">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
           <StatCard
-            icon={<Users className="text-green-400" size={24} />}
+            icon={<Users className="text-neutral-600" size={22} />}
             label="Attendees"
             value={stats.approved}
             color="green"
           />
           <StatCard
-            icon={<Clock className="text-amber-400" size={24} />}
+            icon={<Clock className="text-neutral-600" size={22} />}
             label="Pending"
             value={stats.pending}
             color="amber"
             highlight={stats.pending > 0}
           />
           <StatCard
-            icon={<UserX className="text-red-400" size={24} />}
+            icon={<UserX className="text-neutral-600" size={22} />}
             label="Rejected"
             value={stats.rejected}
             color="red"
           />
           {isToday && (
             <StatCard
-              icon={<CheckCircle2 className="text-cyan-400" size={24} />}
+              icon={<CheckCircle2 className="text-neutral-600" size={22} />}
               label="Checked In"
               value={stats.checkedIn}
               color="cyan"
             />
           )}
           <StatCard
-            icon={<Calendar className="text-purple-400" size={24} />}
+            icon={<Calendar className="text-neutral-600" size={22} />}
             label={isToday ? "LIVE NOW" : "Days to Event"}
             value={isToday ? "LIVE" : stats.daysLeft}
             color="purple"
@@ -76,27 +76,24 @@ function StatCard({
   isLive,
 }: StatCardProps) {
   const getBgColor = () => {
-    if (highlight) return "bg-amber-500/10 border-amber-500/30";
-    return "bg-gray-800/40 border-gray-700/50";
+    if (highlight) return "bg-blue-50 ring-2 ring-blue-200";
+    return "bg-neutral-50";
   };
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border ${getBgColor()} p-4 transition-all hover:bg-gray-800/60`}
+      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all hover:scale-[1.02]`}
     >
       {isLive && (
-        <div className="absolute top-0 right-0 w-2 h-2 bg-green-500 rounded-full animate-pulse mt-2 mr-2" />
+        <div className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse mt-3 mr-3" />
       )}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         {icon}
-        <div className={`text-3xl font-bold text-white`}>{value}</div>
+        <div className={`text-3xl font-semibold text-neutral-900`}>{value}</div>
       </div>
-      <div className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+      <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
         {label}
       </div>
-      {highlight && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
-      )}
     </div>
   );
 }
