@@ -82,16 +82,21 @@ function StatCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all hover:scale-[1.02]`}
+      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group cursor-pointer`}
     >
+      {/* Shimmer effect on hover */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
       {isLive && (
-        <div className="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full animate-pulse mt-3 mr-3" />
+        <div className="absolute top-0 right-0 flex items-center gap-1.5 mt-3 mr-3">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+        </div>
       )}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 relative z-10">
         {icon}
-        <div className={`text-3xl font-semibold text-neutral-900`}>{value}</div>
+        <div className={`text-3xl font-semibold bg-gradient-to-br from-neutral-900 to-neutral-700 bg-clip-text text-transparent`}>{value}</div>
       </div>
-      <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+      <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider relative z-10">
         {label}
       </div>
     </div>

@@ -50,17 +50,17 @@ export default function EventHeader({
   const isPublished = status === "Live" || status === "Today";
 
   return (
-    <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60">
+    <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           {/* Left side */}
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl sm:text-4xl font-semibold text-neutral-900 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent tracking-tight">
                 {name}
               </h1>
               <span
-                className={`px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(
+                className={`px-3 py-1.5 rounded-full text-xs font-medium shadow-sm ${getStatusColor(
                   status
                 )}`}
               >
@@ -90,7 +90,7 @@ export default function EventHeader({
             ) : (
               <button
                 onClick={onPublish}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all active:scale-95 shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all active:scale-95 shadow-lg shadow-blue-500/30"
               >
                 <Play size={18} />
                 <span className="hidden sm:inline">Publish</span>

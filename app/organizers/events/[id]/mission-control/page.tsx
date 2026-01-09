@@ -93,8 +93,16 @@ export default function MissionControlPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="text-neutral-900 text-lg font-medium">Loading mission control...</div>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            {/* Spinning ring */}
+            <div className="w-16 h-16 rounded-full border-4 border-neutral-200 border-t-blue-600 animate-spin" />
+            {/* Inner pulse */}
+            <div className="absolute inset-0 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse" />
+          </div>
+          <div className="text-neutral-900 text-lg font-medium animate-pulse">Loading mission control...</div>
+        </div>
       </div>
     );
   }
@@ -143,7 +151,13 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50">
+      {/* Ambient gradient orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Event Header */}
       <EventHeader
         name={data.event.name}
@@ -170,21 +184,27 @@ export default function MissionControlPage() {
       />
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeIn">
             {/* Left Column */}
             <div className="space-y-8">
-              <OpsSummaryCard
-                ops={data.ops}
-                onGoToApprovals={handleGoToApprovals}
-              />
-              <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+              <div className="animate-slideInLeft">
+                <OpsSummaryCard
+                  ops={data.ops}
+                  onGoToApprovals={handleGoToApprovals}
+                />
+              </div>
+              <div className="animate-slideInLeft" style={{ animationDelay: '0.1s' }}>
+                <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+              </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-8">
-              <ActivityFeed activities={data.activity} />
+              <div className="animate-slideInRight">
+                <ActivityFeed activities={data.activity} />
+              </div>
             </div>
           </div>
         )}
