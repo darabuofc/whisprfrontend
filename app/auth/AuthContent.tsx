@@ -157,7 +157,15 @@ export default function AuthPage() {
         ? router.replace("/attendees/dashboard")
         : router.replace("/attendees/onboarding");
     } else {
-      setStage("signin");
+      // Registration successful - auto-login with token
+      if (data?.token) {
+        persistSession(data.token, "attendee");
+        // Redirect to onboarding since new user
+        router.replace("/attendees/onboarding");
+      } else {
+        // Fallback: if no token returned, switch to signin
+        setStage("signin");
+      }
     }
   };
 
