@@ -86,7 +86,7 @@ export default function OrganizersAuth() {
 
         {/* Google OAuth Button */}
         <div className="mb-4">
-          <GoogleOAuthButton userType="organizer" mode={mode} />
+          <GoogleOAuthButton userType="organizer" mode={mode === "register" ? "signup" : "signin"} />
         </div>
 
         {/* OR Divider */}
