@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { persistOAuthSession, getPostAuthRedirect } from "@/lib/oauth";
 
+export const dynamic = 'force-dynamic';
+
 export default function AttendeeOAuthCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
