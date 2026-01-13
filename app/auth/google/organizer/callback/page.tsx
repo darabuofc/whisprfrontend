@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { persistOAuthSession, getPostAuthRedirect } from "@/lib/oauth";
 
 export const dynamic = 'force-dynamic';
 
-export default function OrganizerOAuthCallback() {
+function OrganizerCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -106,5 +106,22 @@ export default function OrganizerOAuthCallback() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OrganizerOAuthCallback() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-[#040404]">
+        <div className="text-center">
+          <div className="space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-[#b472ff] mx-auto" />
+            <h1 className="text-xl font-semibold text-white">Loading...</h1>
+          </div>
+        </div>
+      </div>
+    }>
+      <OrganizerCallbackContent />
+    </Suspense>
   );
 }
