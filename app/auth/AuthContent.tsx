@@ -391,7 +391,7 @@ export default function AuthPage() {
 
               {/* Google OAuth Button */}
               <div className="mb-4">
-                <GoogleOAuthButton userType={mode} mode={stage} />
+                <GoogleOAuthButton userType={mode} mode={stage === "register" ? "signup" : "signin"} />
               </div>
 
               {/* OR Divider */}
