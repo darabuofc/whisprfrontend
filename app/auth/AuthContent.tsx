@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Ticket, Bell, Sparkles, Shield, Lock } from "lucide-react";
 import Image from "next/image";
+import GoogleOAuthButton from "@/components/auth/GoogleOAuthButton";
 
 type AuthMode = "attendee" | "organizer";
 type AuthStage = "signin" | "register";
@@ -386,6 +387,21 @@ export default function AuthPage() {
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Google OAuth Button */}
+              <div className="mb-4">
+                <GoogleOAuthButton userType={mode} mode={stage} />
+              </div>
+
+              {/* OR Divider */}
+              <div className="relative mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[#040404] px-2 text-white/40 tracking-wider">Or continue with email</span>
+                </div>
               </div>
 
               {/* form */}
