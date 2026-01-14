@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import {
@@ -33,8 +33,6 @@ import {
 // ═══════════════════════════════════════════════════════════
 export default function AttendeeDashboardPage() {
   const router = useRouter();
-  const containerRef = useRef<HTMLDivElement>(null);
-
   const [activeTab, setActiveTab] = useState<
     "explore" | "applications" | "tickets"
   >("explore");
@@ -125,7 +123,6 @@ export default function AttendeeDashboardPage() {
 
   return (
     <div
-      ref={containerRef}
       {...swipeHandlers}
       className="min-h-screen bg-[#000000] text-white font-satoshi relative overflow-hidden"
     >
@@ -658,10 +655,10 @@ function ApplicationsTab({
               </div>
             </div>
 
-            {r.pass_type && (
+            {r.pass?.type && (
               <div className="mt-4 pt-4 border-t border-white/5">
                 <p className="text-sm text-neutral-500">Pass Type</p>
-                <p className="text-sm font-medium mt-1">{r.pass_type}</p>
+                <p className="text-sm font-medium mt-1">{r.pass.type}</p>
               </div>
             )}
           </motion.div>
