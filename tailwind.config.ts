@@ -75,6 +75,13 @@ const config: Config = {
   			space: [
   				'Space Grotesk',
   				'sans-serif'
+  			],
+  			mono: [
+  				'JetBrains Mono',
+  				'SF Mono',
+  				'Consolas',
+  				'Monaco',
+  				'monospace'
   			]
   		},
   		borderRadius: {
