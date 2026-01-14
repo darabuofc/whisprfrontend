@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import GoogleOAuthButton from "@/components/auth/GoogleOAuthButton";
 
 export default function OrganizersAuth() {
   const router = useRouter();
@@ -81,6 +82,21 @@ export default function OrganizersAuth() {
           >
             Register
           </button>
+        </div>
+
+        {/* Google OAuth Button */}
+        <div className="mb-4">
+          <GoogleOAuthButton userType="organizer" mode={mode === "register" ? "signup" : "signin"} />
+        </div>
+
+        {/* OR Divider */}
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-pink-500/20"></div>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-black/50 px-3 text-gray-400 tracking-wider">Or continue with email</span>
+          </div>
         </div>
 
         {/* Form */}
