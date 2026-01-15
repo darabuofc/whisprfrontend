@@ -115,12 +115,11 @@ export default function AuthPage() {
         ? router.replace("/attendees/dashboard")
         : router.replace("/attendees/onboarding");
     } else {
-      if (data?.token) {
-        persistSession(data.token, "attendee");
-        router.replace("/attendees/onboarding");
-      } else {
-        setStage("signin");
+      if (!data?.token) {
+        throw new Error("Something went wrong. Please try again.");
       }
+      persistSession(data.token, "attendee");
+      router.replace("/attendees/onboarding");
     }
   }, [stage, fullName, email, password, router, persistSession]);
 
