@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -25,6 +25,8 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const accent = mode === "attendee" ? "#c1ff72" : "#b472ff";
 
   useEffect(() => {
     setMode(initialMode);
@@ -140,26 +142,47 @@ export default function AuthPage() {
   }, [loading, mode, submitOrganizerFlow, submitAttendeeFlow]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center p-4">
-      {/* Subtle background accent */}
+    <div className="min-h-screen bg-[#040404] text-white flex items-center justify-center p-4">
+      {/* Ambient glow background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-100/40 to-purple-100/40 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-green-100/30 to-blue-100/30 rounded-full blur-3xl" />
+        <div
+          className="absolute -top-1/4 -left-1/4 w-[70vw] h-[60vh] rounded-full blur-[100px] opacity-50"
+          style={{ background: "radial-gradient(circle, rgba(180,114,255,0.4), transparent 60%)" }}
+        />
+        <div
+          className="absolute -bottom-1/4 -right-1/4 w-[70vw] h-[60vh] rounded-full blur-[100px] opacity-40"
+          style={{ background: "radial-gradient(circle, rgba(193,255,114,0.35), transparent 60%)" }}
+        />
+        <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:200px_200px] opacity-[0.03] mix-blend-overlay" />
       </div>
 
       <div className="relative w-full max-w-md">
+        {/* Glow ring behind card */}
+        <div
+          className="absolute -inset-1 rounded-[32px] blur-2xl opacity-60"
+          style={{
+            background: mode === "attendee"
+              ? "conic-gradient(from 180deg, rgba(193,255,114,0.15), rgba(255,255,255,0.02), rgba(193,255,114,0.15))"
+              : "conic-gradient(from 180deg, rgba(180,114,255,0.15), rgba(255,255,255,0.02), rgba(180,114,255,0.15))"
+          }}
+        />
+
         {/* Glass card */}
-        <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/60 p-8 md:p-10">
+        <div className="relative bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.08] p-8 md:p-10 shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center shadow-lg">
+              <div
+                className="absolute -inset-4 rounded-2xl blur-xl opacity-40"
+                style={{ background: accent }}
+              />
+              <div className="relative w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center">
                 <Image
                   src="/favicon.svg"
                   alt="Whispr"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8 brightness-0 invert"
+                  width={28}
+                  height={28}
+                  className="h-7 w-7"
                   priority
                 />
               </div>
@@ -167,10 +190,10 @@ export default function AuthPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-semibold text-center text-slate-800 mb-2">
-            {stage === "signin" ? "Sign in to Whispr" : "Create your account"}
+          <h1 className="text-2xl font-semibold text-center text-white mb-2">
+            {stage === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="text-sm text-center text-slate-500 mb-8">
+          <p className="text-sm text-center text-white/50 mb-8">
             {mode === "attendee"
               ? "Access your tickets and experiences"
               : "Manage your events and guests"}
@@ -178,20 +201,21 @@ export default function AuthPage() {
 
           {/* Role Toggle */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex bg-slate-100/80 rounded-full p-1">
+            <div className="inline-flex bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
               {(["attendee", "organizer"] as AuthMode[]).map((r) => {
                 const active = mode === r;
+                const btnAccent = r === "attendee" ? "#c1ff72" : "#b472ff";
                 return (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setMode(r)}
-                    className={`
-                      px-5 py-2 text-sm font-medium rounded-full transition-all duration-200
-                      ${active
-                        ? "bg-white text-slate-800 shadow-sm"
-                        : "text-slate-500 hover:text-slate-700"}
-                    `}
+                    className="relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300"
+                    style={{
+                      background: active ? btnAccent : "transparent",
+                      color: active ? "#000" : "rgba(255,255,255,0.6)",
+                      boxShadow: active ? `0 8px 24px -8px ${btnAccent}` : "none",
+                    }}
                   >
                     {r === "attendee" ? "Attendee" : "Organizer"}
                   </button>
@@ -204,7 +228,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {stage === "register" && (
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label htmlFor="fullName" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
                   Full Name
                 </label>
                 <input
@@ -214,14 +238,14 @@ export default function AuthPage() {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Jane Doe"
-                  className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
                 />
               </div>
             )}
 
             {stage === "register" && mode === "organizer" && (
               <div>
-                <label htmlFor="organizationName" className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label htmlFor="organizationName" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
                   Organization Name
                 </label>
                 <input
@@ -231,13 +255,13 @@ export default function AuthPage() {
                   onChange={(e) => setOrganizationName(e.target.value)}
                   required
                   placeholder="Your Company"
-                  className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label htmlFor="email" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
                 Email
               </label>
               <input
@@ -248,12 +272,12 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label htmlFor="password" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
@@ -265,12 +289,12 @@ export default function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder={stage === "signin" ? "Enter your password" : "Create a password"}
-                  className="w-full px-4 py-3 pr-12 bg-slate-50/50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full px-4 py-3 pr-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-white/40 hover:text-white/70 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -279,20 +303,21 @@ export default function AuthPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                <p className="text-sm text-red-600 text-center">{error}</p>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                <p className="text-sm text-red-400 text-center">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className={`
-                w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200
-                ${loading
-                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  : "bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98] shadow-sm hover:shadow-md"}
-              `}
+              className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 mt-2"
+              style={{
+                background: loading ? "rgba(255,255,255,0.05)" : accent,
+                color: loading ? "rgba(255,255,255,0.4)" : "#000",
+                boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
+                cursor: loading ? "not-allowed" : "pointer",
+              }}
             >
               {loading ? (
                 <span className="inline-flex items-center justify-center gap-2">
@@ -306,16 +331,17 @@ export default function AuthPage() {
           </form>
 
           {/* Toggle auth stage */}
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-white/40">
             {stage === "signin" ? (
               <>
-                Don&apos;t have an account?{" "}
+                New here?{" "}
                 <button
                   type="button"
                   onClick={() => setStage("register")}
-                  className="text-blue-600 font-medium hover:text-blue-700 transition-colors"
+                  className="font-medium transition-colors"
+                  style={{ color: accent }}
                 >
-                  Sign up
+                  Create an account
                 </button>
               </>
             ) : (
@@ -324,7 +350,8 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setStage("signin")}
-                  className="text-blue-600 font-medium hover:text-blue-700 transition-colors"
+                  className="font-medium transition-colors"
+                  style={{ color: accent }}
                 >
                   Sign in
                 </button>
@@ -334,7 +361,7 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="mt-8 text-center text-xs text-white/30">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
