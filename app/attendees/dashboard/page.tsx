@@ -12,7 +12,6 @@ import {
   Calendar,
   MapPin,
   Sparkles,
-  TrendingUp,
   Clock
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -119,8 +118,6 @@ export default function AttendeeDashboardPage() {
     );
   }
 
-  const featuredEvent = events[0];
-
   return (
     <div
       {...swipeHandlers}
@@ -187,100 +184,8 @@ export default function AttendeeDashboardPage() {
               />
             </motion.div>
 
-            {/* Featured Event Hero */}
-            {featuredEvent && (
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.3 }}
-                className="relative h-[400px] lg:h-[500px] rounded-3xl overflow-hidden group cursor-pointer"
-                onClick={() => router.push(`/attendees/events/${featuredEvent.id}`)}
-              >
-                {/* Background Image */}
-                <div className="absolute inset-0">
-                  <img
-                    src={featuredEvent.cover || "/event-placeholder.jpg"}
-                    alt={featuredEvent.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
-                </div>
-
-                {/* Content Overlay */}
-                <div className="relative h-full flex flex-col justify-end p-8 lg:p-12">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                  >
-                    <div className="inline-block px-4 py-1.5 rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/40 backdrop-blur-md mb-4">
-                      <span className="text-xs text-[#C1FF72] font-medium tracking-wide uppercase">
-                        Featured Event
-                      </span>
-                    </div>
-
-                    <h2 className="text-4xl lg:text-6xl font-bold mb-4 max-w-2xl leading-tight">
-                      {featuredEvent.name}
-                    </h2>
-
-                    <div className="flex flex-wrap items-center gap-4 text-neutral-300 mb-6">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={18} />
-                        <span className="text-sm">{featuredEvent.date || 'TBA'}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin size={18} />
-                        <span className="text-sm">{featuredEvent.location || 'TBA'}</span>
-                      </div>
-                    </div>
-
-                    <button className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#C1FF72] text-black font-semibold hover:bg-[#B5F066] transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(193,255,114,0.3)]">
-                      <Play size={18} fill="currentColor" />
-                      <span>Get Your Pass</span>
-                    </button>
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
           </div>
         </motion.section>
-
-        {/* TAB NAVIGATION */}
-        <div className="sticky top-0 z-40 backdrop-blur-xl bg-black/40 border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <nav className="flex gap-1 py-4">
-              {[
-                { key: "explore", label: "Explore", icon: Search },
-                { key: "applications", label: "My Applications", icon: ClipboardList },
-                { key: "tickets", label: "My Tickets", icon: Ticket },
-              ].map(({ key, label, icon: Icon }) => {
-                const isActive = activeTab === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setActiveTab(key as any)}
-                    className={`relative flex items-center gap-2 px-6 py-3 rounded-full transition-all ${
-                      isActive
-                        ? "text-white"
-                        : "text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute inset-0 bg-white/10 border border-white/10 rounded-full"
-                        transition={{ type: "spring", duration: 0.6 }}
-                      />
-                    )}
-                    <Icon size={18} className="relative z-10" />
-                    <span className="relative z-10 text-sm font-medium">{label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
 
         {/* TAB CONTENT */}
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 pb-24">
@@ -496,23 +401,16 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
       </div>
     );
 
-  // Skip first event (it's featured in hero)
-  const displayEvents = events.slice(1);
+  const displayEvents = events;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-1">Discover Events</h2>
-          <p className="text-sm text-neutral-500">Find your next underground experience</p>
-        </div>
-        <button className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 transition-all text-sm">
-          <span>View All</span>
-          <ChevronRight size={16} />
-        </button>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-1">Discover Events</h2>
+        <p className="text-sm text-neutral-500">Find your next underground experience</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {displayEvents.map((event, index) => {
           const r = event.user_relation;
 
@@ -539,7 +437,7 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
               onClick={() => router.push(`/attendees/events/${event.id}`)}
             >
               {/* Event Image */}
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative h-80 overflow-hidden">
                 <img
                   src={event.cover || "/event-placeholder.jpg"}
                   alt={event.name}
