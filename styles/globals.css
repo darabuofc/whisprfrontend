@@ -144,6 +144,58 @@ body {
   100% { transform: translateX(300%); }
 }
 
+/* ────────────────
+   ONBOARDING ANIMATIONS
+──────────────────*/
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(193, 255, 114, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(193, 255, 114, 0.5); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Custom date input styling for dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.5);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) opacity(0.8);
+}
+
+/* Custom select styling */
+select option {
+  background: #0a0a0a;
+  color: white;
+  padding: 10px;
 /* Attendee Dashboard Animations (from redesign-attendee-dashboard) */
 @keyframes shimmer {
   0% { background-position: -200% center; }
