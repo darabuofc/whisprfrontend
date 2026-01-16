@@ -196,6 +196,8 @@ select option {
   background: #0a0a0a;
   color: white;
   padding: 10px;
+}
+
 /* Attendee Dashboard Animations (from redesign-attendee-dashboard) */
 @keyframes shimmer {
   0% { background-position: -200% center; }
