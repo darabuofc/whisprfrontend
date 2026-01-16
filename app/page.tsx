@@ -1,137 +1,152 @@
 "use client";
 
-import Orb from "@/components/Orb";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
+import { useEffect, useState } from "react";
+
+// Animated W Mark Component
+function WhisprMark({ onAnimationComplete }: { onAnimationComplete: () => void }) {
+  const controls = useAnimation();
+  const [isDrawn, setIsDrawn] = useState(false);
+
+  // Custom W path - minimalist, geometric design
+  const wPath = "M10 10 L30 90 L50 40 L70 90 L90 10";
+
+  useEffect(() => {
+    // Start draw animation
+    controls.start({
+      strokeDashoffset: 0,
+      transition: {
+        duration: 1.8,
+        ease: [0.65, 0, 0.35, 1], // custom easing for smooth draw
+      },
+    }).then(() => {
+      setIsDrawn(true);
+      onAnimationComplete();
+    });
+  }, [controls, onAnimationComplete]);
+
+  return (
+    <motion.svg
+      width="100"
+      height="100"
+      viewBox="0 0 100 100"
+      fill="none"
+      className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28"
+    >
+      {/* The W stroke */}
+      <motion.path
+        d={wPath}
+        stroke="#c1ff00"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        initial={{ strokeDasharray: 300, strokeDashoffset: 300 }}
+        animate={controls}
+      />
+
+      {/* Breathing glow effect after draw completes */}
+      {isDrawn && (
+        <motion.path
+          d={wPath}
+          stroke="#c1ff00"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          initial={{ opacity: 0, filter: "blur(0px)" }}
+          animate={{
+            opacity: [0.3, 0.6, 0.3],
+            filter: ["blur(4px)", "blur(8px)", "blur(4px)"],
+          }}
+          transition={{
+            duration: 2.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      )}
+    </motion.svg>
+  );
+}
+
+// Subtle animated grain overlay
+function GrainOverlay() {
+  return (
+    <div
+      className="pointer-events-none fixed inset-0 z-20 opacity-[0.03]"
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        backgroundRepeat: "repeat",
+      }}
+    />
+  );
+}
 
 export default function WhisprHero() {
+  const [showContent, setShowContent] = useState(false);
+
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#040404] text-white">
-      {/* --- BACKGROUND ORB --- */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 0.55, scale: 1 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-      >
-        <div className="relative h-[120vw] w-[120vw] max-h-[950px] max-w-[950px]">
-          <Orb hoverIntensity={1.6} rotateOnHover={true} hue={90} forceHoverState={true} />
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(193,255,114,0.14),transparent_55%)]" />
-        </div>
-      </motion.div>
+    <section className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+      {/* Subtle radial gradient for depth */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(193,255,0,0.015),transparent_70%)]" />
 
-      {/* --- OVERLAY GRADIENTS --- */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-30%] top-[-10%] h-[40vh] w-[60vw] rotate-12 bg-[radial-gradient(circle_at_30%_30%,rgba(180,114,255,0.35),transparent_60%)] blur-3xl opacity-70" />
-        <div className="absolute right-[-25%] bottom-[-5%] h-[45vh] w-[55vw] bg-[radial-gradient(circle_at_60%_60%,rgba(193,255,114,0.35),transparent_60%)] blur-3xl opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(50%_50%_at_50%_50%,rgba(255,255,255,0.04),transparent_60%)]" />
-      </div>
+      {/* Grain overlay */}
+      <GrainOverlay />
 
-      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-16 pt-20 sm:pt-24 lg:flex-row lg:items-center lg:gap-16 lg:pt-28">
-        {/* LEFT COPY */}
-        <div className="flex-1 space-y-6 text-center lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/70 shadow-[0_0_30px_rgba(193,255,114,0.15)] backdrop-blur"
-          >
-            Now onboarding select curators
-            <span className="h-2 w-2 rounded-full bg-lime-300 shadow-[0_0_12px_#C1FF72]" />
-          </motion.div>
+      {/* Main content - centered vertical stack */}
+      <div className="relative z-10 flex flex-col items-center justify-center px-6">
 
-          <motion.h1
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.1 }}
-            className="text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
-            style={{ textShadow: "0 0 20px rgba(193,255,114,0.25)" }}
-          >
-            Access the underground.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="max-w-xl text-lg leading-relaxed text-white/75 sm:text-xl sm:leading-8 lg:max-w-2xl"
-          >
-            Without all the extra chaos.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.35 }}
-            className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4"
-          >
-            <a
-              href="/auth?role=attendee"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-lime-400 px-8 py-3 text-base font-semibold text-black shadow-[0_15px_45px_-15px_rgba(193,255,114,0.7)] transition-transform duration-300 hover:scale-[1.03]"
-            >
-              For Attendees →
-            </a>
-            <a
-              href="/auth?role=organizer"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full border border-lime-400 px-8 py-3 text-base font-semibold text-lime-300 transition-all duration-300 hover:bg-lime-300 hover:text-black"
-            >
-              For Organizers →
-            </a>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="grid gap-4 sm:grid-cols-2 sm:gap-5"
-          >
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-              <p className="text-sm uppercase tracking-[0.2em] text-white/50">For Hosts</p>
-              <p className="mt-2 text-base text-white/80">We take care of the groundwork so you can shape the experience.</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur">
-              <p className="text-sm uppercase tracking-[0.2em] text-white/50">For Guests</p>
-              <p className="mt-2 text-base text-white/80">Fast entry. Live tickets. First access.</p>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* RIGHT CARD STACK */}
+        {/* Animated W Mark */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.45 }}
-          className="flex-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="mb-8"
         >
-          <div className="relative mx-auto w-full max-w-[420px]">
-            <div className="absolute -left-8 -top-8 h-24 w-24 rounded-3xl bg-[linear-gradient(135deg,rgba(193,255,114,0.5),rgba(180,114,255,0.4))] blur-3xl opacity-60" />
-            <div className="absolute -right-10 bottom-10 h-28 w-28 rounded-3xl bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(193,255,114,0.35))] blur-3xl opacity-70" />
+          <WhisprMark onAnimationComplete={() => setShowContent(true)} />
+        </motion.div>
 
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_25px_120px_-30px_rgba(0,0,0,0.75)]">
-              <div className="border-b border-white/10 px-6 py-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-white/50">13th December</p>
-                    <p className="text-xl font-semibold">Winter Festival</p>
-                  </div>
-                  <span className="rounded-full bg-lime-300/20 px-3 py-1 text-xs font-semibold text-lime-200">
-                    gatr
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-white/60">Karachi · 06:00 PM · Exclusively on whispr.</p>
-              </div>
+        {/* Brand name */}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-4xl sm:text-5xl md:text-6xl font-light tracking-[0.2em] text-white lowercase mb-4"
+        >
+          whispr
+        </motion.h1>
 
-              
+        {/* Tagline */}
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
+          transition={{ duration: 0.8, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-base sm:text-lg text-white/50 tracking-[0.15em] lowercase mb-12"
+        >
+          hear the sound.
+        </motion.p>
 
-              <div className="flex items-center justify-between border-t border-white/10 px-6 py-4 text-sm text-white/70">
-                <span className="inline-flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-lime-300 shadow-[0_0_10px_#C1FF72]" />
-Tickets are now live.                </span>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60">
-                  PKR 12,000
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="flex flex-col sm:flex-row items-center gap-4"
+        >
+          <a
+            href="/auth?role=attendee"
+            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-black bg-[#c1ff00] transition-all duration-300 hover:bg-[#d4ff4d] hover:shadow-[0_0_30px_rgba(193,255,0,0.4)]"
+          >
+            Explore Events
+          </a>
+
+          <a
+            href="/auth?role=organizer"
+            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-white/80 border border-white/20 transition-all duration-300 hover:border-[#c1ff00]/50 hover:text-[#c1ff00]"
+          >
+            Organize an Event
+          </a>
         </motion.div>
       </div>
     </section>
