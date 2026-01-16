@@ -93,8 +93,16 @@ export default function MissionControlPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
-        <div className="text-white text-lg">Loading mission control...</div>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            {/* Spinning ring */}
+            <div className="w-16 h-16 rounded-full border-4 border-neutral-200 border-t-blue-600 animate-spin" />
+            {/* Inner pulse */}
+            <div className="absolute inset-0 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse" />
+          </div>
+          <div className="text-neutral-900 text-lg font-medium animate-pulse">Loading mission control...</div>
+        </div>
       </div>
     );
   }
@@ -143,7 +151,13 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50">
+      {/* Ambient gradient orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Event Header */}
       <EventHeader
         name={data.event.name}
@@ -170,62 +184,68 @@ export default function MissionControlPage() {
       />
 
       {/* Tab Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {activeTab === "overview" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fadeIn">
             {/* Left Column */}
-            <div className="space-y-6">
-              <OpsSummaryCard
-                ops={data.ops}
-                onGoToApprovals={handleGoToApprovals}
-              />
-              <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+            <div className="space-y-8">
+              <div className="animate-slideInLeft">
+                <OpsSummaryCard
+                  ops={data.ops}
+                  onGoToApprovals={handleGoToApprovals}
+                />
+              </div>
+              <div className="animate-slideInLeft" style={{ animationDelay: '0.1s' }}>
+                <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+              </div>
             </div>
 
             {/* Right Column */}
-            <div className="space-y-6">
-              <ActivityFeed activities={data.activity} />
+            <div className="space-y-8">
+              <div className="animate-slideInRight">
+                <ActivityFeed activities={data.activity} />
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === "approvals" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Approvals Tab
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Approvals interface will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "attendees" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Attendees Tab
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Attendees management will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "ops" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Ops Mode</h2>
-            <p className="text-gray-400">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Ops Mode</h2>
+            <p className="text-neutral-500">
               Live operations dashboard will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "settings" && (
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
+            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
               Event Settings
             </h2>
-            <p className="text-gray-400">
+            <p className="text-neutral-500">
               Event configuration will be implemented here
             </p>
           </div>

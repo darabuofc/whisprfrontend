@@ -23,14 +23,21 @@ html.dark {
 /* ────────────────
    GLOBAL STYLES
 ──────────────────*/
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply text-[var(--color-text)] bg-[var(--color-bg)] antialiased;
+  font-feature-settings: 'liga', 'kern';
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
   background: var(--color-accent);
-  color: white;
-  opacity: 0.4;
+  color: #000000;
 }
 
 /* focus visible fallback */
@@ -189,6 +196,81 @@ select option {
   background: #0a0a0a;
   color: white;
   padding: 10px;
+/* Attendee Dashboard Animations (from redesign-attendee-dashboard) */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; filter: blur(20px); }
+  50% { opacity: 1; filter: blur(30px); }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(193, 255, 114, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Mission Control Animations (from revert-mission-control) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s ease-out;
+  animation-fill-mode: both;
 }
 
 /* ---break---*/
