@@ -115,11 +115,29 @@ export default function AuthPage() {
         ? router.replace("/attendees/dashboard")
         : router.replace("/attendees/onboarding");
     } else {
-      if (!data?.token) {
-        throw new Error("Something went wrong. Please try again.");
+      // Registration succeeded - try to use token if provided, otherwise auto-login
+      if (data?.token) {
+        persistSession(data.token, "attendee");
+        router.replace("/attendees/onboarding");
+        return;
       }
-      persistSession(data.token, "attendee");
-      router.replace("/attendees/onboarding");
+
+      // No token in registration response - auto-login with same credentials
+      const loginRes = await fetch(`${base}/attendees/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      const loginData = await loginRes.json().catch(() => ({}));
+      if (!loginRes.ok || !loginData?.token) {
+        throw new Error("Account created. Please sign in to continue.");
+      }
+
+      persistSession(loginData.token, "attendee");
+      loginData.attendee?.is_onboarded
+        ? router.replace("/attendees/dashboard")
+        : router.replace("/attendees/onboarding");
     }
   }, [stage, fullName, email, password, router, persistSession]);
 
