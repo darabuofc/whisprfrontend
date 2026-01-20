@@ -66,6 +66,7 @@ export interface Profile {
   profession?: string;
   bio?: string;
   isOnboarded: boolean;
+  profilePicture: string | null;
 }
 
 // ----------------------------------------------------------
@@ -225,6 +226,7 @@ export async function getMe(): Promise<Profile> {
     isOnboarded: a.is_onboarded,
     gender: a.gender,
     age: a.age,
+    profilePicture: a.profile_picture ?? null,
   };
 }
 
