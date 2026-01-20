@@ -277,9 +277,17 @@ function Sidebar({
       <div className="mb-10">
         <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center mb-4 overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72] to-[#6C2DFF] opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-          <span className="text-2xl font-bold text-white/70">
-            {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
-          </span>
+          {profile?.profilePicture ? (
+            <img
+              src={profile.profilePicture}
+              alt={profile.fullName || 'Profile'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-2xl font-bold text-white/70">
+              {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+            </span>
+          )}
         </div>
 
         <h2 className="text-lg font-semibold mb-1">
