@@ -12,9 +12,13 @@ import {
   Calendar,
   MapPin,
   Sparkles,
-  Clock
+  Clock,
+  LogOut,
+  Instagram,
+  User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { generateEventSlug } from "@/lib/utils";
 
 import {
   getMe,
@@ -134,6 +138,9 @@ export default function AttendeeDashboardPage() {
         setActiveTab={setActiveTab}
         profile={profile}
       />
+
+      {/* Mobile Header */}
+      <MobileHeader profile={profile} />
 
       <div className="lg:ml-[280px]">
         {/* HERO SECTION */}
@@ -340,6 +347,117 @@ function Sidebar({
 }
 
 // ═══════════════════════════════════════════════════════════
+// MOBILE HEADER
+// ═══════════════════════════════════════════════════════════
+function MobileHeader({ profile }: { profile: Profile | null }) {
+  const router = useRouter();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("whispr_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("whispr_role");
+    router.push("/auth");
+  };
+
+  return (
+    <div className="lg:hidden relative z-40">
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-4 py-4">
+        {/* Logo */}
+        <h1 className="text-xl font-bold tracking-tight">
+          whispr<span className="text-[#C1FF72]">.</span>
+        </h1>
+
+        {/* Profile Button */}
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="relative w-10 h-10 rounded-full bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden"
+        >
+          {profile?.profilePicture ? (
+            <img
+              src={profile.profilePicture}
+              alt={profile.fullName || 'Profile'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User size={18} className="text-white/70" />
+          )}
+        </button>
+      </div>
+
+      {/* Dropdown Menu */}
+      <AnimatePresence>
+        {showMenu && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setShowMenu(false)}
+            />
+
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-4 top-16 w-72 rounded-2xl border border-white/10 bg-[#0a0a0a] p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
+            >
+              {/* Profile Info */}
+              <div className="flex items-center gap-4 mb-4 pb-4 border-b border-white/10">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden">
+                  {profile?.profilePicture ? (
+                    <img
+                      src={profile.profilePicture}
+                      alt={profile.fullName || 'Profile'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={24} className="text-white/70" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold truncate">{profile?.fullName || 'User'}</h3>
+                  {profile?.age && (
+                    <p className="text-sm text-white/50">{profile.age} years old</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Instagram Handle */}
+              {profile?.instagramHandle && (
+                <a
+                  href={`https://instagram.com/${profile.instagramHandle.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/5 hover:text-[#C1FF72] transition-colors mb-2"
+                >
+                  <Instagram size={18} />
+                  <span>{profile.instagramHandle.startsWith('@') ? profile.instagramHandle : `@${profile.instagramHandle}`}</span>
+                </a>
+              )}
+
+              {/* Sign Out Button */}
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+              >
+                <LogOut size={18} />
+                <span>Sign Out</span>
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 // MOBILE NAV
 // ═══════════════════════════════════════════════════════════
 function MobileNav({
@@ -422,8 +540,9 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
         {displayEvents.map((event, index) => {
           const r = event.user_relation;
 
+          const eventSlug = generateEventSlug(event.name, event.id);
           let ctaLabel = "Get Pass";
-          let ctaAction = () => router.push(`/attendees/events/${event.id}`);
+          let ctaAction = () => router.push(`/attendees/events/${eventSlug}`);
 
           if (r?.has_ticket) {
             ctaLabel = "View Ticket";
@@ -442,7 +561,7 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
               className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all cursor-pointer"
-              onClick={() => router.push(`/attendees/events/${event.id}`)}
+              onClick={() => router.push(`/attendees/events/${eventSlug}`)}
             >
               {/* Event Image */}
               <div className="relative h-80 overflow-hidden">
