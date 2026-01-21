@@ -216,10 +216,10 @@ export default function OrganizerDashboard() {
                     <Clock size={20} className="text-amber-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-semibold text-amber-200 mb-1">
+                    <h3 className="text-base font-semibold text-white mb-1">
                       Account Pending Approval
                     </h3>
-                    <p className="text-sm text-amber-200/70">
+                    <p className="text-sm text-white/70">
                       Your organizer account is currently under review. You'll be able to create and publish events once approved.
                       This typically takes 24-48 hours.
                     </p>
@@ -465,7 +465,7 @@ function Sidebar({
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold truncate">
-              {organization?.name || organizer?.name || 'Your Organization'}
+              {organization?.name || 'Your Organization'}
             </h3>
             {organization?.tagline && (
               <p className="text-xs text-neutral-500 truncate">{organization.tagline}</p>
@@ -506,7 +506,7 @@ function Sidebar({
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#B472FF]/10 border border-[#B472FF]/20 text-[#B472FF] text-sm font-medium hover:bg-[#B472FF]/20 transition-colors"
         >
           <Settings size={16} />
-          {organization?.logo || organization?.tagline ? 'Edit Organization' : 'Setup Organization'}
+          {organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}
         </button>
       </div>
 
@@ -657,7 +657,7 @@ function MobileHeader({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-base font-semibold truncate">
-                    {organization?.name || organizer?.name || 'Your Organization'}
+                    {organization?.name || 'Your Organization'}
                   </h3>
                   <p className="text-sm text-white/50">{organizer?.email}</p>
                 </div>
@@ -692,7 +692,7 @@ function MobileHeader({
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/5 hover:text-[#B472FF] transition-colors mb-2"
               >
                 <Settings size={18} />
-                <span>{organization?.logo || organization?.tagline ? 'Edit Organization' : 'Setup Organization'}</span>
+                <span>{organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}</span>
               </button>
 
               {/* Sign Out Button */}
