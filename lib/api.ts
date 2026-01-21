@@ -334,3 +334,36 @@ export async function addPassTypes(id: string, data: any) {
 export async function publishEvent(id: string) {
   return (await api.post(`/organizers/events/${id}/publish`)).data.event;
 }
+
+// ----------------------------------------------------------
+// ORGANIZATION API
+// ----------------------------------------------------------
+
+export interface Organization {
+  id: string;
+  name?: string;
+  logo?: string;
+  tagline?: string;
+  website?: string;
+  instagram_handle?: string;
+}
+
+export async function getOrganization(): Promise<Organization | null> {
+  try {
+    const res = await api.get("/organizers/organization");
+    return res.data.organization || null;
+  } catch (err: any) {
+    if (err.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function updateOrganization(data: {
+  logo?: string;
+  tagline?: string;
+  website?: string;
+  instagram_handle?: string;
+}): Promise<Organization> {
+  const res = await api.put("/organizers/organization", data);
+  return res.data.organization;
+}
