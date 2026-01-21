@@ -13,15 +13,19 @@ interface Pass {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-async function postWithAuth(url: string, data: any = {}) {
+async function postWithAuth(url: string, data: any = {}, isFormData = false) {
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("whispr_token") || localStorage.getItem("token")
       : null;
   if (!token) throw new Error("No JWT token found");
-  return axios.post(`${API_BASE}${url}`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+
+  const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+  if (isFormData) {
+    headers["Content-Type"] = "multipart/form-data";
+  }
+
+  return axios.post(`${API_BASE}${url}`, data, { headers });
 }
 
 // Step icons
@@ -617,9 +621,11 @@ const CustomDatePicker = ({
 const EventPreviewCard = ({
   eventData,
   passes,
+  bannerPreview,
 }: {
   eventData: { name: string; description: string; date: string; location: string };
   passes: Pass[];
+  bannerPreview?: string;
 }) => {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -638,10 +644,20 @@ const EventPreviewCard = ({
       animate={{ opacity: 1, y: 0 }}
       className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] border border-white/[0.1]"
     >
-      {/* Cover gradient */}
-      <div className="h-32 bg-gradient-to-br from-[#C1FF72]/30 via-purple-500/20 to-blue-500/20 relative">
-        <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:100px] opacity-10" />
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+      {/* Cover image or gradient */}
+      <div className="h-40 relative overflow-hidden">
+        {bannerPreview ? (
+          <img
+            src={bannerPreview}
+            alt="Event banner"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#C1FF72]/30 via-purple-500/20 to-blue-500/20">
+            <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:100px] opacity-10" />
+          </div>
+        )}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
       </div>
 
       {/* Content */}
@@ -728,6 +744,16 @@ export default function EventOnboardingPage() {
     location: "",
   });
 
+  // Banner image state
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string>("");
+
+  const handleBannerChange = (file: File | null) => {
+    if (!file) return;
+    setBannerFile(file);
+    setBannerPreview(URL.createObjectURL(file));
+  };
+
   // Default quantity to 1000 (hidden from UI)
   const [passes, setPasses] = useState<Pass[]>([{ type: "", price: 0, quantity: 1000 }]);
 
@@ -754,10 +780,16 @@ export default function EventOnboardingPage() {
           setError("Please provide both event name and description.");
           return;
         }
-        await postWithAuth(`/organizers/events/${id}/update`, {
-          name: eventData.name,
-          description: eventData.description,
-        });
+
+        // Use FormData to support banner image upload
+        const formData = new FormData();
+        formData.append("name", eventData.name);
+        formData.append("description", eventData.description);
+        if (bannerFile) {
+          formData.append("banner", bannerFile);
+        }
+
+        await postWithAuth(`/organizers/events/${id}/update`, formData, true);
         setStep(2);
       } else if (step === 2) {
         if (!eventData.date || !eventData.location) {
@@ -960,6 +992,57 @@ export default function EventOnboardingPage() {
                   onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
                   helper="Describe the vibe, music, dress code, or anything exciting"
                 />
+
+                {/* Event Banner Upload */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white/60">Event banner</label>
+                  <motion.div
+                    onClick={() => document.getElementById("bannerInput")?.click()}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="relative w-full aspect-video rounded-2xl cursor-pointer group overflow-hidden"
+                  >
+                    {bannerPreview ? (
+                      <>
+                        <img
+                          src={bannerPreview}
+                          alt="Event banner"
+                          className="w-full h-full object-cover rounded-2xl"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm">
+                            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
+                            <span className="text-white text-sm font-medium">Change image</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full rounded-2xl bg-white/[0.05] border-2 border-dashed border-white/[0.15]
+                                      flex flex-col items-center justify-center gap-3 transition-all
+                                      group-hover:border-[#C1FF72]/40 group-hover:bg-white/[0.07]">
+                        <div className="w-12 h-12 rounded-xl bg-white/[0.08] flex items-center justify-center">
+                          <svg className="w-6 h-6 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                          </svg>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white/70 text-sm font-medium">Click to upload banner</p>
+                          <p className="text-white/40 text-xs mt-1">Recommended: 1920×1080px (16:9)</p>
+                        </div>
+                      </div>
+                    )}
+                    <input
+                      id="bannerInput"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleBannerChange(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </motion.div>
+                  <p className="text-sm text-white/40 pl-1">This will be shown on your event page and cards</p>
+                </div>
               </motion.div>
             )}
 
@@ -1060,7 +1143,7 @@ export default function EventOnboardingPage() {
                 transition={pageTransition}
                 className="space-y-6"
               >
-                <EventPreviewCard eventData={eventData} passes={passes} />
+                <EventPreviewCard eventData={eventData} passes={passes} bannerPreview={bannerPreview} />
 
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/[0.08]">
                   <div className="flex items-start gap-3">
