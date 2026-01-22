@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import {
@@ -18,7 +19,11 @@ import {
   User,
   Globe,
   Building2,
+  Copy,
+  Share2,
+  ExternalLink,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { generateEventSlug } from "@/lib/utils";
 
@@ -38,7 +43,23 @@ import {
 // MAIN DASHBOARD PAGE — PREMIUM APPLE × SPOTIFY × WHISPR
 // ═══════════════════════════════════════════════════════════
 export default function AttendeeDashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen flex flex-col items-center justify-center bg-[#000000]">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#C1FF72] to-[#6C2DFF] opacity-20 animate-pulse" />
+          <p className="text-neutral-500 text-sm tracking-wider">Loading your experience...</p>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
     "explore" | "applications" | "tickets"
   >("explore");
@@ -50,6 +71,21 @@ export default function AttendeeDashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
+
+  // Handle URL query params for highlighting
+  const highlightedAppId = searchParams.get('highlight');
+  const tabParam = searchParams.get('tab');
+
+  // Switch to applications tab if highlight param is present
+  useEffect(() => {
+    if (highlightedAppId || tabParam === 'applications') {
+      setActiveTab('applications');
+    } else if (tabParam === 'tickets') {
+      setActiveTab('tickets');
+    } else if (tabParam === 'explore') {
+      setActiveTab('explore');
+    }
+  }, [highlightedAppId, tabParam]);
 
   // Parallax scroll effects
   const { scrollY } = useScroll();
@@ -210,9 +246,11 @@ export default function AttendeeDashboardPage() {
                   <div className="w-12 h-12 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
                 </div>
               ) : activeTab === "explore" ? (
-                <ExploreTab events={events} />
+                <ExploreTab events={events} onViewApplication={(regId) => {
+                  router.push(`/attendees/dashboard?tab=applications&highlight=${regId}`);
+                }} />
               ) : activeTab === "applications" ? (
-                <ApplicationsTab registrations={registrations} />
+                <ApplicationsTab registrations={registrations} highlightedId={highlightedAppId} />
               ) : (
                 <TicketsTab tickets={tickets} />
               )}
@@ -275,10 +313,15 @@ function Sidebar({
     <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[280px] bg-black/40 backdrop-blur-2xl border-r border-white/5 flex-col p-8 z-50">
       {/* Logo / Brand */}
       <div className="mb-12">
-        <h1 className="text-2xl font-bold tracking-tight">
-          whispr<span className="text-[#C1FF72]">.</span>
-        </h1>
-        <p className="text-xs text-neutral-500 mt-1 tracking-wider uppercase">Underground</p>
+        <Image
+          src="/whisprrr.svg"
+          alt="Whispr"
+          width={120}
+          height={32}
+          className="h-8 w-auto"
+          priority
+        />
+        <p className="text-xs text-neutral-500 mt-2 tracking-wider uppercase">Underground</p>
       </div>
 
       {/* Profile Section */}
@@ -370,9 +413,14 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
           <div className="flex items-center gap-2">
             <div className="relative">
               <div className="absolute -inset-1 bg-[#C1FF72]/20 rounded-full blur-md" />
-              <h1 className="relative text-xl font-bold tracking-tight">
-                whispr<span className="text-[#C1FF72]">.</span>
-              </h1>
+              <Image
+                src="/whisprrr.svg"
+                alt="Whispr"
+                width={100}
+                height={28}
+                className="relative h-7 w-auto"
+                priority
+              />
             </div>
           </div>
 
@@ -526,7 +574,13 @@ function MobileNav({
 // ═══════════════════════════════════════════════════════════
 // EXPLORE TAB
 // ═══════════════════════════════════════════════════════════
-function ExploreTab({ events }: { events: ExploreEvent[] }) {
+function ExploreTab({
+  events,
+  onViewApplication,
+}: {
+  events: ExploreEvent[];
+  onViewApplication: (registrationId: string) => void;
+}) {
   const router = useRouter();
 
   const formatEventDate = (dateStr: string | null) => {
@@ -577,8 +631,12 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
               router.push(`/attendees/tickets/${r.ticket?.id}`);
           } else if (r?.is_registered) {
             ctaLabel = "View Application";
-            ctaAction = () =>
-              router.push(`/attendees/applications/${r.registration?.id}`);
+            ctaAction = () => {
+              // Navigate to applications tab with highlight
+              if (r.registration?.id) {
+                onViewApplication(r.registration.id);
+              }
+            };
           }
 
           return (
@@ -680,9 +738,68 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
 // ═══════════════════════════════════════════════════════════
 function ApplicationsTab({
   registrations,
+  highlightedId,
 }: {
   registrations: RegistrationItem[];
+  highlightedId?: string | null;
 }) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const highlightedRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to highlighted application
+  useEffect(() => {
+    if (highlightedId && highlightedRef.current) {
+      highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [highlightedId]);
+
+  const handleCopyCode = async (code: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleShare = async (r: RegistrationItem) => {
+    const shareText = `Join me at ${r.event.name}! Use my registration code: ${r.registration_id}`;
+    const shareUrl = r.share_link || (typeof window !== 'undefined' ? window.location.origin : '');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: r.event.name || 'Event Registration',
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch {
+        // User cancelled or error
+      }
+    } else {
+      // Fallback to WhatsApp
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`,
+        '_blank'
+      );
+    }
+  };
+
+  const formatEventDate = (dateStr: string | null) => {
+    if (!dateStr) return "Date TBA";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   if (!registrations.length)
     return (
       <div className="text-center py-20">
@@ -702,41 +819,144 @@ function ApplicationsTab({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {registrations.map((r, index) => (
-          <motion.div
-            key={r.registration_airtable_id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            className="rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all p-6"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold mb-2">{r.event.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-neutral-400">
-                  <Calendar size={14} />
-                  <span>{r.event.date || 'TBA'}</span>
-                </div>
-              </div>
-              <div className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize ${
-                r.status === 'approved'
-                  ? 'bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/40'
-                  : r.status === 'pending'
-                  ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
-                  : 'bg-red-500/20 text-red-400 border border-red-500/40'
-              }`}>
-                {r.status}
-              </div>
-            </div>
+        {registrations.map((r, index) => {
+          const isHighlighted = highlightedId === r.registration_airtable_id || highlightedId === r.registration_id;
 
-            {r.pass?.type && (
-              <div className="mt-4 pt-4 border-t border-white/5">
-                <p className="text-sm text-neutral-500">Pass Type</p>
-                <p className="text-sm font-medium mt-1">{r.pass.type}</p>
+          return (
+            <motion.div
+              key={r.registration_airtable_id}
+              ref={isHighlighted ? highlightedRef : null}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: isHighlighted ? [1, 1.02, 1] : 1,
+              }}
+              transition={{
+                duration: 0.4,
+                delay: index * 0.1,
+                scale: { duration: 0.6, repeat: isHighlighted ? 2 : 0 }
+              }}
+              className={`rounded-3xl overflow-hidden bg-white/[0.02] border transition-all ${
+                isHighlighted
+                  ? 'border-[#C1FF72]/50 ring-2 ring-[#C1FF72]/20'
+                  : 'border-white/5 hover:border-white/10'
+              }`}
+            >
+              {/* Event Cover Image */}
+              {r.event.cover && (
+                <div className="relative h-32 overflow-hidden">
+                  <img
+                    src={r.event.cover}
+                    alt={r.event.name || 'Event'}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+
+                  {/* Status Badge on Image */}
+                  <div className="absolute top-3 right-3">
+                    <div className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize backdrop-blur-md ${
+                      r.status === 'approved'
+                        ? 'bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/40'
+                        : r.status === 'pending'
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                    }`}>
+                      {r.status}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-5">
+                {/* Header - Event Name & Status (if no cover) */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold mb-2 line-clamp-1">{r.event.name || 'Untitled Event'}</h3>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-neutral-400">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={13} className="text-[#C1FF72]" />
+                        <span>{formatEventDate(r.event.date)}</span>
+                      </div>
+                      {r.event.location && (
+                        <div className="flex items-center gap-1.5">
+                          <MapPin size={13} className="text-[#C1FF72]" />
+                          <span className="line-clamp-1">{r.event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {/* Status badge if no cover image */}
+                  {!r.event.cover && (
+                    <div className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium capitalize ${
+                      r.status === 'approved'
+                        ? 'bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/40'
+                        : r.status === 'pending'
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                    }`}>
+                      {r.status}
+                    </div>
+                  )}
+                </div>
+
+                {/* Pass Type & Price */}
+                {r.pass?.type && (
+                  <div className="flex items-center justify-between py-3 border-t border-white/5">
+                    <div>
+                      <p className="text-xs text-neutral-500 uppercase tracking-wider">Pass Type</p>
+                      <p className="text-sm font-medium mt-0.5">{r.pass.type}</p>
+                    </div>
+                    {r.pass.price !== null && r.pass.price !== undefined && (
+                      <div className="text-right">
+                        <p className="text-xs text-neutral-500 uppercase tracking-wider">Price</p>
+                        <p className="text-sm font-semibold text-[#C1FF72] mt-0.5">
+                          {r.pass.price === 0 ? 'Free' : `PKR ${r.pass.price.toLocaleString()}`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Registration Code */}
+                <div className="mt-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] text-neutral-500 uppercase tracking-wider mb-1">Registration Code</p>
+                      <p className="font-mono text-sm text-[#C1FF72] font-medium">{r.registration_id}</p>
+                    </div>
+                    <button
+                      onClick={() => handleCopyCode(r.registration_id, r.registration_airtable_id)}
+                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+                      title="Copy code"
+                    >
+                      {copiedId === r.registration_airtable_id ? (
+                        <motion.span
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          className="text-[#C1FF72] text-xs font-medium"
+                        >
+                          Copied!
+                        </motion.span>
+                      ) : (
+                        <Copy size={14} className="text-neutral-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Share Button */}
+                <button
+                  onClick={() => handleShare(r)}
+                  className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all hover:border-[#C1FF72]/30"
+                >
+                  <Share2 size={14} />
+                  Share Registration
+                </button>
               </div>
-            )}
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
