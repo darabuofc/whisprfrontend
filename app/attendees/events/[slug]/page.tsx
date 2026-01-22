@@ -14,6 +14,9 @@ import {
   Ticket,
   Instagram,
   Users,
+  Globe,
+  Building2,
+  ExternalLink,
 } from "lucide-react";
 import {
   getEventById,
@@ -22,6 +25,15 @@ import {
   joinExistingRegistration,
 } from "@/lib/api";
 import { extractEventIdFromSlug } from "@/lib/utils";
+
+interface EventOrganization {
+  id: string;
+  name: string | null;
+  logo: string | null;
+  instagram_handle: string | null;
+  tagline: string | null;
+  website: string | null;
+}
 
 interface EventDetail {
   id: string;
@@ -33,6 +45,7 @@ interface EventDetail {
   organizer?: string;
   organizer_instagram?: string;
   organizer_profile_picture?: string;
+  organization?: EventOrganization | null;
   user_registered?: boolean;
   registration?: {
     join_code?: string;
@@ -226,39 +239,82 @@ export default function EventDetailPage() {
           </button>
         </div>
 
-        {/* SECTION 1: Organizer */}
+        {/* SECTION 1: Organization / Organizer */}
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 backdrop-blur"
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
         >
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-3">Presented by</p>
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden">
-              {event.organizer_profile_picture ? (
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">Presented by</p>
+
+          {/* Organization Info */}
+          <div className="flex items-start gap-4">
+            {/* Logo */}
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {event.organization?.logo ? (
+                <img
+                  src={event.organization.logo}
+                  alt={event.organization.name || 'Organization'}
+                  className="w-full h-full object-cover"
+                />
+              ) : event.organizer_profile_picture ? (
                 <img
                   src={event.organizer_profile_picture}
                   alt={event.organizer || 'Organizer'}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <Users size={24} className="text-white/50" />
+                <Building2 size={28} className="text-white/50" />
               )}
             </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold">{event.organizer || "Organizer"}</h3>
-              {event.organizer_instagram && (
-                <a
-                  href={`https://instagram.com/${event.organizer_instagram.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-[#C1FF72] hover:underline mt-0.5"
-                >
-                  <Instagram size={14} />
-                  <span>{event.organizer_instagram.startsWith('@') ? event.organizer_instagram : `@${event.organizer_instagram}`}</span>
-                </a>
+
+            {/* Details */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold">
+                {event.organization?.name || event.organizer || "Organizer"}
+              </h3>
+
+              {/* Tagline */}
+              {event.organization?.tagline && (
+                <p className="text-sm text-white/60 mt-1 line-clamp-2">
+                  {event.organization.tagline}
+                </p>
               )}
+
+              {/* Links Row */}
+              <div className="flex flex-wrap items-center gap-3 mt-3">
+                {/* Instagram */}
+                {(event.organization?.instagram_handle || event.organizer_instagram) && (
+                  <a
+                    href={`https://instagram.com/${(event.organization?.instagram_handle || event.organizer_instagram || '').replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#C1FF72] hover:border-[#C1FF72]/30 transition-colors"
+                  >
+                    <Instagram size={14} />
+                    <span>
+                      {(event.organization?.instagram_handle || event.organizer_instagram || '').startsWith('@')
+                        ? (event.organization?.instagram_handle || event.organizer_instagram)
+                        : `@${event.organization?.instagram_handle || event.organizer_instagram}`}
+                    </span>
+                  </a>
+                )}
+
+                {/* Website */}
+                {event.organization?.website && (
+                  <a
+                    href={event.organization.website.startsWith('http') ? event.organization.website : `https://${event.organization.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#C1FF72] hover:border-[#C1FF72]/30 transition-colors"
+                  >
+                    <Globe size={14} />
+                    <span>Website</span>
+                    <ExternalLink size={12} className="opacity-50" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </motion.section>
@@ -317,15 +373,24 @@ export default function EventDetailPage() {
         >
           <div className="flex items-center justify-between px-1">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Select Pass</p>
-              <h2 className="text-xl font-semibold">Get Your Entry</h2>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Apply for a Pass</p>
+              <h2 className="text-xl font-semibold">Request Entry</h2>
             </div>
             {!event.user_registered && passes.length > 0 && (
               <span className="rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/30 px-3 py-1 text-xs font-medium text-[#C1FF72]">
-                Available
+                Open
               </span>
             )}
           </div>
+
+          {/* Gated Event Explainer */}
+          {!event.user_registered && passes.length > 0 && (
+            <div className="rounded-xl bg-white/[0.02] border border-white/5 px-4 py-3">
+              <p className="text-xs text-white/50 leading-relaxed">
+                This is an invite-only event. Select a pass to apply — the organizer will review your profile and approve your request. Once approved, you'll receive a payment link.
+              </p>
+            </div>
+          )}
 
           {!event.user_registered && passes.length > 0 && (
             <div className="grid gap-3">
@@ -337,19 +402,19 @@ export default function EventDetailPage() {
                   className="group relative flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left transition-all hover:border-[#C8FF5A]/50 hover:bg-white/[0.05] disabled:opacity-50"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20 group-hover:border-[#C8FF5A]/40 transition-colors">
                       <Ticket size={20} className="text-[#C8FF5A]" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold">{p.type}</h3>
+                      <h3 className="text-base font-semibold text-white group-hover:text-[#C8FF5A] transition-colors">{p.type}</h3>
                       {p.max_members > 1 && (
                         <p className="text-xs text-white/50 mt-0.5">Includes {p.max_members} entries</p>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="rounded-full bg-[#C8FF5A]/15 px-4 py-1.5 text-sm font-semibold text-[#C8FF5A] group-hover:bg-[#C8FF5A] group-hover:text-black transition-colors">
-                      {p.price ? `PKR ${p.price}` : "Free"}
+                    <div className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white group-hover:bg-[#C8FF5A] group-hover:text-black transition-colors">
+                      {p.price ? `PKR ${p.price.toLocaleString()}` : "Free"}
                     </div>
                   </div>
                 </button>
