@@ -92,6 +92,15 @@ export interface UserRelation {
   ticket: EventTicketRelation | null;
 }
 
+export interface EventOrganization {
+  id: string;
+  name: string | null;
+  logo: string | null;
+  instagram_handle: string | null;
+  tagline: string | null;
+  website: string | null;
+}
+
 export interface ExploreEvent {
   id: string;
   name: string;
@@ -100,6 +109,7 @@ export interface ExploreEvent {
   cover?: string | null;
   status?: string | null;
   user_relation: UserRelation;
+  organization?: EventOrganization | null;
 }
 
 // ----------------------------------------------------------
@@ -266,6 +276,17 @@ export async function getAttendeeEvents(): Promise<ExploreEvent[]> {
           }
         : null,
     },
+
+    organization: e.organization
+      ? {
+          id: e.organization.id ?? "",
+          name: e.organization.name ?? null,
+          logo: e.organization.logo ?? null,
+          instagram_handle: e.organization.instagram_handle ?? null,
+          tagline: e.organization.tagline ?? null,
+          website: e.organization.website ?? null,
+        }
+      : null,
   }));
 }
 

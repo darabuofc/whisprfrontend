@@ -16,6 +16,8 @@ import {
   LogOut,
   Instagram,
   User,
+  Globe,
+  Building2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generateEventSlug } from "@/lib/utils";
@@ -29,6 +31,7 @@ import {
   ExploreEvent,
   RegistrationItem,
   TicketItem,
+  EventOrganization,
 } from "@/lib/api";
 
 // ═══════════════════════════════════════════════════════════
@@ -156,11 +159,9 @@ export default function AttendeeDashboardPage() {
               transition={{ duration: 0.6 }}
               className="mb-8"
             >
-              <p className="text-neutral-500 text-sm tracking-wider uppercase mb-2">
-                Welcome back
-              </p>
-              <h1 className="text-5xl lg:text-6xl font-bold tracking-tight">
-                {profile?.fullName?.split(' ')[0] || 'There'}
+              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight whitespace-nowrap">
+                <span className="text-neutral-400">Welcome back,</span>{" "}
+                <span className="text-white">{profile?.fullName?.split(' ')[0] || 'There'}</span>
               </h1>
             </motion.div>
 
@@ -362,28 +363,37 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
 
   return (
     <div className="lg:hidden relative z-40">
-      {/* Header Bar */}
-      <div className="flex items-center justify-between px-4 py-4">
-        {/* Logo */}
-        <h1 className="text-xl font-bold tracking-tight">
-          whispr<span className="text-[#C1FF72]">.</span>
-        </h1>
+      {/* Header Bar - Glassmorphic */}
+      <div className="mx-4 mt-4 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* Logo with Glow */}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <div className="absolute -inset-1 bg-[#C1FF72]/20 rounded-full blur-md" />
+              <h1 className="relative text-xl font-bold tracking-tight">
+                whispr<span className="text-[#C1FF72]">.</span>
+              </h1>
+            </div>
+          </div>
 
-        {/* Profile Button */}
-        <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="relative w-10 h-10 rounded-full bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden"
-        >
-          {profile?.profilePicture ? (
-            <img
-              src={profile.profilePicture}
-              alt={profile.fullName || 'Profile'}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <User size={18} className="text-white/70" />
-          )}
-        </button>
+          {/* Profile Button with Ring */}
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="relative w-10 h-10 rounded-full bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border-2 border-white/20 flex items-center justify-center overflow-hidden ring-2 ring-transparent hover:ring-[#C1FF72]/30 transition-all"
+          >
+            {profile?.profilePicture ? (
+              <img
+                src={profile.profilePicture}
+                alt={profile.fullName || 'Profile'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-sm font-bold text-white/70">
+                {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Dropdown Menu */}
@@ -395,7 +405,7 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               onClick={() => setShowMenu(false)}
             />
 
@@ -405,7 +415,7 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-4 top-16 w-72 rounded-2xl border border-white/10 bg-[#0a0a0a] p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
+              className="absolute right-4 top-20 w-72 rounded-2xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
             >
               {/* Profile Info */}
               <div className="flex items-center gap-4 mb-4 pb-4 border-b border-white/10">
@@ -417,7 +427,9 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User size={24} className="text-white/70" />
+                    <span className="text-xl font-bold text-white/70">
+                      {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -517,6 +529,20 @@ function MobileNav({
 function ExploreTab({ events }: { events: ExploreEvent[] }) {
   const router = useRouter();
 
+  const formatEventDate = (dateStr: string | null) => {
+    if (!dateStr) return "Date TBA";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   if (!events.length)
     return (
       <div className="text-center py-20">
@@ -539,6 +565,7 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {displayEvents.map((event, index) => {
           const r = event.user_relation;
+          const org = event.organization;
 
           const eventSlug = generateEventSlug(event.name, event.id);
           let ctaLabel = "Get Pass";
@@ -560,11 +587,11 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/20 transition-all cursor-pointer"
+              className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-[#C1FF72]/30 transition-all cursor-pointer"
               onClick={() => router.push(`/attendees/events/${eventSlug}`)}
             >
               {/* Event Image */}
-              <div className="relative h-80 overflow-hidden">
+              <div className="relative h-72 overflow-hidden">
                 <img
                   src={event.cover || "/event-placeholder.jpg"}
                   alt={event.name}
@@ -572,7 +599,23 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-                {/* Status Badge */}
+                {/* Organization Badge - Top Left */}
+                {org && (
+                  <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
+                    {org.logo ? (
+                      <img
+                        src={org.logo}
+                        alt={org.name || 'Organization'}
+                        className="w-5 h-5 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Building2 size={14} className="text-white/70" />
+                    )}
+                    <span className="text-xs text-white/80 font-medium">{org.name || 'Organizer'}</span>
+                  </div>
+                )}
+
+                {/* Status Badge - Top Right */}
                 {r?.is_registered && (
                   <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/40 backdrop-blur-md">
                     <span className="text-xs text-[#C1FF72] font-medium">Registered</span>
@@ -589,20 +632,20 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
 
               {/* Event Info */}
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 line-clamp-1">
+                <h3 className="text-xl font-bold mb-3 line-clamp-1 group-hover:text-[#C1FF72] transition-colors">
                   {event.name}
                 </h3>
 
-                <div className="flex flex-col gap-2 text-sm text-neutral-400 mb-4">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-400 mb-5">
                   {event.date && (
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} />
-                      <span>{event.date}</span>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5">
+                      <Calendar size={13} className="text-[#C1FF72]" />
+                      <span>{formatEventDate(event.date)}</span>
                     </div>
                   )}
                   {event.location && (
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} />
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5">
+                      <MapPin size={13} className="text-[#C1FF72]" />
                       <span className="line-clamp-1">{event.location}</span>
                     </div>
                   )}
@@ -613,7 +656,13 @@ function ExploreTab({ events }: { events: ExploreEvent[] }) {
                     e.stopPropagation();
                     ctaAction();
                   }}
-                  className="w-full py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-sm font-medium transition-all"
+                  className={`w-full py-3.5 rounded-full text-sm font-semibold transition-all ${
+                    r?.has_ticket
+                      ? "bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/30 hover:bg-[#C1FF72]/30"
+                      : r?.is_registered
+                      ? "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                      : "bg-gradient-to-r from-[#C1FF72] to-[#A5E652] text-black hover:shadow-[0_8px_30px_-8px_rgba(193,255,114,0.4)] hover:scale-[1.02]"
+                  }`}
                 >
                   {ctaLabel}
                 </button>
