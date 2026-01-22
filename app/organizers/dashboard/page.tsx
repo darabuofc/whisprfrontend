@@ -33,6 +33,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import Image from "next/image";
 
 interface Event {
   id: string;
@@ -443,10 +444,15 @@ function Sidebar({
     <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[300px] bg-black/40 backdrop-blur-2xl border-r border-white/5 flex-col p-8 z-50">
       {/* Logo / Brand */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">
-          whispr<span className="text-[#B472FF]">.</span>
-        </h1>
-        <p className="text-xs text-neutral-500 mt-1 tracking-wider uppercase">Organizer Portal</p>
+        <Image
+          src="/whisprrr.svg"
+          alt="Whispr"
+          width={120}
+          height={32}
+          className="h-8 w-auto"
+          priority
+        />
+        <p className="text-xs text-neutral-500 mt-2 tracking-wider uppercase">Organizer Portal</p>
       </div>
 
       {/* Organization Section */}
@@ -608,9 +614,14 @@ function MobileHeader({
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 py-4">
         {/* Logo */}
-        <h1 className="text-xl font-bold tracking-tight">
-          whispr<span className="text-[#B472FF]">.</span>
-        </h1>
+        <Image
+          src="/whisprrr.svg"
+          alt="Whispr"
+          width={100}
+          height={28}
+          className="h-7 w-auto"
+          priority
+        />
 
         {/* Menu Button */}
         <button

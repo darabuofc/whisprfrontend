@@ -190,8 +190,79 @@ export default function EventDetailPage() {
 
   if (loading)
     return (
-      <div className="h-screen flex items-center justify-center text-neutral-400 animate-pulse bg-[#040404]">
-        loading event...
+      <div className="relative min-h-screen overflow-hidden bg-[#040404] text-white font-satoshi">
+        {/* Background glows */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(180,114,255,0.25),transparent_55%)]" />
+          <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(200,255,90,0.3),transparent_60%)]" />
+        </div>
+
+        <div className="relative z-10 mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-12 pt-6 sm:px-6">
+          {/* Header skeleton */}
+          <div className="flex items-center justify-between">
+            <div className="h-10 w-10 rounded-full bg-white/5 animate-pulse" />
+            <div className="h-10 w-10 rounded-full bg-white/5 animate-pulse" />
+          </div>
+
+          {/* Organization skeleton */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="h-3 w-20 bg-white/5 rounded animate-pulse mb-4" />
+            <div className="flex items-start gap-4">
+              <div className="h-16 w-16 rounded-2xl bg-white/5 animate-pulse flex-shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="h-5 w-32 bg-white/5 rounded animate-pulse" />
+                <div className="h-4 w-48 bg-white/5 rounded animate-pulse" />
+                <div className="flex gap-2">
+                  <div className="h-8 w-24 bg-white/5 rounded-full animate-pulse" />
+                  <div className="h-8 w-20 bg-white/5 rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Event banner skeleton */}
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+            <div className="aspect-video w-full bg-white/5 animate-pulse" />
+            <div className="p-4 space-y-3">
+              <div className="h-7 w-3/4 bg-white/5 rounded animate-pulse" />
+              <div className="flex gap-2">
+                <div className="h-8 w-28 bg-white/5 rounded-full animate-pulse" />
+                <div className="h-8 w-32 bg-white/5 rounded-full animate-pulse" />
+              </div>
+              <div className="space-y-2 pt-1">
+                <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
+                <div className="h-4 w-2/3 bg-white/5 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+
+          {/* Passes skeleton */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <div className="space-y-2">
+                <div className="h-3 w-24 bg-white/5 rounded animate-pulse" />
+                <div className="h-6 w-32 bg-white/5 rounded animate-pulse" />
+              </div>
+              <div className="h-7 w-16 bg-white/5 rounded-full animate-pulse" />
+            </div>
+            <div className="grid gap-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-xl bg-white/5 animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-5 w-24 bg-white/5 rounded animate-pulse" />
+                        <div className="h-3 w-20 bg-white/5 rounded animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="h-8 w-20 bg-white/5 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
 
