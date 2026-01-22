@@ -170,7 +170,7 @@ export default function AttendeeDashboardPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-3 gap-4 mb-12"
+              className="grid grid-cols-3 gap-4 mb-4"
             >
               <StatsCard
                 icon={<Sparkles size={20} />}
@@ -196,7 +196,7 @@ export default function AttendeeDashboardPage() {
         </motion.section>
 
         {/* TAB CONTENT */}
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 pb-24">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-4 pb-24">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

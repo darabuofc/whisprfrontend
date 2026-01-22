@@ -448,7 +448,7 @@ export default function EventDetailPage() {
                   <span className="font-medium">{event.registration.pass?.name}</span>
                 </div>
 
-                {event.registration.join_code && event.registration.pass?.max_members && event.registration.pass.max_members > 1 && (
+                {event.registration.join_code && event.registration.pass?.name?.toLowerCase().includes('couple') && (
                   <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -602,7 +602,7 @@ export default function EventDetailPage() {
                     </p>
                   </div>
 
-                  {createdJoinCode && selectedPass && selectedPass.max_members > 1 && (
+                  {createdJoinCode && selectedPass && (selectedPass.type?.toLowerCase().includes('couple') || selectedPass.joinable) && (
                     <div className="rounded-xl border border-white/10 bg-white/5 p-4 mb-5 space-y-3">
                       <p className="text-sm text-white/60 text-center">Share this code with your partner:</p>
                       <p
