@@ -190,6 +190,7 @@ export default function OrganizerDashboard() {
         organizer={organizer}
         organization={organization}
         onSignOut={handleSignOut}
+        isPending={isPending}
       />
 
       {/* Mobile Header */}
@@ -197,6 +198,7 @@ export default function OrganizerDashboard() {
         organizer={organizer}
         organization={organization}
         onSignOut={handleSignOut}
+        isPending={isPending}
       />
 
       {/* Main Content */}
@@ -433,12 +435,15 @@ function Sidebar({
   organizer,
   organization,
   onSignOut,
+  isPending,
 }: {
   organizer: Organizer | null;
   organization: Organization | null;
   onSignOut: () => void;
+  isPending: boolean;
 }) {
   const router = useRouter();
+  const [showPendingTooltip, setShowPendingTooltip] = useState(false);
 
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[300px] bg-black/40 backdrop-blur-2xl border-r border-white/5 flex-col p-8 z-50">
@@ -507,13 +512,47 @@ function Sidebar({
         </div>
 
         {/* Setup Button */}
-        <button
-          onClick={() => router.push('/organizers/setup')}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#B472FF]/10 border border-[#B472FF]/20 text-[#B472FF] text-sm font-medium hover:bg-[#B472FF]/20 transition-colors"
-        >
-          <Settings size={16} />
-          {organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => {
+              if (isPending) {
+                setShowPendingTooltip(true);
+                setTimeout(() => setShowPendingTooltip(false), 3000);
+                return;
+              }
+              router.push('/organizers/setup');
+            }}
+            onMouseEnter={() => isPending && setShowPendingTooltip(true)}
+            onMouseLeave={() => setShowPendingTooltip(false)}
+            className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+              isPending
+                ? 'bg-white/5 text-white/40 cursor-not-allowed border border-white/10'
+                : 'bg-[#B472FF]/10 border border-[#B472FF]/20 text-[#B472FF] hover:bg-[#B472FF]/20'
+            }`}
+          >
+            <Settings size={16} />
+            {organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}
+          </button>
+
+          {/* Pending Tooltip */}
+          <AnimatePresence>
+            {showPendingTooltip && isPending && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-full mt-2 left-0 right-0 p-3 rounded-xl bg-[#1a1a1a] border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-white/60">
+                    Available once your account is approved.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Profile Section */}
@@ -601,13 +640,16 @@ function MobileHeader({
   organizer,
   organization,
   onSignOut,
+  isPending,
 }: {
   organizer: Organizer | null;
   organization: Organization | null;
   onSignOut: () => void;
+  isPending: boolean;
 }) {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
+  const [showPendingTooltip, setShowPendingTooltip] = useState(false);
 
   return (
     <div className="lg:hidden relative z-40">
@@ -695,16 +737,43 @@ function MobileHeader({
               )}
 
               {/* Setup Organization */}
-              <button
-                onClick={() => {
-                  setShowMenu(false);
-                  router.push('/organizers/setup');
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/5 hover:text-[#B472FF] transition-colors mb-2"
-              >
-                <Settings size={18} />
-                <span>{organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}</span>
-              </button>
+              <div className="relative mb-2">
+                <button
+                  onClick={() => {
+                    if (isPending) {
+                      setShowPendingTooltip(true);
+                      setTimeout(() => setShowPendingTooltip(false), 3000);
+                      return;
+                    }
+                    setShowMenu(false);
+                    router.push('/organizers/setup');
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                    isPending
+                      ? 'text-white/40 cursor-not-allowed'
+                      : 'text-white/70 hover:bg-white/5 hover:text-[#B472FF]'
+                  }`}
+                >
+                  <Settings size={18} />
+                  <span>{organization?.logo && organization?.website && organization?.instagram_handle ? 'Edit Organization' : 'Setup Organization'}</span>
+                </button>
+
+                {/* Pending Tooltip */}
+                <AnimatePresence>
+                  {showPendingTooltip && isPending && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="absolute left-0 right-0 top-full mt-1 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20"
+                    >
+                      <p className="text-xs text-amber-400 text-center">
+                        Available once approved
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Sign Out Button */}
               <button
@@ -739,6 +808,7 @@ function MobileBottomNav({
   setShowPendingTooltip: (show: boolean) => void;
 }) {
   const router = useRouter();
+  const [showSetupPendingTooltip, setShowSetupPendingTooltip] = useState(false);
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe">
@@ -790,13 +860,39 @@ function MobileBottomNav({
           </div>
 
           {/* Organization Setup */}
-          <button
-            onClick={() => router.push('/organizers/setup')}
-            className="flex flex-col items-center justify-center py-3 px-3 rounded-2xl text-neutral-500"
-          >
-            <Building2 size={20} strokeWidth={1.5} className="mb-1" />
-            <span className="text-[10px] font-medium tracking-wide">Setup</span>
-          </button>
+          <div className="relative flex justify-center">
+            <button
+              onClick={() => {
+                if (isPending) {
+                  setShowSetupPendingTooltip(true);
+                  setTimeout(() => setShowSetupPendingTooltip(false), 3000);
+                } else {
+                  router.push('/organizers/setup');
+                }
+              }}
+              className={`flex flex-col items-center justify-center py-3 px-3 rounded-2xl ${
+                isPending ? 'text-white/30' : 'text-neutral-500'
+              }`}
+            >
+              <Building2 size={20} strokeWidth={1.5} className="mb-1" />
+              <span className="text-[10px] font-medium tracking-wide">Setup</span>
+            </button>
+
+            {/* Tooltip */}
+            <AnimatePresence>
+              {showSetupPendingTooltip && isPending && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute bottom-full mb-2 w-40 p-2 rounded-xl bg-[#1a1a1a] border border-white/10 text-center"
+                >
+                  <p className="text-xs text-white/80">Account pending approval</p>
+                  <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1a1a1a] border-r border-b border-white/10 rotate-45" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </nav>
