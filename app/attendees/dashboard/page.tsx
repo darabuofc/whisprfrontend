@@ -314,7 +314,7 @@ function Sidebar({
       {/* Logo / Brand */}
       <div className="mb-12">
         <Image
-          src="/whisprrr.svg"
+          src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
           alt="Whispr"
           width={120}
           height={32}
@@ -414,7 +414,7 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
             <div className="relative">
               <div className="absolute -inset-1 bg-[#C1FF72]/20 rounded-full blur-md" />
               <Image
-                src="/whisprrr.svg"
+                src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
                 alt="Whispr"
                 width={100}
                 height={28}

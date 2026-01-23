@@ -450,7 +450,7 @@ function Sidebar({
       {/* Logo / Brand */}
       <div className="mb-8">
         <Image
-          src="/whisprrr.svg"
+          src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
           alt="Whispr"
           width={120}
           height={32}
@@ -657,7 +657,7 @@ function MobileHeader({
       <div className="flex items-center justify-between px-4 py-4">
         {/* Logo */}
         <Image
-          src="/whisprrr.svg"
+          src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
           alt="Whispr"
           width={100}
           height={28}
