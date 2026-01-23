@@ -132,18 +132,18 @@ export default function WhisprHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="flex flex-col sm:flex-row items-center gap-4"
+          className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto max-w-xs sm:max-w-none"
         >
           <a
             href="/auth?role=attendee"
-            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-black bg-[#c1ff00] transition-all duration-300 hover:bg-[#d4ff4d] hover:shadow-[0_0_30px_rgba(193,255,0,0.4)]"
+            className="group relative w-full sm:w-auto px-8 py-3 text-sm tracking-[0.15em] uppercase text-black bg-[#c1ff00] transition-all duration-300 hover:bg-[#d4ff4d] hover:shadow-[0_0_30px_rgba(193,255,0,0.4)] text-center"
           >
             Explore Events
           </a>
 
           <a
             href="/auth?role=organizer"
-            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-white/80 border border-white/20 transition-all duration-300 hover:border-[#c1ff00]/50 hover:text-[#c1ff00]"
+            className="group relative w-full sm:w-auto px-8 py-3 text-sm tracking-[0.15em] uppercase text-white/80 border border-white/20 transition-all duration-300 hover:border-[#c1ff00]/50 hover:text-[#c1ff00] text-center"
           >
             Organize an Event
           </a>

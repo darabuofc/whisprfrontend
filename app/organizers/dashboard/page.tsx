@@ -329,7 +329,7 @@ export default function OrganizerDashboard() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute top-full mt-2 right-0 w-64 p-4 rounded-xl bg-[#1a1a1a] border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
+                    className="absolute top-full mt-2 right-0 w-64 max-w-[calc(100vw-2rem)] p-4 rounded-xl bg-[#1a1a1a] border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
                   >
                     <div className="flex items-start gap-3">
                       <AlertCircle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
@@ -376,7 +376,7 @@ export default function OrganizerDashboard() {
               )}
             </motion.div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
               {events.map((ev, index) => (
                 <EventCard key={ev.id} event={ev} index={index} />
               ))}
@@ -651,7 +651,7 @@ function MobileHeader({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-4 top-16 w-80 rounded-2xl border border-white/10 bg-[#0a0a0a] p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
+              className="absolute right-4 top-16 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-[#0a0a0a] p-4 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] z-50"
             >
               {/* Organization Info */}
               <div className="flex items-center gap-4 mb-4 pb-4 border-b border-white/10">

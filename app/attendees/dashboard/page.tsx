@@ -195,7 +195,7 @@ function DashboardContent() {
               transition={{ duration: 0.6 }}
               className="mb-8"
             >
-              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight whitespace-nowrap">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
                 <span className="text-neutral-400">Welcome back,</span>{" "}
                 <span className="text-white">{profile?.fullName?.split(' ')[0] || 'There'}</span>
               </h1>
@@ -206,7 +206,7 @@ function DashboardContent() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-3 gap-4 mb-4"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4"
             >
               <StatsCard
                 icon={<Sparkles size={20} />}
@@ -535,7 +535,7 @@ function MobileNav({
         <div className="grid grid-cols-3 p-2">
           {[
             { key: "explore", label: "Explore", icon: Search },
-            { key: "applications", label: "Applications", icon: ClipboardList },
+            { key: "applications", label: "Apps", icon: ClipboardList },
             { key: "tickets", label: "Tickets", icon: Ticket },
           ].map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
@@ -545,7 +545,7 @@ function MobileNav({
                 onClick={() =>
                   setActiveTab(key as "explore" | "applications" | "tickets")
                 }
-                className={`relative flex flex-col items-center justify-center py-4 px-3 rounded-2xl transition-all ${
+                className={`relative flex flex-col items-center justify-center py-4 px-2 rounded-2xl transition-all ${
                   isActive
                     ? "text-white"
                     : "text-neutral-500"
@@ -559,7 +559,7 @@ function MobileNav({
                   />
                 )}
                 <Icon size={20} strokeWidth={1.5} className="relative z-10 mb-1" />
-                <span className="relative z-10 text-[10px] font-medium tracking-wide">
+                <span className="relative z-10 text-[10px] font-medium tracking-wide truncate max-w-full">
                   {label}
                 </span>
               </button>

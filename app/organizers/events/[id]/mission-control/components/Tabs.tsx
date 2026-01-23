@@ -42,31 +42,36 @@ export default function Tabs({ activeTab, onTabChange, isToday }: TabsProps) {
   ];
 
   return (
-    <div className="bg-white border-b border-neutral-200/60">
+    <div className="bg-black/40 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`
-                flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-all rounded-t-xl
-                ${
-                  activeTab === tab.id
-                    ? "text-neutral-900 bg-neutral-50"
-                    : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50/50"
-                }
-              `}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-              {tab.id === "ops" && isToday && (
-                <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
-                  LIVE
-                </span>
-              )}
-            </button>
-          ))}
+        {/* Mobile scroll indicator */}
+        <div className="relative">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`
+                  flex items-center gap-2 px-4 py-3.5 text-sm font-medium whitespace-nowrap transition-all rounded-t-xl
+                  ${
+                    activeTab === tab.id
+                      ? "text-white bg-white/10"
+                      : "text-white/50 hover:text-white hover:bg-white/5"
+                  }
+                `}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                {tab.id === "ops" && isToday && (
+                  <span className="ml-1 px-2 py-0.5 text-xs bg-[#C1FF72]/20 text-[#C1FF72] rounded-full border border-[#C1FF72]/30">
+                    LIVE
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {/* Scroll fade indicator for mobile */}
+          <div className="absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-black/40 to-transparent pointer-events-none sm:hidden" />
         </div>
       </div>
     </div>

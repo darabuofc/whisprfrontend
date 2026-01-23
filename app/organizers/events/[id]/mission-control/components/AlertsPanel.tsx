@@ -16,16 +16,16 @@ export default function AlertsPanel({ alerts, onFix }: AlertsPanelProps) {
   }
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-lg hover:shadow-xl p-6 ring-2 ring-orange-100 transition-all duration-300 overflow-hidden">
+    <div className="relative bg-white/[0.02] border border-white/10 rounded-2xl p-6 ring-2 ring-amber-500/20 transition-all duration-300 overflow-hidden hover:border-white/20">
       {/* Animated warning stripe */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600" />
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600" />
 
       <div className="flex items-start justify-between mb-5">
-        <h3 className="text-xl font-semibold bg-gradient-to-r from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
+        <h3 className="text-xl font-semibold text-white">
           Alerts & Attention
         </h3>
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center shadow-sm">
-          <AlertTriangle className="text-orange-600 animate-pulse" size={20} />
+        <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+          <AlertTriangle className="text-amber-400 animate-pulse" size={20} />
         </div>
       </div>
 
@@ -33,18 +33,18 @@ export default function AlertsPanel({ alerts, onFix }: AlertsPanelProps) {
         {alerts.map((alert) => (
           <div
             key={alert.id}
-            className="flex items-center justify-between gap-4 p-4 bg-orange-50/50 rounded-xl transition-all"
+            className="flex items-center justify-between gap-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl transition-all"
           >
             <div className="flex items-start gap-3 flex-1">
               <AlertTriangle
-                className="text-orange-600 mt-0.5 flex-shrink-0"
+                className="text-amber-400 mt-0.5 flex-shrink-0"
                 size={18}
               />
-              <p className="text-sm text-neutral-700">{alert.text}</p>
+              <p className="text-sm text-white/70">{alert.text}</p>
             </div>
             <button
               onClick={() => onFix?.(alert.id)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-lg text-sm font-medium transition-all active:scale-95 whitespace-nowrap group shadow-md shadow-orange-500/30"
+              className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-lg text-sm font-medium transition-all active:scale-95 whitespace-nowrap group shadow-md shadow-amber-500/30"
             >
               Fix
               <ArrowRight

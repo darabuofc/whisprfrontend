@@ -14,10 +14,13 @@ interface HealthStripProps {
 }
 
 export default function HealthStrip({ stats, isToday }: HealthStripProps) {
+  // Calculate number of cards to determine proper grid layout
+  const cardCount = isToday ? 5 : 4;
+
   return (
-    <div className="bg-white border-b border-neutral-200/60">
+    <div className="bg-black/20 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
+        <div className={`grid grid-cols-2 gap-5 lg:gap-6 ${isToday ? 'sm:grid-cols-3 lg:grid-cols-5' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
           <StatCard
             icon={<Users className="text-neutral-600" size={22} />}
             label="Attendees"
@@ -76,27 +79,38 @@ function StatCard({
   isLive,
 }: StatCardProps) {
   const getBgColor = () => {
-    if (highlight) return "bg-blue-50 ring-2 ring-blue-200";
-    return "bg-neutral-50";
+    if (highlight) return "bg-[#B472FF]/10 ring-2 ring-[#B472FF]/30";
+    return "bg-white/[0.02]";
+  };
+
+  const getIconColor = () => {
+    switch (color) {
+      case "green": return "text-[#C1FF72]";
+      case "amber": return "text-amber-400";
+      case "red": return "text-red-400";
+      case "cyan": return "text-cyan-400";
+      case "purple": return "text-[#B472FF]";
+      default: return "text-white/60";
+    }
   };
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group cursor-pointer`}
+      className={`relative overflow-hidden rounded-2xl ${getBgColor()} border border-white/10 p-5 transition-all duration-300 hover:scale-[1.02] hover:border-white/20 group cursor-pointer`}
     >
       {/* Shimmer effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
       {isLive && (
         <div className="absolute top-0 right-0 flex items-center gap-1.5 mt-3 mr-3">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-[#C1FF72] rounded-full animate-pulse" />
         </div>
       )}
       <div className="flex items-center justify-between mb-3 relative z-10">
-        {icon}
-        <div className={`text-3xl font-semibold bg-gradient-to-br from-neutral-900 to-neutral-700 bg-clip-text text-transparent`}>{value}</div>
+        <div className={getIconColor()}>{icon}</div>
+        <div className="text-3xl font-semibold text-white">{value}</div>
       </div>
-      <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider relative z-10">
+      <div className="text-xs font-medium text-white/50 uppercase tracking-wider relative z-10">
         {label}
       </div>
     </div>

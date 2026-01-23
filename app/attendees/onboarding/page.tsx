@@ -515,7 +515,7 @@ export default function AttendeesOnboarding() {
                   </>
                 ) : !profile.whatsappVerified ? (
                   <>
-                    <div className="flex justify-center gap-3">
+                    <div className="flex justify-center gap-2 sm:gap-3">
                       {Array.from({ length: 6 }).map((_, i) => (
                         <motion.input
                           key={i}
@@ -529,8 +529,8 @@ export default function AttendeesOnboarding() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className="w-12 h-14 sm:w-14 sm:h-16 rounded-xl bg-white/[0.07] border border-white/[0.08]
-                                     text-center text-2xl font-bold text-white outline-none transition-all duration-300
+                          className="w-10 h-12 sm:w-14 sm:h-16 rounded-xl bg-white/[0.07] border border-white/[0.08]
+                                     text-center text-xl sm:text-2xl font-bold text-white outline-none transition-all duration-300
                                      focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.15)]"
                         />
                       ))}

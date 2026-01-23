@@ -93,15 +93,15 @@ export default function MissionControlPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#000000] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             {/* Spinning ring */}
-            <div className="w-16 h-16 rounded-full border-4 border-neutral-200 border-t-blue-600 animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-[#B472FF] animate-spin" />
             {/* Inner pulse */}
-            <div className="absolute inset-0 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse" />
+            <div className="absolute inset-0 w-16 h-16 rounded-full bg-[#B472FF]/20 animate-pulse" />
           </div>
-          <div className="text-neutral-900 text-lg font-medium animate-pulse">Loading mission control...</div>
+          <div className="text-white/70 text-lg font-medium animate-pulse">Loading mission control...</div>
         </div>
       </div>
     );
@@ -151,11 +151,11 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50">
+    <div className="min-h-screen bg-[#000000] text-white">
       {/* Ambient gradient orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#B472FF]/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-[#6C2DFF]/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
       {/* Event Header */}
@@ -210,42 +210,42 @@ export default function MissionControlPage() {
         )}
 
         {activeTab === "approvals" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
+          <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-12 text-center">
+            <h2 className="text-2xl font-semibold text-white mb-3">
               Approvals Tab
             </h2>
-            <p className="text-neutral-500">
+            <p className="text-white/50">
               Approvals interface will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "attendees" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
+          <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-12 text-center">
+            <h2 className="text-2xl font-semibold text-white mb-3">
               Attendees Tab
             </h2>
-            <p className="text-neutral-500">
+            <p className="text-white/50">
               Attendees management will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "ops" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Ops Mode</h2>
-            <p className="text-neutral-500">
+          <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-12 text-center">
+            <h2 className="text-2xl font-semibold text-white mb-3">Ops Mode</h2>
+            <p className="text-white/50">
               Live operations dashboard will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "settings" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
+          <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-12 text-center">
+            <h2 className="text-2xl font-semibold text-white mb-3">
               Event Settings
             </h2>
-            <p className="text-neutral-500">
+            <p className="text-white/50">
               Event configuration will be implemented here
             </p>
           </div>

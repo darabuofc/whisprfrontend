@@ -585,13 +585,13 @@ export default function EventDetailPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm px-4 pb-4"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm px-4 pb-4 pt-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="w-full max-w-md rounded-3xl border border-white/10 bg-[#0a0a0a] p-6 shadow-[0_25px_120px_-40px_rgba(0,0,0,0.8)]"
+              className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-[#0a0a0a] p-6 shadow-[0_25px_120px_-40px_rgba(0,0,0,0.8)]"
             >
               {modalStep === "couple" && (
                 <>

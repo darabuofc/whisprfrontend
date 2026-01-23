@@ -85,7 +85,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
-              className="absolute top-full right-0 mt-3 w-48 rounded-2xl border border-white/10 bg-black/60 p-4 backdrop-blur-xl md:hidden"
+              className="absolute top-full right-0 mt-3 w-56 rounded-2xl border border-white/10 bg-black/60 p-4 backdrop-blur-xl md:hidden"
             >
               <div className="flex flex-col gap-3 text-sm font-medium text-white/80">
                 <a href="#" onClick={() => setMenuOpen(false)}>Discover</a>
