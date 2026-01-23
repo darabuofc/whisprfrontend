@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Whispr",
   description: "Gated ticketing and event management platform",
   icons: {
-    icon: "/favicon.svg",
+    icon: "https://whispr-app-storage.s3.eu-north-1.amazonaws.com/attendees/whisprlogo.png",
   },
 };
 
