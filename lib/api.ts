@@ -27,6 +27,24 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Normalize error messages from API responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Extract the actual error message from the response if available
+    const backendMessage =
+      error?.response?.data?.message ||
+      error?.response?.data?.detail ||
+      error?.response?.data?.error;
+
+    if (backendMessage) {
+      error.message = backendMessage;
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // ----------------------------------------------------------
 // CORE TYPES
 // ----------------------------------------------------------
