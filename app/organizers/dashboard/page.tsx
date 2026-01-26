@@ -912,7 +912,7 @@ function EventCard({ event, index }: { event: Event; index: number }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      onClick={() => router.push(`/organizers/events/${event.id}`)}
+      onClick={() => router.push(`/organizers/events/${event.id}/mission-control`)}
       className="group rounded-2xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-white/15 transition-all cursor-pointer"
     >
       {/* Cover Image */}
@@ -968,7 +968,7 @@ function EventCard({ event, index }: { event: Event; index: number }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            router.push(`/organizers/events/${event.id}`);
+            router.push(`/organizers/events/${event.id}/mission-control`);
           }}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all group-hover:border-[#B472FF]/30"
         >
