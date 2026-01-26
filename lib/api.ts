@@ -189,6 +189,26 @@ export async function login(phone: string, password: string) {
 }
 
 // ----------------------------------------------------------
+// FORGOT PASSWORD
+// ----------------------------------------------------------
+
+export async function sendAttendeeForgotPasswordOtp(whatsapp: string) {
+  return (await api.post("/attendees/forgot-password/send-otp", { whatsapp })).data;
+}
+
+export async function resetAttendeePassword(whatsapp: string, otp: string, new_password: string) {
+  return (await api.post("/attendees/forgot-password/reset", { whatsapp, otp, new_password })).data;
+}
+
+export async function sendOrganizerForgotPasswordOtp(whatsapp: string) {
+  return (await api.post("/organizers/forgot-password/send-otp", { whatsapp })).data;
+}
+
+export async function resetOrganizerPassword(whatsapp: string, otp: string, new_password: string) {
+  return (await api.post("/organizers/forgot-password/reset", { whatsapp, otp, new_password })).data;
+}
+
+// ----------------------------------------------------------
 // ONBOARDING
 // ----------------------------------------------------------
 

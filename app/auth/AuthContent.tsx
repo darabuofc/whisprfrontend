@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Image from "next/image";
+import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
 
 type AuthMode = "attendee" | "organizer";
 type AuthStage = "signin" | "register";
@@ -26,6 +27,7 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const accent = mode === "attendee" ? "#c1ff72" : "#b472ff";
 
@@ -333,6 +335,18 @@ export default function AuthPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {stage === "signin" && (
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="mt-2 text-xs transition-colors"
+                  style={{ color: `${accent}99` }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = `${accent}99`)}
+                >
+                  Forgot password?
+                </button>
+              )}
             </div>
 
             {error && (
@@ -398,6 +412,13 @@ export default function AuthPage() {
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        mode={mode}
+      />
     </div>
   );
 }
