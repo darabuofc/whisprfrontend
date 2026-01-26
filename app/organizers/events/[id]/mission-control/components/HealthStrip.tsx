@@ -15,38 +15,38 @@ interface HealthStripProps {
 
 export default function HealthStrip({ stats, isToday }: HealthStripProps) {
   return (
-    <div className="bg-white border-b border-neutral-200/60">
+    <div className="bg-whispr-bg/50 border-b border-white/10 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
           <StatCard
-            icon={<Users className="text-neutral-600" size={22} />}
+            icon={<Users className="text-whispr-accent" size={22} />}
             label="Attendees"
             value={stats.approved}
             color="green"
           />
           <StatCard
-            icon={<Clock className="text-neutral-600" size={22} />}
+            icon={<Clock className="text-amber-400" size={22} />}
             label="Pending"
             value={stats.pending}
             color="amber"
             highlight={stats.pending > 0}
           />
           <StatCard
-            icon={<UserX className="text-neutral-600" size={22} />}
+            icon={<UserX className="text-red-400" size={22} />}
             label="Rejected"
             value={stats.rejected}
             color="red"
           />
           {isToday && (
             <StatCard
-              icon={<CheckCircle2 className="text-neutral-600" size={22} />}
+              icon={<CheckCircle2 className="text-cyan-400" size={22} />}
               label="Checked In"
               value={stats.checkedIn}
               color="cyan"
             />
           )}
           <StatCard
-            icon={<Calendar className="text-neutral-600" size={22} />}
+            icon={<Calendar className="text-whispr-purple" size={22} />}
             label={isToday ? "LIVE NOW" : "Days to Event"}
             value={isToday ? "LIVE" : stats.daysLeft}
             color="purple"
@@ -76,27 +76,27 @@ function StatCard({
   isLive,
 }: StatCardProps) {
   const getBgColor = () => {
-    if (highlight) return "bg-blue-50 ring-2 ring-blue-200";
-    return "bg-neutral-50";
+    if (highlight) return "bg-amber-500/10 ring-1 ring-amber-500/30";
+    return "bg-white/5";
   };
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg group cursor-pointer`}
+      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all duration-300 hover:scale-[1.02] hover:bg-white/10 group cursor-pointer border border-white/10`}
     >
       {/* Shimmer effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
 
       {isLive && (
         <div className="absolute top-0 right-0 flex items-center gap-1.5 mt-3 mr-3">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-whispr-accent rounded-full animate-pulse" />
         </div>
       )}
       <div className="flex items-center justify-between mb-3 relative z-10">
         {icon}
-        <div className={`text-3xl font-semibold bg-gradient-to-br from-neutral-900 to-neutral-700 bg-clip-text text-transparent`}>{value}</div>
+        <div className="text-3xl font-semibold text-whispr-text">{value}</div>
       </div>
-      <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider relative z-10">
+      <div className="text-xs font-medium text-whispr-muted uppercase tracking-wider relative z-10">
         {label}
       </div>
     </div>
