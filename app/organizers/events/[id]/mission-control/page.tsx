@@ -8,13 +8,14 @@ import Tabs from "./components/Tabs";
 import OpsSummaryCard from "./components/OpsSummaryCard";
 import AlertsPanel from "./components/AlertsPanel";
 import ActivityFeed from "./components/ActivityFeed";
+import ApprovalsTable from "./components/ApprovalsTable";
+import { getEventRegistrations, approveRegistration, rejectRegistration } from "@/lib/api";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
 type TabType = "overview" | "approvals" | "attendees" | "ops" | "settings";
 
-
-// Mock data
-const data = {
+// Mock data for overview
+const mockData = {
   event: {
     name: "GATR Winter Fest",
     status: "Live" as EventStatus,
@@ -62,14 +63,43 @@ const data = {
   ],
 };
 
+export interface LinkedAttendee {
+  id: string;
+  name: string;
+  email: string;
+  whatsapp?: string;
+  cnic?: string;
+  instagram?: string;
+  profile_picture?: string;
+}
+
+export interface RegistrationListItem {
+  registration_id: string;
+  status: string;
+  name: string;
+  type: string;
+  linked_attendees: LinkedAttendee[];
+  created_date: string;
+  actions: {
+    canApprove: boolean;
+    canReject: boolean;
+  };
+}
+
 export default function MissionControlPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params?.id as string;
+  const eventId = params?.id as string;
 
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Approvals state
+  const [registrations, setRegistrations] = useState<RegistrationListItem[]>([]);
+  const [registrationsLoading, setRegistrationsLoading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Auth gate
   useEffect(() => {
@@ -91,17 +121,59 @@ export default function MissionControlPage() {
     setLoading(false);
   }, [router]);
 
+  // Fetch registrations when approvals tab is active
+  useEffect(() => {
+    if (activeTab === "approvals" && eventId && authorized) {
+      fetchRegistrations();
+    }
+  }, [activeTab, eventId, authorized, statusFilter, searchQuery]);
+
+  const fetchRegistrations = async () => {
+    setRegistrationsLoading(true);
+    try {
+      const data = await getEventRegistrations(eventId, {
+        status: statusFilter || undefined,
+        search: searchQuery || undefined,
+      });
+      setRegistrations(data);
+    } catch (error) {
+      console.error("Failed to fetch registrations:", error);
+    } finally {
+      setRegistrationsLoading(false);
+    }
+  };
+
+  const handleApprove = async (registrationId: string) => {
+    try {
+      await approveRegistration(registrationId);
+      fetchRegistrations();
+    } catch (error) {
+      console.error("Failed to approve registration:", error);
+    }
+  };
+
+  const handleReject = async (registrationId: string) => {
+    try {
+      await rejectRegistration(registrationId);
+      fetchRegistrations();
+    } catch (error) {
+      console.error("Failed to reject registration:", error);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
+      <div className="min-h-screen bg-whispr-bg flex items-center justify-center">
+        <div className="mesh-bg">
+          <div className="mesh-layer" />
+          <div className="mesh-noise" />
+        </div>
+        <div className="flex flex-col items-center gap-4 relative z-10">
           <div className="relative">
-            {/* Spinning ring */}
-            <div className="w-16 h-16 rounded-full border-4 border-neutral-200 border-t-blue-600 animate-spin" />
-            {/* Inner pulse */}
-            <div className="absolute inset-0 w-16 h-16 rounded-full bg-blue-500/20 animate-pulse" />
+            <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-whispr-accent animate-spin" />
+            <div className="absolute inset-0 w-16 h-16 rounded-full bg-whispr-accent/20 animate-pulse" />
           </div>
-          <div className="text-neutral-900 text-lg font-medium animate-pulse">Loading mission control...</div>
+          <div className="text-whispr-text text-lg font-medium animate-pulse">Loading mission control...</div>
         </div>
       </div>
     );
@@ -111,7 +183,7 @@ export default function MissionControlPage() {
     return null;
   }
 
-  const isToday = data.event.status === "Today";
+  const isToday = mockData.event.status === "Today";
 
   // Handler functions
   const handlePublish = () => {
@@ -151,20 +223,20 @@ export default function MissionControlPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-blue-50/30 to-neutral-50">
-      {/* Ambient gradient orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-purple-400/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="min-h-screen bg-whispr-bg">
+      {/* Mesh background */}
+      <div className="mesh-bg">
+        <div className="mesh-layer" />
+        <div className="mesh-noise" />
       </div>
 
       {/* Event Header */}
       <EventHeader
-        name={data.event.name}
-        status={data.event.status}
-        date={data.event.date}
-        time={data.event.time}
-        venue={data.event.venue}
+        name={mockData.event.name}
+        status={mockData.event.status}
+        date={mockData.event.date}
+        time={mockData.event.time}
+        venue={mockData.event.venue}
         onPublish={handlePublish}
         onPause={handlePause}
         onShare={handleShare}
@@ -174,7 +246,7 @@ export default function MissionControlPage() {
       />
 
       {/* Health Strip */}
-      <HealthStrip stats={data.stats} isToday={isToday} />
+      <HealthStrip stats={mockData.stats} isToday={isToday} />
 
       {/* Tabs */}
       <Tabs
@@ -191,61 +263,65 @@ export default function MissionControlPage() {
             <div className="space-y-8">
               <div className="animate-slideInLeft">
                 <OpsSummaryCard
-                  ops={data.ops}
+                  ops={mockData.ops}
                   onGoToApprovals={handleGoToApprovals}
                 />
               </div>
               <div className="animate-slideInLeft" style={{ animationDelay: '0.1s' }}>
-                <AlertsPanel alerts={data.alerts} onFix={handleFixAlert} />
+                <AlertsPanel alerts={mockData.alerts} onFix={handleFixAlert} />
               </div>
             </div>
 
             {/* Right Column */}
             <div className="space-y-8">
               <div className="animate-slideInRight">
-                <ActivityFeed activities={data.activity} />
+                <ActivityFeed activities={mockData.activity} />
               </div>
             </div>
           </div>
         )}
 
         {activeTab === "approvals" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
-              Approvals Tab
-            </h2>
-            <p className="text-neutral-500">
-              Approvals interface will be implemented here
-            </p>
+          <div className="animate-fadeIn">
+            <ApprovalsTable
+              registrations={registrations}
+              loading={registrationsLoading}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              statusFilter={statusFilter}
+              onStatusFilterChange={setStatusFilter}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
           </div>
         )}
 
         {activeTab === "attendees" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
+          <div className="glass rounded-2xl p-12 text-center animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-whispr-text mb-3">
               Attendees Tab
             </h2>
-            <p className="text-neutral-500">
+            <p className="text-whispr-muted">
               Attendees management will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "ops" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">Ops Mode</h2>
-            <p className="text-neutral-500">
+          <div className="glass rounded-2xl p-12 text-center animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-whispr-text mb-3">Ops Mode</h2>
+            <p className="text-whispr-muted">
               Live operations dashboard will be implemented here
             </p>
           </div>
         )}
 
         {activeTab === "settings" && (
-          <div className="bg-white rounded-2xl shadow-sm p-12 text-center">
-            <h2 className="text-2xl font-semibold text-neutral-900 mb-3">
+          <div className="glass rounded-2xl p-12 text-center animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-whispr-text mb-3">
               Event Settings
             </h2>
-            <p className="text-neutral-500">
+            <p className="text-whispr-muted">
               Event configuration will be implemented here
             </p>
           </div>

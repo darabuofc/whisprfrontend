@@ -388,3 +388,84 @@ export async function updateOrganization(data: {
   const res = await api.put("/organizers/organization", data);
   return res.data.organization;
 }
+
+// ----------------------------------------------------------
+// ORGANIZER REGISTRATION MANAGEMENT API
+// ----------------------------------------------------------
+
+export interface LinkedAttendee {
+  id: string;
+  name: string;
+  email: string;
+  whatsapp?: string;
+  cnic?: string;
+  instagram?: string;
+  profile_picture?: string;
+}
+
+export interface RegistrationListItem {
+  registration_id: string;
+  status: string;
+  name: string;
+  type: string;
+  linked_attendees: LinkedAttendee[];
+  created_date: string;
+  actions: {
+    canApprove: boolean;
+    canReject: boolean;
+  };
+}
+
+export interface RegistrationDetail {
+  registration: any;
+  attendees: {
+    full_name: string;
+    email: string;
+    whatsapp?: string;
+    instagram_handle?: string;
+    profession?: string;
+    bio?: string;
+    age?: number;
+    gender?: string;
+    profile_picture?: string;
+  }[];
+}
+
+export async function getEventRegistrations(
+  eventId: string,
+  params?: { status?: string; type?: string; search?: string }
+): Promise<RegistrationListItem[]> {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.append("status", params.status);
+  if (params?.type) queryParams.append("type", params.type);
+  if (params?.search) queryParams.append("search", params.search);
+
+  const queryString = queryParams.toString();
+  const url = `/registrations/event/${eventId}${queryString ? `?${queryString}` : ""}`;
+
+  const res = await api.get(url);
+  return res.data.registrations ?? [];
+}
+
+export async function getRegistrationDetail(
+  registrationId: string
+): Promise<RegistrationDetail> {
+  const res = await api.get(`/registrations/${registrationId}`);
+  return res.data;
+}
+
+export async function approveRegistration(registrationId: string): Promise<void> {
+  await api.post(`/registrations/${registrationId}/approve`);
+}
+
+export async function rejectRegistration(registrationId: string): Promise<void> {
+  await api.post(`/registrations/${registrationId}/reject`);
+}
+
+export async function revokeRegistration(registrationId: string): Promise<void> {
+  await api.post(`/registrations/${registrationId}/revoke`);
+}
+
+export async function reconsiderRegistration(registrationId: string): Promise<void> {
+  await api.post(`/registrations/${registrationId}/reconsider`);
+}
