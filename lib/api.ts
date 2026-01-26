@@ -551,3 +551,89 @@ export async function getOrganizerEventDetails(eventId: string): Promise<Organiz
     },
   };
 }
+
+// ----------------------------------------------------------
+// DISCOUNT CODES API
+// ----------------------------------------------------------
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  amount: number;
+  active: boolean;
+  created_at?: string;
+}
+
+export interface DiscountCodeCreate {
+  code: string;
+  type: "percent" | "fixed";
+  amount: number;
+  active?: boolean;
+}
+
+export interface DiscountValidationResult {
+  original_price: number;
+  discount_amount: number;
+  final_price: number;
+}
+
+// Organizer: Create discount code
+export async function createDiscountCode(
+  eventId: string,
+  data: DiscountCodeCreate
+): Promise<DiscountCode> {
+  const res = await api.post(`/organizers/events/${eventId}/discount-codes`, data);
+  return res.data.discount_code;
+}
+
+// Organizer: List discount codes
+export async function listDiscountCodes(eventId: string): Promise<DiscountCode[]> {
+  const res = await api.get(`/organizers/events/${eventId}/discount-codes`);
+  return res.data.discount_codes ?? [];
+}
+
+// Organizer: Update discount code
+export async function updateDiscountCode(
+  eventId: string,
+  codeId: string,
+  data: Partial<DiscountCodeCreate>
+): Promise<DiscountCode> {
+  const res = await api.put(`/organizers/events/${eventId}/discount-codes/${codeId}`, data);
+  return res.data.discount_code;
+}
+
+// Organizer: Deactivate discount code
+export async function deactivateDiscountCode(
+  eventId: string,
+  codeId: string
+): Promise<void> {
+  await api.delete(`/organizers/events/${eventId}/discount-codes/${codeId}`);
+}
+
+// Attendee: Validate discount code
+export async function validateDiscountCode(
+  eventId: string,
+  passTypeId: string,
+  discountCode: string
+): Promise<DiscountValidationResult> {
+  const res = await api.post(`/events/${eventId}/discounts/validate`, {
+    pass_type_id: passTypeId,
+    discount_code: discountCode,
+  });
+  return res.data;
+}
+
+// Attendee: Register with optional discount code
+export async function registerForEventWithDiscount(
+  eventId: string,
+  passTypeId: string,
+  discountCode?: string
+) {
+  return (
+    await api.post(`/events/${eventId}/registrations`, {
+      pass_type_id: passTypeId,
+      ...(discountCode && { discount_code: discountCode }),
+    })
+  ).data;
+}

@@ -18,12 +18,15 @@ import {
   Building2,
   ExternalLink,
   LogIn,
+  X,
 } from "lucide-react";
 import {
   getEventById,
   getEventPasses,
-  registerForEvent,
+  registerForEventWithDiscount,
   joinExistingRegistration,
+  validateDiscountCode,
+  type DiscountValidationResult,
 } from "@/lib/api";
 import { extractEventIdFromSlug } from "@/lib/utils";
 
@@ -75,13 +78,19 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalStep, setModalStep] = useState<"couple" | "join" | "success">("couple");
+  const [modalStep, setModalStep] = useState<"couple" | "join" | "discount" | "success">("couple");
   const [selectedPass, setSelectedPass] = useState<Pass | null>(null);
   const [joinCode, setJoinCode] = useState("");
   const [createdJoinCode, setCreatedJoinCode] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const passesRef = useRef<HTMLDivElement | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Discount code state
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountValidation, setDiscountValidation] = useState<DiscountValidationResult | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
+  const [validatingDiscount, setValidatingDiscount] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -109,11 +118,15 @@ export default function EventDetailPage() {
     })();
   }, [eventId]);
 
-  const handleRegister = async (passId: string) => {
+  const handleRegister = async (passId: string, withDiscount?: string) => {
     if (!event) return;
     setRegistering(true);
     try {
-      const res = await registerForEvent(event.id, passId);
+      const res = await registerForEventWithDiscount(
+        event.id,
+        passId,
+        withDiscount || (discountValidation ? discountCode : undefined)
+      );
       const joinCode = res?.registration?.join_code || null;
       setCreatedJoinCode(joinCode);
       setModalStep("success");
@@ -121,12 +134,39 @@ export default function EventDetailPage() {
       setEvent((prev) =>
         prev ? { ...prev, user_registered: true, registration: res.registration } : prev
       );
+      // Reset discount state on success
+      setDiscountCode("");
+      setDiscountValidation(null);
+      setDiscountError(null);
     } catch (err: any) {
       setSuccessMsg(`Registration failed: ${err.message}`);
       setShowModal(false);
     } finally {
       setRegistering(false);
     }
+  };
+
+  const handleValidateDiscount = async () => {
+    if (!event || !selectedPass || !discountCode.trim()) return;
+
+    setValidatingDiscount(true);
+    setDiscountError(null);
+    setDiscountValidation(null);
+
+    try {
+      const result = await validateDiscountCode(event.id, selectedPass.id, discountCode.trim());
+      setDiscountValidation(result);
+    } catch (err: any) {
+      setDiscountError(err.message || "Invalid discount code");
+    } finally {
+      setValidatingDiscount(false);
+    }
+  };
+
+  const clearDiscount = () => {
+    setDiscountCode("");
+    setDiscountValidation(null);
+    setDiscountError(null);
   };
 
   const handleJoin = async () => {
@@ -151,14 +191,21 @@ export default function EventDetailPage() {
     setJoinCode("");
     setSuccessMsg(null);
     setCreatedJoinCode(null);
+    clearDiscount();
 
     const type = pass.type?.toLowerCase() || "";
     const isCouple = type.includes("couple") || pass.joinable || pass.max_members > 1;
+    const hasPaidPrice = pass.price && pass.price > 0;
 
     if (isCouple) {
       setModalStep("couple");
       setShowModal(true);
+    } else if (hasPaidPrice) {
+      // Show discount code option for paid passes
+      setModalStep("discount");
+      setShowModal(true);
     } else {
+      // Free pass, register directly
       handleRegister(pass.id);
     }
   };
@@ -694,6 +741,104 @@ export default function EventDetailPage() {
                       className="w-full py-2 text-sm text-white/50 transition hover:text-white"
                     >
                       Back
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {modalStep === "discount" && (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
+                      <Ticket size={28} className="text-[#C8FF5A]" />
+                    </div>
+                    <h2 className="text-xl font-semibold">{selectedPass.type}</h2>
+                    <p className="mt-2 text-sm text-white/60">
+                      {selectedPass.price ? `PKR ${selectedPass.price.toLocaleString()}` : "Free"}
+                    </p>
+                  </div>
+
+                  {/* Discount code input */}
+                  <div className="mb-5 space-y-3">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Have a discount code?"
+                        value={discountCode}
+                        onChange={(e) => {
+                          setDiscountCode(e.target.value.toUpperCase());
+                          setDiscountError(null);
+                          setDiscountValidation(null);
+                        }}
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/30 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 pr-24"
+                      />
+                      {discountCode && !discountValidation && (
+                        <button
+                          onClick={handleValidateDiscount}
+                          disabled={validatingDiscount}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-white/10 text-xs font-medium text-white/70 hover:bg-white/20 transition disabled:opacity-50"
+                        >
+                          {validatingDiscount ? "..." : "Apply"}
+                        </button>
+                      )}
+                      {discountValidation && (
+                        <button
+                          onClick={clearDiscount}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/10 text-white/50 hover:text-white hover:bg-white/20 transition"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Discount error */}
+                    {discountError && (
+                      <p className="text-sm text-red-400 text-center">{discountError}</p>
+                    )}
+
+                    {/* Discount applied - price breakdown */}
+                    {discountValidation && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-xl border border-[#C8FF5A]/20 bg-[#C8FF5A]/5 p-4 space-y-2"
+                      >
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-white/50">Original price</span>
+                          <span className="text-white/70">PKR {discountValidation.original_price.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-[#C8FF5A]">Discount ({discountCode})</span>
+                          <span className="text-[#C8FF5A]">-PKR {discountValidation.discount_amount.toLocaleString()}</span>
+                        </div>
+                        <div className="border-t border-white/10 pt-2 flex items-center justify-between">
+                          <span className="text-white font-medium">Final price</span>
+                          <span className="text-white font-semibold text-lg">
+                            {discountValidation.final_price === 0
+                              ? "Free"
+                              : `PKR ${discountValidation.final_price.toLocaleString()}`}
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => handleRegister(selectedPass.id)}
+                      disabled={registering}
+                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                    >
+                      {registering ? "Processing..." : "Request Entry"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        clearDiscount();
+                      }}
+                      className="w-full py-2 text-sm text-white/50 transition hover:text-white"
+                    >
+                      Cancel
                     </button>
                   </div>
                 </>
