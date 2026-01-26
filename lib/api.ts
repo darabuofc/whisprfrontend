@@ -494,21 +494,22 @@ export interface OrganizerEventDetails {
 export async function getOrganizerEventDetails(eventId: string): Promise<OrganizerEventDetails> {
   const res = await api.get(`/organizers/events/${eventId}`);
   const event = res.data.event;
+  const fields = event.fields ?? {};
 
   return {
     id: event.id,
-    name: event.name ?? "Untitled Event",
-    status: event.status ?? "Draft",
-    date: event.date ?? null,
-    time: event.time ?? null,
-    venue: event.venue ?? event.location ?? null,
-    cover: event.cover ?? null,
-    description: event.description ?? null,
+    name: fields.Name ?? "Untitled Event",
+    status: fields.Status ?? "Draft",
+    date: fields.Date ?? null,
+    time: fields.Time ?? null,
+    venue: fields.Location ?? null,
+    cover: Array.isArray(fields.Cover) && fields.Cover.length > 0 ? fields.Cover[0]?.url ?? null : null,
+    description: fields.Description ?? null,
     stats: {
-      approved: event.stats?.approved ?? 0,
-      pending: event.stats?.pending ?? 0,
-      rejected: event.stats?.rejected ?? 0,
-      checked_in: event.stats?.checked_in ?? 0,
+      approved: fields.approved_count ?? 0,
+      pending: fields.pending_count ?? 0,
+      rejected: Array.isArray(fields.rejected_count) ? fields.rejected_count.length : (fields.rejected_count ?? 0),
+      checked_in: Array.isArray(fields.checked_in_count) ? fields.checked_in_count.length : (fields.checked_in_count ?? 0),
     },
   };
 }
