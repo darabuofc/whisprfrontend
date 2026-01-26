@@ -11,46 +11,68 @@ interface Stats {
 interface HealthStripProps {
   stats: Stats;
   isToday: boolean;
+  loading?: boolean;
 }
 
-export default function HealthStrip({ stats, isToday }: HealthStripProps) {
+export default function HealthStrip({ stats, isToday, loading }: HealthStripProps) {
+  if (loading) {
+    return (
+      <div className="bg-[#0a0a0a]/80 border-b border-white/[0.06] relative z-10">
+        <div className="max-w-6xl mx-auto px-6 py-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-5"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-5 h-5 bg-white/5 rounded animate-pulse" />
+                  <div className="w-10 h-7 bg-white/5 rounded animate-pulse" />
+                </div>
+                <div className="w-16 h-3 bg-white/5 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-whispr-bg/50 border-b border-white/10 relative z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6">
+    <div className="bg-[#0a0a0a]/80 border-b border-white/[0.06] relative z-10">
+      <div className="max-w-6xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <StatCard
-            icon={<Users className="text-whispr-accent" size={22} />}
-            label="Attendees"
+            icon={<Users className="text-emerald-400" size={18} />}
+            label="Approved"
             value={stats.approved}
-            color="green"
+            variant="default"
           />
           <StatCard
-            icon={<Clock className="text-amber-400" size={22} />}
+            icon={<Clock className="text-amber-400" size={18} />}
             label="Pending"
             value={stats.pending}
-            color="amber"
-            highlight={stats.pending > 0}
+            variant={stats.pending > 0 ? "highlight" : "default"}
           />
           <StatCard
-            icon={<UserX className="text-red-400" size={22} />}
+            icon={<UserX className="text-red-400/80" size={18} />}
             label="Rejected"
             value={stats.rejected}
-            color="red"
+            variant="default"
           />
           {isToday && (
             <StatCard
-              icon={<CheckCircle2 className="text-cyan-400" size={22} />}
+              icon={<CheckCircle2 className="text-cyan-400" size={18} />}
               label="Checked In"
               value={stats.checkedIn}
-              color="cyan"
+              variant="default"
             />
           )}
           <StatCard
-            icon={<Calendar className="text-whispr-purple" size={22} />}
-            label={isToday ? "LIVE NOW" : "Days to Event"}
+            icon={<Calendar className="text-violet-400" size={18} />}
+            label={isToday ? "Status" : "Days Left"}
             value={isToday ? "LIVE" : stats.daysLeft}
-            color="purple"
-            isLive={isToday}
+            variant={isToday ? "live" : "default"}
           />
         </div>
       </div>
@@ -62,41 +84,37 @@ interface StatCardProps {
   icon: React.ReactNode;
   label: string;
   value: number | string;
-  color: "green" | "amber" | "red" | "cyan" | "purple";
-  highlight?: boolean;
-  isLive?: boolean;
+  variant: "default" | "highlight" | "live";
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-  highlight,
-  isLive,
-}: StatCardProps) {
-  const getBgColor = () => {
-    if (highlight) return "bg-amber-500/10 ring-1 ring-amber-500/30";
-    return "bg-white/5";
+function StatCard({ icon, label, value, variant }: StatCardProps) {
+  const getCardStyles = () => {
+    switch (variant) {
+      case "highlight":
+        return "bg-amber-500/[0.06] border-amber-500/20";
+      case "live":
+        return "bg-emerald-500/[0.06] border-emerald-500/20";
+      default:
+        return "bg-white/[0.02] border-white/[0.04] hover:bg-white/[0.04]";
+    }
   };
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl ${getBgColor()} p-5 transition-all duration-300 hover:scale-[1.02] hover:bg-white/10 group cursor-pointer border border-white/10`}
+      className={`relative rounded-xl border p-5 transition-colors duration-200 ${getCardStyles()}`}
     >
-      {/* Shimmer effect on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-
-      {isLive && (
-        <div className="absolute top-0 right-0 flex items-center gap-1.5 mt-3 mr-3">
-          <div className="w-2 h-2 bg-whispr-accent rounded-full animate-pulse" />
+      {variant === "live" && (
+        <div className="absolute top-4 right-4">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full" />
         </div>
       )}
-      <div className="flex items-center justify-between mb-3 relative z-10">
-        {icon}
-        <div className="text-3xl font-semibold text-whispr-text">{value}</div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="opacity-80">{icon}</div>
+        <div className="text-2xl font-semibold text-white/90 tabular-nums">
+          {value}
+        </div>
       </div>
-      <div className="text-xs font-medium text-whispr-muted uppercase tracking-wider relative z-10">
+      <div className="text-[11px] font-medium text-white/40 uppercase tracking-wider">
         {label}
       </div>
     </div>

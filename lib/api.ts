@@ -469,3 +469,46 @@ export async function revokeRegistration(registrationId: string): Promise<void> 
 export async function reconsiderRegistration(registrationId: string): Promise<void> {
   await api.post(`/registrations/${registrationId}/reconsider`);
 }
+
+// ----------------------------------------------------------
+// ORGANIZER EVENT DETAILS API
+// ----------------------------------------------------------
+
+export interface OrganizerEventDetails {
+  id: string;
+  name: string;
+  status: string;
+  date: string | null;
+  time: string | null;
+  venue: string | null;
+  cover: string | null;
+  description: string | null;
+  stats: {
+    approved: number;
+    pending: number;
+    rejected: number;
+    checked_in: number;
+  };
+}
+
+export async function getOrganizerEventDetails(eventId: string): Promise<OrganizerEventDetails> {
+  const res = await api.get(`/organizers/events/${eventId}`);
+  const event = res.data.event;
+
+  return {
+    id: event.id,
+    name: event.name ?? "Untitled Event",
+    status: event.status ?? "Draft",
+    date: event.date ?? null,
+    time: event.time ?? null,
+    venue: event.venue ?? event.location ?? null,
+    cover: event.cover ?? null,
+    description: event.description ?? null,
+    stats: {
+      approved: event.stats?.approved ?? 0,
+      pending: event.stats?.pending ?? 0,
+      rejected: event.stats?.rejected ?? 0,
+      checked_in: event.stats?.checked_in ?? 0,
+    },
+  };
+}
