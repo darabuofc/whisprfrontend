@@ -13,6 +13,7 @@ export default function AuthPage() {
   const searchParams = useSearchParams();
   const roleParam = searchParams.get("role");
   const stageParam = searchParams.get("mode");
+  const redirectParam = searchParams.get("redirect");
   const initialMode: AuthMode = roleParam === "organizer" ? "organizer" : "attendee";
   const initialStage: AuthStage = stageParam === "register" ? "register" : "signin";
 
@@ -70,7 +71,7 @@ export default function AuthPage() {
       const token = data?.token;
       if (!token) throw new Error("Something went wrong. Please try again.");
       persistSession(token, "organizer");
-      router.replace("/organizers/dashboard");
+      router.replace(redirectParam || "/organizers/dashboard");
       return;
     }
 
@@ -87,8 +88,8 @@ export default function AuthPage() {
     }
     if (!data?.token) throw new Error("Something went wrong. Please try again.");
     persistSession(data.token, "organizer");
-    router.replace("/organizers/dashboard");
-  }, [stage, fullName, organizationName, email, password, router, persistSession]);
+    router.replace(redirectParam || "/organizers/dashboard");
+  }, [stage, fullName, organizationName, email, password, router, persistSession, redirectParam]);
 
   const submitAttendeeFlow = useCallback(async () => {
     const base = process.env.NEXT_PUBLIC_API_URL;
@@ -111,13 +112,24 @@ export default function AuthPage() {
 
     if (stage === "signin") {
       if (data?.token) persistSession(data.token, "attendee");
-      data.attendee?.is_onboarded
-        ? router.replace("/attendees/dashboard")
-        : router.replace("/attendees/onboarding");
+      // Use redirect param if present and user is onboarded, otherwise use default flow
+      if (data.attendee?.is_onboarded) {
+        router.replace(redirectParam || "/attendees/dashboard");
+      } else {
+        // Save redirect URL for after onboarding if present
+        if (redirectParam) {
+          localStorage.setItem("whispr_post_auth_redirect", redirectParam);
+        }
+        router.replace("/attendees/onboarding");
+      }
     } else {
       // Registration succeeded - try to use token if provided, otherwise auto-login
       if (data?.token) {
         persistSession(data.token, "attendee");
+        // Save redirect URL for after onboarding if present
+        if (redirectParam) {
+          localStorage.setItem("whispr_post_auth_redirect", redirectParam);
+        }
         router.replace("/attendees/onboarding");
         return;
       }
@@ -135,11 +147,17 @@ export default function AuthPage() {
       }
 
       persistSession(loginData.token, "attendee");
-      loginData.attendee?.is_onboarded
-        ? router.replace("/attendees/dashboard")
-        : router.replace("/attendees/onboarding");
+      if (loginData.attendee?.is_onboarded) {
+        router.replace(redirectParam || "/attendees/dashboard");
+      } else {
+        // Save redirect URL for after onboarding if present
+        if (redirectParam) {
+          localStorage.setItem("whispr_post_auth_redirect", redirectParam);
+        }
+        router.replace("/attendees/onboarding");
+      }
     }
-  }, [stage, fullName, email, password, router, persistSession]);
+  }, [stage, fullName, email, password, router, persistSession, redirectParam]);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

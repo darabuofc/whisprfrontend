@@ -89,14 +89,44 @@ export function handleOAuthCallback(response: OAuthCallbackResponse): {
 }
 
 /**
+ * Save a custom redirect URL to be used after authentication
+ */
+export function savePostAuthRedirect(url: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("whispr_post_auth_redirect", url);
+}
+
+/**
+ * Get and clear the saved post-auth redirect URL
+ */
+export function getAndClearPostAuthRedirect(): string | null {
+  if (typeof window === "undefined") return null;
+  const url = localStorage.getItem("whispr_post_auth_redirect");
+  if (url) {
+    localStorage.removeItem("whispr_post_auth_redirect");
+  }
+  return url;
+}
+
+/**
  * Get redirect URL after successful authentication
+ * Checks for saved redirect URL first, then falls back to default
  */
 export function getPostAuthRedirect(
   role: "organizer" | "attendee",
   isOnboarded: boolean
 ): string {
+  // Check for saved redirect URL first (for users coming from event pages, etc.)
+  const savedRedirect = getAndClearPostAuthRedirect();
+
   if (role === "organizer") {
-    return "/organizers/dashboard";
+    return savedRedirect || "/organizers/dashboard";
+  }
+
+  // For attendees, only use saved redirect if they're onboarded
+  // Otherwise they need to complete onboarding first
+  if (isOnboarded && savedRedirect) {
+    return savedRedirect;
   }
 
   return isOnboarded ? "/attendees/dashboard" : "/attendees/onboarding";

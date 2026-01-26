@@ -2,22 +2,31 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { savePostAuthRedirect } from "@/lib/oauth";
 
 interface GoogleOAuthButtonProps {
   userType: "organizer" | "attendee";
   mode?: "signin" | "signup";
   className?: string;
+  redirectUrl?: string;
 }
 
 export default function GoogleOAuthButton({
   userType,
   mode = "signin",
-  className = ""
+  className = "",
+  redirectUrl
 }: GoogleOAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleAuth = () => {
     setIsLoading(true);
+
+    // Save redirect URL if provided (for returning to event page after auth)
+    if (redirectUrl) {
+      savePostAuthRedirect(redirectUrl);
+    }
+
     const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000';
     const endpoint = userType === "organizer"
       ? `${apiBase}/auth/google/organizer`
