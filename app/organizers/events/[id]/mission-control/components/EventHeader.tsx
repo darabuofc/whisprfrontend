@@ -1,4 +1,4 @@
-import { Share2, MoreVertical, Play, Pause, MapPin } from "lucide-react";
+import { Share2, MoreVertical, Play, Pause, MapPin, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
@@ -9,6 +9,7 @@ interface EventHeaderProps {
   date: string;
   time: string;
   venue: string;
+  onBack?: () => void;
   onPublish?: () => void;
   onPause?: () => void;
   onShare?: () => void;
@@ -23,6 +24,7 @@ export default function EventHeader({
   date,
   time,
   venue,
+  onBack,
   onPublish,
   onPause,
   onShare,
@@ -56,6 +58,14 @@ export default function EventHeader({
           {/* Left side */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 -ml-2.5 text-white/50 hover:text-white/90 hover:bg-white/[0.06] rounded-lg text-sm font-medium transition-colors"
+              >
+                <ArrowLeft size={16} />
+                <span className="hidden sm:inline">Dashboard</span>
+              </button>
+              <span className="text-white/20 hidden sm:inline">|</span>
               <h1 className="text-2xl sm:text-3xl font-semibold text-white/95 tracking-tight truncate">
                 {name}
               </h1>

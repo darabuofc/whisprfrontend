@@ -253,6 +253,10 @@ export default function MissionControlPage() {
   };
 
   // Handler functions
+  const handleBack = () => {
+    router.push("/organizers/dashboard");
+  };
+
   const handlePublish = () => {
     console.log("Publishing event...");
   };
@@ -336,6 +340,7 @@ export default function MissionControlPage() {
           date={formatEventDate(eventData?.date ?? null)}
           time={eventData?.time ?? "Time TBD"}
           venue={eventData?.venue ?? "Venue TBD"}
+          onBack={handleBack}
           onPublish={handlePublish}
           onPause={handlePause}
           onShare={handleShare}
