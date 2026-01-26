@@ -10,6 +10,7 @@ import {
   saveProfile,
   getOnboardingStatus,
 } from "@/lib/api";
+import { getAndClearPostAuthRedirect } from "@/lib/oauth";
 
 // Step icons as SVG components for crisp rendering
 const PhoneIcon = () => (
@@ -385,7 +386,9 @@ export default function AttendeesOnboarding() {
       setLoading(true);
       const status = await getOnboardingStatus();
       if (status.mustCompleted) {
-        router.push("/attendees/dashboard");
+        // Check for saved redirect URL (e.g., from event page)
+        const savedRedirect = getAndClearPostAuthRedirect();
+        router.push(savedRedirect || "/attendees/dashboard");
       } else {
         alert("Please complete all required fields first.");
       }

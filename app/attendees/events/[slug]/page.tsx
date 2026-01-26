@@ -17,6 +17,7 @@ import {
   Globe,
   Building2,
   ExternalLink,
+  LogIn,
 } from "lucide-react";
 import {
   getEventById,
@@ -80,6 +81,18 @@ export default function EventDetailPage() {
   const [createdJoinCode, setCreatedJoinCode] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const passesRef = useRef<HTMLDivElement | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const token = localStorage.getItem("whispr_token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleSignInRedirect = () => {
+    const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+    router.push(`/auth?role=attendee&redirect=${encodeURIComponent(currentPath)}`);
+  };
 
   useEffect(() => {
     (async () => {
@@ -447,15 +460,38 @@ export default function EventDetailPage() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Apply for a Pass</p>
               <h2 className="text-xl font-semibold">Request Entry</h2>
             </div>
-            {!event.user_registered && passes.length > 0 && (
+            {isAuthenticated && !event.user_registered && passes.length > 0 && (
               <span className="rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/30 px-3 py-1 text-xs font-medium text-[#C1FF72]">
                 Open
               </span>
             )}
           </div>
 
-          {/* Gated Event Explainer */}
-          {!event.user_registered && passes.length > 0 && (
+          {/* Sign in prompt for unauthenticated users */}
+          {!isAuthenticated && !event.user_registered && (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+              <div className="text-center space-y-4">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
+                  <LogIn size={24} className="text-[#C8FF5A]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1">Sign in to view passes</h3>
+                  <p className="text-sm text-white/50">
+                    Create an account or sign in to see available passes and request entry to this event.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSignInRedirect}
+                  className="w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01]"
+                >
+                  Sign In or Create Account
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Gated Event Explainer - only show for authenticated users */}
+          {isAuthenticated && !event.user_registered && passes.length > 0 && (
             <div className="rounded-xl bg-white/[0.02] border border-white/5 px-4 py-3">
               <p className="text-xs text-white/50 leading-relaxed">
                 This is an invite-only event. Select a pass to apply — the organizer will review your profile and approve your request. Once approved, you'll receive a payment link.
@@ -463,7 +499,8 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {!event.user_registered && passes.length > 0 && (
+          {/* Pass list - only show for authenticated users */}
+          {isAuthenticated && !event.user_registered && passes.length > 0 && (
             <div className="grid gap-3">
               {passes.map((p) => (
                 <button
@@ -493,7 +530,8 @@ export default function EventDetailPage() {
             </div>
           )}
 
-          {!event.user_registered && passes.length === 0 && (
+          {/* No passes available - only show for authenticated users */}
+          {isAuthenticated && !event.user_registered && passes.length === 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center text-sm text-white/50">
               No passes available yet. Check back soon.
             </div>
