@@ -13,6 +13,7 @@ interface ApprovalsTableProps {
   onStatusFilterChange: (status: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onRowClick?: (registration: RegistrationListItem) => void;
 }
 
 export default function ApprovalsTable({
@@ -24,6 +25,7 @@ export default function ApprovalsTable({
   onStatusFilterChange,
   searchQuery,
   onSearchChange,
+  onRowClick,
 }: ApprovalsTableProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -214,7 +216,8 @@ export default function ApprovalsTable({
               registrations.map((registration) => (
                 <tr
                   key={registration.registration_id}
-                  className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+                  onClick={() => onRowClick?.(registration)}
+                  className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4">
                     <span className="text-sm font-mono text-white/70 tabular-nums">
@@ -250,7 +253,10 @@ export default function ApprovalsTable({
                     <div className="flex items-center justify-end gap-2">
                       {registration.actions?.canApprove && (
                         <button
-                          onClick={() => handleApprove(registration.registration_id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApprove(registration.registration_id);
+                          }}
                           disabled={actionLoading === registration.registration_id}
                           className="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Approve"
@@ -264,7 +270,10 @@ export default function ApprovalsTable({
                       )}
                       {registration.actions?.canReject && (
                         <button
-                          onClick={() => handleReject(registration.registration_id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReject(registration.registration_id);
+                          }}
                           disabled={actionLoading === registration.registration_id}
                           className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Reject"

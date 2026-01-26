@@ -9,6 +9,7 @@ import OpsSummaryCard from "./components/OpsSummaryCard";
 import AlertsPanel from "./components/AlertsPanel";
 import ActivityFeed from "./components/ActivityFeed";
 import ApprovalsTable from "./components/ApprovalsTable";
+import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -116,6 +117,10 @@ export default function MissionControlPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<RegistrationListItem | null>(null);
+
   // Auth gate
   useEffect(() => {
     const token =
@@ -200,6 +205,16 @@ export default function MissionControlPage() {
     } catch (error) {
       console.error("Failed to reject registration:", error);
     }
+  };
+
+  const handleRowClick = (registration: RegistrationListItem) => {
+    setSelectedRegistration(registration);
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+    setSelectedRegistration(null);
   };
 
   if (loading) {
@@ -372,6 +387,7 @@ export default function MissionControlPage() {
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            onRowClick={handleRowClick}
           />
         )}
 
@@ -406,6 +422,17 @@ export default function MissionControlPage() {
           </div>
         )}
       </div>
+
+      {/* Attendee Detail Drawer */}
+      <AttendeeDetailDrawer
+        isOpen={drawerOpen}
+        onClose={handleDrawerClose}
+        registrationId={selectedRegistration?.registration_id || null}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        canApprove={selectedRegistration?.actions?.canApprove}
+        canReject={selectedRegistration?.actions?.canReject}
+      />
     </div>
   );
 }
