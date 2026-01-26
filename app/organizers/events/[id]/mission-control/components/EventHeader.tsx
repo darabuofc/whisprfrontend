@@ -1,4 +1,4 @@
-import { Share2, MoreVertical, Play, Pause } from "lucide-react";
+import { Share2, MoreVertical, Play, Pause, MapPin } from "lucide-react";
 import { useState } from "react";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
@@ -32,67 +32,70 @@ export default function EventHeader({
 }: EventHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const getStatusColor = (status: EventStatus) => {
+  const getStatusStyles = (status: EventStatus) => {
     switch (status) {
       case "Live":
-        return "bg-whispr-accent/20 text-whispr-accent border border-whispr-accent/30";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "Today":
-        return "bg-whispr-accent/20 text-whispr-accent border border-whispr-accent/30";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "Draft":
-        return "bg-white/10 text-whispr-muted border border-white/10";
+        return "bg-white/[0.04] text-white/50 border-white/[0.08]";
       case "Ended":
-        return "bg-white/5 text-whispr-muted border border-white/10";
+        return "bg-white/[0.02] text-white/30 border-white/[0.04]";
       default:
-        return "bg-white/10 text-whispr-muted border border-white/10";
+        return "bg-white/[0.04] text-white/50 border-white/[0.08]";
     }
   };
 
   const isPublished = status === "Live" || status === "Today";
 
   return (
-    <div className="sticky top-0 z-40 bg-whispr-bg/80 backdrop-blur-xl border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="sticky top-0 z-40 bg-[#0a0a0a]/90 backdrop-blur-lg border-b border-white/[0.06]">
+      <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           {/* Left side */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl sm:text-4xl font-semibold text-whispr-text tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-white/95 tracking-tight truncate">
                 {name}
               </h1>
               <span
-                className={`px-3 py-1.5 rounded-full text-xs font-medium ${getStatusColor(
+                className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium border ${getStatusStyles(
                   status
                 )}`}
               >
                 {status}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm text-whispr-muted">
-              <span className="font-medium text-whispr-text/80">{date}</span>
-              <span className="hidden sm:inline text-white/30">•</span>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-white/40">
+              <span className="font-medium text-white/60">{date}</span>
+              <span className="hidden sm:inline text-white/20">·</span>
               <span>{time}</span>
-              <span className="hidden sm:inline text-white/30">•</span>
-              <span>{venue}</span>
+              <span className="hidden sm:inline text-white/20">·</span>
+              <span className="flex items-center gap-1.5">
+                <MapPin size={12} className="opacity-60" />
+                {venue}
+              </span>
             </div>
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             {/* Primary action button */}
             {isPublished ? (
               <button
                 onClick={onPause}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-whispr-text rounded-xl font-medium transition-all active:scale-95 border border-white/10"
+                className="flex items-center gap-2 px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/80 rounded-lg text-sm font-medium transition-colors border border-white/[0.08]"
               >
-                <Pause size={18} />
+                <Pause size={15} />
                 <span className="hidden sm:inline">Pause</span>
               </button>
             ) : (
               <button
                 onClick={onPublish}
-                className="flex items-center gap-2 px-4 py-2.5 bg-whispr-accent hover:bg-whispr-accent/90 text-black rounded-xl font-medium transition-all active:scale-95 shadow-glow"
+                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg text-sm font-medium transition-colors hover:bg-white/90"
               >
-                <Play size={18} />
+                <Play size={15} />
                 <span className="hidden sm:inline">Publish</span>
               </button>
             )}
@@ -100,9 +103,9 @@ export default function EventHeader({
             {/* Share button */}
             <button
               onClick={onShare}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 text-whispr-text rounded-xl font-medium transition-all active:scale-95 border border-white/10"
+              className="flex items-center gap-2 px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/80 rounded-lg text-sm font-medium transition-colors border border-white/[0.08]"
             >
-              <Share2 size={18} />
+              <Share2 size={15} />
               <span className="hidden sm:inline">Share</span>
             </button>
 
@@ -110,9 +113,9 @@ export default function EventHeader({
             <div className="relative">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2.5 bg-white/10 hover:bg-white/15 text-whispr-text rounded-xl transition-all active:scale-95 border border-white/10"
+                className="p-2 bg-white/[0.06] hover:bg-white/[0.1] text-white/60 rounded-lg transition-colors border border-white/[0.08]"
               >
-                <MoreVertical size={20} />
+                <MoreVertical size={18} />
               </button>
 
               {menuOpen && (
@@ -123,13 +126,13 @@ export default function EventHeader({
                     onClick={() => setMenuOpen(false)}
                   />
                   {/* Menu */}
-                  <div className="absolute right-0 mt-2 w-48 bg-base-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl py-1.5 z-20">
+                  <div className="absolute right-0 mt-2 w-44 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20">
                     <button
                       onClick={() => {
                         onEdit?.();
                         setMenuOpen(false);
                       }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-whispr-text hover:bg-white/5 transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
                     >
                       Edit event
                     </button>
@@ -138,11 +141,11 @@ export default function EventHeader({
                         onDuplicate?.();
                         setMenuOpen(false);
                       }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-whispr-text hover:bg-white/5 transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-sm text-white/80 hover:bg-white/[0.06] transition-colors"
                     >
                       Duplicate
                     </button>
-                    <div className="border-t border-white/10 my-1.5" />
+                    <div className="border-t border-white/[0.06] my-1" />
                     <button
                       onClick={() => {
                         onCancel?.();
