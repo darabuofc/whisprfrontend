@@ -190,19 +190,17 @@ export default function AuthPage() {
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div
-                className="absolute -inset-4 rounded-2xl blur-xl opacity-40"
+                className="absolute -inset-6 rounded-full blur-2xl opacity-50"
                 style={{ background: accent }}
               />
-              <div className="relative w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center">
-                <Image
-                  src="/favicon.svg"
-                  alt="Whispr"
-                  width={28}
-                  height={28}
-                  className="h-7 w-7"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="Whispr"
+                width={64}
+                height={64}
+                className="relative h-16 w-16 drop-shadow-[0_0_20px_rgba(193,255,0,0.3)]"
+                priority
+              />
             </div>
           </div>
 

@@ -1,72 +1,57 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
+import Image from "next/image";
 
-// Animated W Mark Component
-function WhisprMark({ onAnimationComplete }: { onAnimationComplete: () => void }) {
-  const controls = useAnimation();
-  const [isDrawn, setIsDrawn] = useState(false);
-
-  // Custom W path - minimalist, geometric design
-  const wPath = "M10 10 L30 90 L50 40 L70 90 L90 10";
-
-  useEffect(() => {
-    // Start draw animation
-    controls.start({
-      strokeDashoffset: 0,
-      transition: {
-        duration: 1.8,
-        ease: [0.65, 0, 0.35, 1], // custom easing for smooth draw
-      },
-    }).then(() => {
-      setIsDrawn(true);
-      onAnimationComplete();
-    });
-  }, [controls, onAnimationComplete]);
+// Animated Logo Component with glow effect
+function WhisprLogo({ onAnimationComplete }: { onAnimationComplete: () => void }) {
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <motion.svg
-      width="100"
-      height="100"
-      viewBox="0 0 100 100"
-      fill="none"
-      className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28"
-    >
-      {/* The W stroke */}
-      <motion.path
-        d={wPath}
-        stroke="#c1ff00"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        initial={{ strokeDasharray: 300, strokeDashoffset: 300 }}
-        animate={controls}
+    <div className="relative">
+      {/* Breathing glow effect behind logo */}
+      <motion.div
+        className="absolute inset-0 rounded-full"
+        initial={{ opacity: 0 }}
+        animate={isLoaded ? {
+          opacity: [0.4, 0.7, 0.4],
+          scale: [1, 1.1, 1],
+        } : { opacity: 0 }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{
+          background: "radial-gradient(circle, rgba(193,255,0,0.4) 0%, transparent 70%)",
+          filter: "blur(20px)",
+        }}
       />
 
-      {/* Breathing glow effect after draw completes */}
-      {isDrawn && (
-        <motion.path
-          d={wPath}
-          stroke="#c1ff00"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-          initial={{ opacity: 0, filter: "blur(0px)" }}
-          animate={{
-            opacity: [0.3, 0.6, 0.3],
-            filter: ["blur(4px)", "blur(8px)", "blur(4px)"],
-          }}
-          transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+      {/* The logo image */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 1.2,
+          ease: [0.25, 0.46, 0.45, 0.94],
+        }}
+        onAnimationComplete={() => {
+          setIsLoaded(true);
+          onAnimationComplete();
+        }}
+      >
+        <Image
+          src="/logo.png"
+          alt="Whispr"
+          width={120}
+          height={120}
+          className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_30px_rgba(193,255,0,0.3)]"
+          priority
         />
-      )}
-    </motion.svg>
+      </motion.div>
+    </div>
   );
 }
 
@@ -97,14 +82,14 @@ export default function WhisprHero() {
       {/* Main content - centered vertical stack */}
       <div className="relative z-10 flex flex-col items-center justify-center px-6">
 
-        {/* Animated W Mark */}
+        {/* Animated Logo */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
           className="mb-8"
         >
-          <WhisprMark onAnimationComplete={() => setShowContent(true)} />
+          <WhisprLogo onAnimationComplete={() => setShowContent(true)} />
         </motion.div>
 
         {/* Brand name */}
