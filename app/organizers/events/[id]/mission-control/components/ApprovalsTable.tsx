@@ -174,6 +174,9 @@ export default function ApprovalsTable({
                 Primary Attendee
               </th>
               <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
+                Pass Price
+              </th>
+              <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
                 Linked Attendees
               </th>
               <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
@@ -187,7 +190,7 @@ export default function ApprovalsTable({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={6} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
                     <span className="text-white/40 text-sm">Loading registrations...</span>
@@ -196,7 +199,7 @@ export default function ApprovalsTable({
               </tr>
             ) : registrations.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={6} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-white/[0.02] flex items-center justify-center">
                       <Users className="w-5 h-5 text-white/20" />
@@ -236,6 +239,15 @@ export default function ApprovalsTable({
                         <p className="text-xs text-white/30">{registration.type}</p>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {registration.pass_price !== null && registration.pass_price !== undefined ? (
+                      <span className="text-sm font-medium text-white/70 tabular-nums">
+                        Rs. {registration.pass_price.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-white/30">Free</span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     {renderLinkedAttendees(registration.linked_attendees)}
