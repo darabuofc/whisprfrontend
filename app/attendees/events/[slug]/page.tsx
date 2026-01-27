@@ -691,7 +691,15 @@ export default function EventDetailPage() {
                   </div>
                   <div className="space-y-3">
                     <button
-                      onClick={() => handleRegister(selectedPass.id)}
+                      onClick={() => {
+                        // If pass has a price, go to discount step first
+                        if (selectedPass.price && selectedPass.price > 0) {
+                          setModalStep("discount");
+                        } else {
+                          // Free couple pass, register directly
+                          handleRegister(selectedPass.id);
+                        }
+                      }}
                       disabled={registering}
                       className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
                     >
@@ -746,103 +754,120 @@ export default function EventDetailPage() {
                 </>
               )}
 
-              {modalStep === "discount" && (
-                <>
-                  <div className="text-center mb-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
-                      <Ticket size={28} className="text-[#C8FF5A]" />
-                    </div>
-                    <h2 className="text-xl font-semibold">{selectedPass.type}</h2>
-                    <p className="mt-2 text-sm text-white/60">
-                      {selectedPass.price ? `PKR ${selectedPass.price.toLocaleString()}` : "Free"}
-                    </p>
-                  </div>
+              {modalStep === "discount" && (() => {
+                const type = selectedPass.type?.toLowerCase() || "";
+                const isCouplePass = type.includes("couple") || selectedPass.joinable || selectedPass.max_members > 1;
 
-                  {/* Discount code input */}
-                  <div className="mb-5 space-y-3">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Have a discount code?"
-                        value={discountCode}
-                        onChange={(e) => {
-                          setDiscountCode(e.target.value.toUpperCase());
-                          setDiscountError(null);
-                          setDiscountValidation(null);
-                        }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/30 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 pr-24"
-                      />
-                      {discountCode && !discountValidation && (
-                        <button
-                          onClick={handleValidateDiscount}
-                          disabled={validatingDiscount}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-white/10 text-xs font-medium text-white/70 hover:bg-white/20 transition disabled:opacity-50"
-                        >
-                          {validatingDiscount ? "..." : "Apply"}
-                        </button>
+                return (
+                  <>
+                    <div className="text-center mb-6">
+                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
+                        {isCouplePass ? (
+                          <Users size={28} className="text-[#C8FF5A]" />
+                        ) : (
+                          <Ticket size={28} className="text-[#C8FF5A]" />
+                        )}
+                      </div>
+                      <h2 className="text-xl font-semibold">{selectedPass.type}</h2>
+                      <p className="mt-2 text-sm text-white/60">
+                        {selectedPass.price ? `PKR ${selectedPass.price.toLocaleString()}` : "Free"}
+                        {isCouplePass && selectedPass.max_members > 1 && (
+                          <span className="block mt-1">Includes {selectedPass.max_members} entries</span>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Discount code input */}
+                    <div className="mb-5 space-y-3">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Have a discount code?"
+                          value={discountCode}
+                          onChange={(e) => {
+                            setDiscountCode(e.target.value.toUpperCase());
+                            setDiscountError(null);
+                            setDiscountValidation(null);
+                          }}
+                          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/30 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 pr-24"
+                        />
+                        {discountCode && !discountValidation && (
+                          <button
+                            onClick={handleValidateDiscount}
+                            disabled={validatingDiscount}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-white/10 text-xs font-medium text-white/70 hover:bg-white/20 transition disabled:opacity-50"
+                          >
+                            {validatingDiscount ? "..." : "Apply"}
+                          </button>
+                        )}
+                        {discountValidation && (
+                          <button
+                            onClick={clearDiscount}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/10 text-white/50 hover:text-white hover:bg-white/20 transition"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Discount error */}
+                      {discountError && (
+                        <p className="text-sm text-red-400 text-center">{discountError}</p>
                       )}
+
+                      {/* Discount applied - price breakdown */}
                       {discountValidation && (
-                        <button
-                          onClick={clearDiscount}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-white/10 text-white/50 hover:text-white hover:bg-white/20 transition"
+                        <motion.div
+                          initial={{ opacity: 0, y: -8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-xl border border-[#C8FF5A]/20 bg-[#C8FF5A]/5 p-4 space-y-2"
                         >
-                          <X size={16} />
-                        </button>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-white/50">Original price</span>
+                            <span className="text-white/70">PKR {discountValidation.original_price.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[#C8FF5A]">Discount ({discountCode})</span>
+                            <span className="text-[#C8FF5A]">-PKR {discountValidation.discount_amount.toLocaleString()}</span>
+                          </div>
+                          <div className="border-t border-white/10 pt-2 flex items-center justify-between">
+                            <span className="text-white font-medium">Final price</span>
+                            <span className="text-white font-semibold text-lg">
+                              {discountValidation.final_price === 0
+                                ? "Free"
+                                : `PKR ${discountValidation.final_price.toLocaleString()}`}
+                            </span>
+                          </div>
+                        </motion.div>
                       )}
                     </div>
 
-                    {/* Discount error */}
-                    {discountError && (
-                      <p className="text-sm text-red-400 text-center">{discountError}</p>
-                    )}
-
-                    {/* Discount applied - price breakdown */}
-                    {discountValidation && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="rounded-xl border border-[#C8FF5A]/20 bg-[#C8FF5A]/5 p-4 space-y-2"
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => handleRegister(selectedPass.id)}
+                        disabled={registering}
+                        className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
                       >
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-white/50">Original price</span>
-                          <span className="text-white/70">PKR {discountValidation.original_price.toLocaleString()}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-[#C8FF5A]">Discount ({discountCode})</span>
-                          <span className="text-[#C8FF5A]">-PKR {discountValidation.discount_amount.toLocaleString()}</span>
-                        </div>
-                        <div className="border-t border-white/10 pt-2 flex items-center justify-between">
-                          <span className="text-white font-medium">Final price</span>
-                          <span className="text-white font-semibold text-lg">
-                            {discountValidation.final_price === 0
-                              ? "Free"
-                              : `PKR ${discountValidation.final_price.toLocaleString()}`}
-                          </span>
-                        </div>
-                      </motion.div>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => handleRegister(selectedPass.id)}
-                      disabled={registering}
-                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
-                    >
-                      {registering ? "Processing..." : "Request Entry"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowModal(false);
-                        clearDiscount();
-                      }}
-                      className="w-full py-2 text-sm text-white/50 transition hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              )}
+                        {registering ? "Processing..." : "Request Entry"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (isCouplePass) {
+                            setModalStep("couple");
+                            clearDiscount();
+                          } else {
+                            setShowModal(false);
+                            clearDiscount();
+                          }
+                        }}
+                        className="w-full py-2 text-sm text-white/50 transition hover:text-white"
+                      >
+                        {isCouplePass ? "Back" : "Cancel"}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
 
               {modalStep === "success" && (
                 <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
