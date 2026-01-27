@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * Add this relationship to your existing Registration model.
+ *
+ * Location: app/Models/Registration.php
+ */
+
+// Add this use statement at the top:
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+// Add this method to the Registration class:
+
+/**
+ * Get the registration answers for this registration.
+ */
+public function answers(): HasMany
+{
+    return $this->hasMany(EventRegistrationAnswer::class, 'registration_id');
+}

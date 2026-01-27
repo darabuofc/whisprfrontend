@@ -1,0 +1,20 @@
+<?php
+
+/**
+ * Add this relationship to your existing Event model.
+ *
+ * Location: app/Models/Event.php
+ */
+
+// Add this use statement at the top:
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+// Add this method to the Event class:
+
+/**
+ * Get the registration questions for this event.
+ */
+public function registrationQuestions(): HasMany
+{
+    return $this->hasMany(EventRegistrationQuestion::class)->ordered();
+}
