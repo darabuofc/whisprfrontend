@@ -1,0 +1,149 @@
+<?php
+
+/**
+ * This file shows the modifications needed to your existing RegistrationController
+ * to support custom registration questions and answers.
+ *
+ * Location: app/Http/Controllers/Api/RegistrationController.php
+ */
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreRegistrationWithAnswersRequest;
+use App\Services\RegistrationAnswerService;
+use App\Services\RegistrationService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
+class RegistrationController extends Controller
+{
+    public function __construct(
+        protected RegistrationService $registrationService,
+        protected RegistrationAnswerService $answerService
+    ) {}
+
+    /**
+     * POST /api/events/{eventId}/registrations
+     *
+     * Create a new registration with optional custom question answers.
+     *
+     * Request body:
+     * {
+     *   "pass_type_id": "xxx",
+     *   "discount_code": "SAVE10",  // optional
+     *   "answers": [                 // optional
+     *     { "question_id": "xxx", "answer": "yyy" },
+     *     { "question_id": "aaa", "answer": "bbb" }
+     *   ]
+     * }
+     */
+    public function store(StoreRegistrationWithAnswersRequest $request, string $eventId): JsonResponse
+    {
+        $attendee = $request->user();
+        $validated = $request->validated();
+
+        try {
+            // Use transaction to ensure both registration and answers are created atomically
+            $registration = DB::transaction(function () use ($eventId, $attendee, $validated) {
+                // Create registration using your existing logic
+                // This is where you would:
+                // 1. Validate pass type
+                // 2. Check availability
+                // 3. Apply discount code if provided
+                // 4. Create the registration record
+
+                $registration = $this->registrationService->createRegistrationWithAnswers(
+                    $eventId,
+                    $attendee->id,
+                    [
+                        'pass_type_id' => $validated['pass_type_id'],
+                        'discount_code' => $validated['discount_code'] ?? null,
+                    ],
+                    $validated['answers'] ?? []
+                );
+
+                return $registration;
+            });
+
+            // Load relationships for response
+            $registration->load(['event', 'passType']);
+
+            return response()->json([
+                'message' => 'Registration created successfully.',
+                'registration' => [
+                    'id' => $registration->id,
+                    'registration_id' => $registration->registration_id,
+                    'status' => $registration->status,
+                    'event' => [
+                        'id' => $registration->event->id,
+                        'name' => $registration->event->name,
+                    ],
+                    'pass_type' => $registration->passType?->type,
+                    'share_link' => $this->generateShareLink($registration),
+                ],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to create registration.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /api/registrations/{registrationId}
+     *
+     * Get registration details including answers.
+     */
+    public function show(string $registrationId): JsonResponse
+    {
+        try {
+            $data = $this->registrationService->getRegistrationWithAnswers($registrationId);
+
+            return response()->json([
+                'registration' => $data['registration'],
+                'answers' => $data['answers'],
+                'attendees' => $this->formatAttendees($data['registration']),
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Registration not found.',
+            ], 404);
+        }
+    }
+
+    /**
+     * Generate share link for group registration.
+     */
+    protected function generateShareLink($registration): string
+    {
+        // Implement based on your frontend URL structure
+        $baseUrl = config('app.frontend_url', 'http://localhost:3000');
+        return "{$baseUrl}/join/{$registration->join_code}";
+    }
+
+    /**
+     * Format attendees for response.
+     */
+    protected function formatAttendees($registration): array
+    {
+        $attendees = collect([$registration->primaryAttendee])
+            ->merge($registration->linkedAttendees ?? [])
+            ->filter()
+            ->map(fn ($a) => [
+                'full_name' => $a->full_name,
+                'email' => $a->email,
+                'whatsapp' => $a->whatsapp ?? null,
+                'instagram_handle' => $a->instagram_handle ?? null,
+                'profession' => $a->profession ?? null,
+                'bio' => $a->bio ?? null,
+                'age' => $a->age ?? null,
+                'gender' => $a->gender ?? null,
+                'profile_picture' => $a->profile_picture ?? null,
+            ])
+            ->toArray();
+
+        return $attendees;
+    }
+}

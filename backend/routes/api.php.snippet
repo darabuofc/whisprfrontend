@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * Add these routes to your existing routes/api.php file.
+ *
+ * These routes handle event registration questions for both organizers and attendees.
+ */
+
+use App\Http\Controllers\Api\EventRegistrationQuestionController;
+use App\Http\Controllers\Api\Organizer\RegistrationQuestionController as OrganizerRegistrationQuestionController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Registration Questions Routes
+|--------------------------------------------------------------------------
+|
+| Routes for managing event registration questions.
+|
+*/
+
+// ============================================
+// ORGANIZER ROUTES (requires organizer auth)
+// ============================================
+Route::middleware(['auth:sanctum', 'organizer'])->prefix('organizer')->group(function () {
+    // Registration questions for an event
+    Route::prefix('events/{eventId}/registration-questions')->group(function () {
+        // GET /api/organizer/events/{eventId}/registration-questions
+        Route::get('/', [OrganizerRegistrationQuestionController::class, 'index']);
+
+        // POST /api/organizer/events/{eventId}/registration-questions
+        Route::post('/', [OrganizerRegistrationQuestionController::class, 'store']);
+
+        // POST /api/organizer/events/{eventId}/registration-questions/reorder
+        Route::post('/reorder', [OrganizerRegistrationQuestionController::class, 'reorder']);
+    });
+
+    // Individual question operations (not nested under event)
+    // PUT /api/organizer/registration-questions/{id}
+    Route::put('registration-questions/{id}', [OrganizerRegistrationQuestionController::class, 'update']);
+
+    // DELETE /api/organizer/registration-questions/{id}
+    Route::delete('registration-questions/{id}', [OrganizerRegistrationQuestionController::class, 'destroy']);
+});
+
+// ============================================
+// PUBLIC/ATTENDEE ROUTES
+// ============================================
+
+// Public route - no auth required (or optional auth)
+// GET /api/events/{eventId}/registration-questions
+Route::get('events/{eventId}/registration-questions', [EventRegistrationQuestionController::class, 'index']);
+
+// ============================================
+// MODIFIED REGISTRATION ROUTE
+// ============================================
+
+// Note: Your existing registration endpoint at POST /api/events/{eventId}/registrations
+// should be updated to use the StoreRegistrationWithAnswersRequest validator
+// and handle the 'answers' array in the request body.
+//
+// Example route (if not already defined):
+// Route::middleware(['auth:sanctum'])->group(function () {
+//     Route::post('events/{eventId}/registrations', [RegistrationController::class, 'store']);
+// });
