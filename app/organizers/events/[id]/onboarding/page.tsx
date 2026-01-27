@@ -744,6 +744,10 @@ export default function EventOnboardingPage() {
     location: "",
   });
 
+  // Payment settings state
+  const [paymentMode, setPaymentMode] = useState<"online" | "manual">("online");
+  const [manualPaymentAccount, setManualPaymentAccount] = useState("");
+
   // Banner image state
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string>("");
@@ -809,13 +813,27 @@ export default function EventOnboardingPage() {
           return;
         }
 
+        // Validate payment settings
+        if (paymentMode === "manual" && !manualPaymentAccount.trim()) {
+          setError("Please provide payment account details for manual payments.");
+          return;
+        }
+
         // Set default quantity of 1000 for all passes before sending
         const passesWithQuantity = validPasses.map(p => ({
           ...p,
           quantity: 1000, // Default quantity
         }));
 
+        // Save pass types
         await postWithAuth(`/organizers/events/${id}/pass-types`, { passes: passesWithQuantity });
+
+        // Save payment settings
+        await postWithAuth(`/organizers/events/${id}/update`, {
+          payment_mode: paymentMode,
+          ...(paymentMode === "manual" && { manual_payment_account: manualPaymentAccount.trim() }),
+        });
+
         setStep(4);
       } else if (step === 4) {
         await postWithAuth(`/organizers/events/${id}/publish`);
@@ -1129,6 +1147,108 @@ export default function EventOnboardingPage() {
                     Add another pass type
                   </motion.button>
                 )}
+
+                {/* Payment Settings Section */}
+                <div className="mt-8 pt-6 border-t border-white/[0.08]">
+                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-purple-400">Payment Settings</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Choose how attendees will pay for their tickets after approval.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-white/60">Payment Mode</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setPaymentMode("online")}
+                        className={`p-4 rounded-xl border transition-all duration-300 text-left ${
+                          paymentMode === "online"
+                            ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                            : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:bg-white/[0.07]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            paymentMode === "online" ? "bg-[#C1FF72]/30" : "bg-white/[0.08]"
+                          }`}>
+                            <svg className={`w-4 h-4 ${paymentMode === "online" ? "text-[#C1FF72]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                            </svg>
+                          </div>
+                          <span className="font-medium text-sm">Online Payment</span>
+                        </div>
+                        <p className="text-xs text-white/40">
+                          Attendees pay via Abhipay payment link
+                        </p>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setPaymentMode("manual")}
+                        className={`p-4 rounded-xl border transition-all duration-300 text-left ${
+                          paymentMode === "manual"
+                            ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                            : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:bg-white/[0.07]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                            paymentMode === "manual" ? "bg-[#C1FF72]/30" : "bg-white/[0.08]"
+                          }`}>
+                            <svg className={`w-4 h-4 ${paymentMode === "manual" ? "text-[#C1FF72]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                            </svg>
+                          </div>
+                          <span className="font-medium text-sm">Manual Payment</span>
+                        </div>
+                        <p className="text-xs text-white/40">
+                          Attendees pay via bank transfer/cash
+                        </p>
+                      </motion.button>
+                    </div>
+
+                    {/* Manual Payment Account Field */}
+                    <AnimatePresence>
+                      {paymentMode === "manual" && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="space-y-2"
+                        >
+                          <label className="block text-sm font-medium text-white/60">Payment Account Details</label>
+                          <textarea
+                            value={manualPaymentAccount}
+                            onChange={(e) => setManualPaymentAccount(e.target.value)}
+                            placeholder="Enter bank account details, UPI ID, or other payment instructions that will be sent to approved attendees..."
+                            rows={4}
+                            className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-sm
+                                       placeholder:text-white/30 outline-none transition-all duration-300 resize-none
+                                       focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                                       hover:bg-white/[0.09]"
+                          />
+                          <p className="text-xs text-white/40 pl-1">
+                            This info will be sent to attendees on WhatsApp after approval
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -1182,7 +1302,7 @@ export default function EventOnboardingPage() {
             disabled={
               (step === 1 && (!eventData.name || !eventData.description)) ||
               (step === 2 && (!eventData.date || !eventData.location)) ||
-              (step === 3 && !passes.some(p => p.type && p.price > 0))
+              (step === 3 && (!passes.some(p => p.type && p.price > 0) || (paymentMode === "manual" && !manualPaymentAccount.trim())))
             }
             loading={loading}
             className={step === 1 ? "w-full" : "flex-1"}
