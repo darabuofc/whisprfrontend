@@ -628,12 +628,104 @@ export async function validateDiscountCode(
 export async function registerForEventWithDiscount(
   eventId: string,
   passTypeId: string,
-  discountCode?: string
+  discountCode?: string,
+  answers?: { question_id: string; answer: string }[]
 ) {
   return (
     await api.post(`/events/${eventId}/registrations`, {
       pass_type_id: passTypeId,
       ...(discountCode && { discount_code: discountCode }),
+      ...(answers && answers.length > 0 && { answers }),
     })
   ).data;
+}
+
+// ----------------------------------------------------------
+// REGISTRATION QUESTIONS API
+// ----------------------------------------------------------
+
+export type QuestionType =
+  | "text"
+  | "textarea"
+  | "select"
+  | "multiselect"
+  | "checkbox"
+  | "yesno"
+  | "number"
+  | "file";
+
+export interface RegistrationQuestion {
+  id: string;
+  event_id: string;
+  question_text: string;
+  question_type: QuestionType;
+  is_required: boolean;
+  options_json: string[] | null;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface RegistrationQuestionCreate {
+  question_text: string;
+  question_type: QuestionType;
+  is_required: boolean;
+  options_json?: string[];
+  order_index?: number;
+}
+
+export interface RegistrationAnswer {
+  id: string;
+  registration_id: string;
+  question_id: string;
+  answer_text: string;
+  created_at?: string;
+}
+
+// Organizer: List registration questions for an event
+export async function listRegistrationQuestions(
+  eventId: string
+): Promise<RegistrationQuestion[]> {
+  const res = await api.get(`/organizer/events/${eventId}/registration-questions`);
+  return res.data.questions ?? [];
+}
+
+// Organizer: Create a registration question
+export async function createRegistrationQuestion(
+  eventId: string,
+  data: RegistrationQuestionCreate
+): Promise<RegistrationQuestion> {
+  const res = await api.post(`/organizer/events/${eventId}/registration-questions`, data);
+  return res.data.question;
+}
+
+// Organizer: Update a registration question
+export async function updateRegistrationQuestion(
+  questionId: string,
+  data: Partial<RegistrationQuestionCreate>
+): Promise<RegistrationQuestion> {
+  const res = await api.put(`/organizer/registration-questions/${questionId}`, data);
+  return res.data.question;
+}
+
+// Organizer: Delete a registration question
+export async function deleteRegistrationQuestion(questionId: string): Promise<void> {
+  await api.delete(`/organizer/registration-questions/${questionId}`);
+}
+
+// Organizer: Reorder registration questions
+export async function reorderRegistrationQuestions(
+  eventId: string,
+  questionIds: string[]
+): Promise<void> {
+  await api.put(`/organizer/events/${eventId}/registration-questions/reorder`, {
+    question_ids: questionIds,
+  });
+}
+
+// Attendee: Get registration questions for an event
+export async function getEventRegistrationQuestions(
+  eventId: string
+): Promise<RegistrationQuestion[]> {
+  const res = await api.get(`/events/${eventId}/registration-questions`);
+  return res.data.questions ?? [];
 }

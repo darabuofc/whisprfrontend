@@ -1,6 +1,6 @@
-import { LayoutDashboard, ClipboardCheck, Users, Zap, Settings, Tag } from "lucide-react";
+import { LayoutDashboard, ClipboardCheck, Users, Zap, Settings, Tag, FileQuestion } from "lucide-react";
 
-type TabType = "overview" | "approvals" | "attendees" | "discounts" | "ops" | "settings";
+type TabType = "overview" | "approvals" | "attendees" | "discounts" | "questions" | "ops" | "settings";
 
 interface TabsProps {
   activeTab: TabType;
@@ -29,6 +29,11 @@ export default function Tabs({ activeTab, onTabChange, isToday }: TabsProps) {
       id: "discounts" as TabType,
       label: "Discounts",
       icon: <Tag size={16} />,
+    },
+    {
+      id: "questions" as TabType,
+      label: "Questions",
+      icon: <FileQuestion size={16} />,
     },
     ...(isToday
       ? [

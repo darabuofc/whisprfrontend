@@ -26,7 +26,9 @@ import {
   registerForEventWithDiscount,
   joinExistingRegistration,
   validateDiscountCode,
+  getEventRegistrationQuestions,
   type DiscountValidationResult,
+  type RegistrationQuestion,
 } from "@/lib/api";
 import { extractEventIdFromSlug } from "@/lib/utils";
 
@@ -78,7 +80,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [modalStep, setModalStep] = useState<"couple" | "join" | "discount" | "success">("couple");
+  const [modalStep, setModalStep] = useState<"couple" | "join" | "discount" | "questions" | "success">("couple");
   const [selectedPass, setSelectedPass] = useState<Pass | null>(null);
   const [joinCode, setJoinCode] = useState("");
   const [createdJoinCode, setCreatedJoinCode] = useState<string | null>(null);
@@ -91,6 +93,11 @@ export default function EventDetailPage() {
   const [discountValidation, setDiscountValidation] = useState<DiscountValidationResult | null>(null);
   const [discountError, setDiscountError] = useState<string | null>(null);
   const [validatingDiscount, setValidatingDiscount] = useState(false);
+
+  // Registration questions state
+  const [registrationQuestions, setRegistrationQuestions] = useState<RegistrationQuestion[]>([]);
+  const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({});
+  const [questionErrors, setQuestionErrors] = useState<Record<string, string>>({});
 
   // Check authentication status on mount
   useEffect(() => {
@@ -110,6 +117,14 @@ export default function EventDetailPage() {
         setEvent(data);
         const passData = await getEventPasses(eventId);
         setPasses(passData);
+        // Fetch registration questions
+        try {
+          const questions = await getEventRegistrationQuestions(eventId);
+          setRegistrationQuestions(questions);
+        } catch (qErr) {
+          // Questions endpoint might not exist yet or event has no questions
+          console.log("No registration questions available");
+        }
       } catch (err) {
         console.error("Failed to fetch event:", err);
       } finally {
@@ -118,14 +133,43 @@ export default function EventDetailPage() {
     })();
   }, [eventId]);
 
+  // Validate required questions before registration
+  const validateQuestions = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    registrationQuestions.forEach((q) => {
+      if (q.is_required) {
+        const answer = questionAnswers[q.id];
+        if (!answer || (Array.isArray(answer) && answer.length === 0) || (typeof answer === "string" && !answer.trim())) {
+          errors[q.id] = "This field is required";
+        }
+      }
+    });
+
+    setQuestionErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Convert answers to API format
+  const formatAnswersForApi = () => {
+    return Object.entries(questionAnswers)
+      .filter(([_, value]) => value && (Array.isArray(value) ? value.length > 0 : value.trim()))
+      .map(([questionId, answer]) => ({
+        question_id: questionId,
+        answer: Array.isArray(answer) ? answer.join(", ") : answer,
+      }));
+  };
+
   const handleRegister = async (passId: string, withDiscount?: string) => {
     if (!event) return;
     setRegistering(true);
     try {
+      const answers = formatAnswersForApi();
       const res = await registerForEventWithDiscount(
         event.id,
         passId,
-        withDiscount || (discountValidation ? discountCode : undefined)
+        withDiscount || (discountValidation ? discountCode : undefined),
+        answers.length > 0 ? answers : undefined
       );
       const joinCode = res?.registration?.join_code || null;
       setCreatedJoinCode(joinCode);
@@ -138,6 +182,9 @@ export default function EventDetailPage() {
       setDiscountCode("");
       setDiscountValidation(null);
       setDiscountError(null);
+      // Reset question answers on success
+      setQuestionAnswers({});
+      setQuestionErrors({});
     } catch (err: any) {
       setSuccessMsg(`Registration failed: ${err.message}`);
       setShowModal(false);
@@ -185,6 +232,11 @@ export default function EventDetailPage() {
     }
   };
 
+  const clearQuestions = () => {
+    setQuestionAnswers({});
+    setQuestionErrors({});
+  };
+
   const handlePassSelect = (pass: Pass) => {
     if (event?.user_registered) return;
     setSelectedPass(pass);
@@ -192,13 +244,19 @@ export default function EventDetailPage() {
     setSuccessMsg(null);
     setCreatedJoinCode(null);
     clearDiscount();
+    clearQuestions();
 
     const type = pass.type?.toLowerCase() || "";
     const isCouple = type.includes("couple") || pass.joinable || pass.max_members > 1;
     const hasPaidPrice = pass.price && pass.price > 0;
+    const hasQuestions = registrationQuestions.length > 0;
 
     if (isCouple) {
       setModalStep("couple");
+      setShowModal(true);
+    } else if (hasQuestions) {
+      // Show questions step first
+      setModalStep("questions");
       setShowModal(true);
     } else if (hasPaidPrice) {
       // Show discount code option for paid passes
@@ -691,7 +749,13 @@ export default function EventDetailPage() {
                   </div>
                   <div className="space-y-3">
                     <button
-                      onClick={() => handleRegister(selectedPass.id)}
+                      onClick={() => {
+                        if (registrationQuestions.length > 0) {
+                          setModalStep("questions");
+                        } else {
+                          handleRegister(selectedPass.id);
+                        }
+                      }}
                       disabled={registering}
                       className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
                     >
@@ -835,6 +899,235 @@ export default function EventDetailPage() {
                       onClick={() => {
                         setShowModal(false);
                         clearDiscount();
+                      }}
+                      className="w-full py-2 text-sm text-white/50 transition hover:text-white"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {modalStep === "questions" && (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
+                      <Ticket size={28} className="text-[#C8FF5A]" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Additional Information</h2>
+                    <p className="mt-2 text-sm text-white/60">
+                      Please answer a few questions to complete your registration
+                    </p>
+                  </div>
+
+                  {/* Questions form */}
+                  <div className="space-y-4 max-h-[40vh] overflow-y-auto mb-5 pr-1">
+                    {registrationQuestions.map((question) => (
+                      <div key={question.id} className="space-y-2">
+                        <label className="block text-sm font-medium text-white/80">
+                          {question.question_text}
+                          {question.is_required && (
+                            <span className="text-amber-400 ml-1">*</span>
+                          )}
+                        </label>
+
+                        {/* Text input */}
+                        {question.question_type === "text" && (
+                          <input
+                            type="text"
+                            value={(questionAnswers[question.id] as string) || ""}
+                            onChange={(e) =>
+                              setQuestionAnswers({
+                                ...questionAnswers,
+                                [question.id]: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm"
+                            placeholder="Your answer"
+                          />
+                        )}
+
+                        {/* Textarea */}
+                        {question.question_type === "textarea" && (
+                          <textarea
+                            value={(questionAnswers[question.id] as string) || ""}
+                            onChange={(e) =>
+                              setQuestionAnswers({
+                                ...questionAnswers,
+                                [question.id]: e.target.value,
+                              })
+                            }
+                            rows={3}
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm resize-none"
+                            placeholder="Your answer"
+                          />
+                        )}
+
+                        {/* Number input */}
+                        {question.question_type === "number" && (
+                          <input
+                            type="number"
+                            value={(questionAnswers[question.id] as string) || ""}
+                            onChange={(e) =>
+                              setQuestionAnswers({
+                                ...questionAnswers,
+                                [question.id]: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm"
+                            placeholder="0"
+                          />
+                        )}
+
+                        {/* Select dropdown */}
+                        {question.question_type === "select" && question.options_json && (
+                          <select
+                            value={(questionAnswers[question.id] as string) || ""}
+                            onChange={(e) =>
+                              setQuestionAnswers({
+                                ...questionAnswers,
+                                [question.id]: e.target.value,
+                              })
+                            }
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm appearance-none cursor-pointer"
+                          >
+                            <option value="" className="bg-[#0a0a0a]">
+                              Select an option
+                            </option>
+                            {question.options_json.map((option, idx) => (
+                              <option key={idx} value={option} className="bg-[#0a0a0a]">
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+                        {/* Multi-select checkboxes */}
+                        {question.question_type === "multiselect" && question.options_json && (
+                          <div className="space-y-2">
+                            {question.options_json.map((option, idx) => {
+                              const selectedOptions = (questionAnswers[question.id] as string[]) || [];
+                              const isChecked = selectedOptions.includes(option);
+                              return (
+                                <label
+                                  key={idx}
+                                  className="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/[0.08] transition-colors"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const newOptions = e.target.checked
+                                        ? [...selectedOptions, option]
+                                        : selectedOptions.filter((o) => o !== option);
+                                      setQuestionAnswers({
+                                        ...questionAnswers,
+                                        [question.id]: newOptions,
+                                      });
+                                    }}
+                                    className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#C8FF5A] focus:ring-[#C8FF5A]/50"
+                                  />
+                                  <span className="text-sm text-white/80">{option}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Single checkbox */}
+                        {question.question_type === "checkbox" && (
+                          <label className="flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/[0.08] transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={(questionAnswers[question.id] as string) === "yes"}
+                              onChange={(e) =>
+                                setQuestionAnswers({
+                                  ...questionAnswers,
+                                  [question.id]: e.target.checked ? "yes" : "",
+                                })
+                              }
+                              className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#C8FF5A] focus:ring-[#C8FF5A]/50"
+                            />
+                            <span className="text-sm text-white/80">Yes</span>
+                          </label>
+                        )}
+
+                        {/* Yes/No toggle */}
+                        {question.question_type === "yesno" && (
+                          <div className="flex gap-3">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuestionAnswers({
+                                  ...questionAnswers,
+                                  [question.id]: "yes",
+                                })
+                              }
+                              className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
+                                questionAnswers[question.id] === "yes"
+                                  ? "bg-[#C8FF5A]/20 border-[#C8FF5A]/50 text-[#C8FF5A]"
+                                  : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
+                              }`}
+                            >
+                              Yes
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setQuestionAnswers({
+                                  ...questionAnswers,
+                                  [question.id]: "no",
+                                })
+                              }
+                              className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
+                                questionAnswers[question.id] === "no"
+                                  ? "bg-red-500/20 border-red-500/50 text-red-400"
+                                  : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
+                              }`}
+                            >
+                              No
+                            </button>
+                          </div>
+                        )}
+
+                        {/* File upload note */}
+                        {question.question_type === "file" && (
+                          <div className="p-4 rounded-xl border border-white/10 bg-white/5 text-center">
+                            <p className="text-sm text-white/50">
+                              File uploads will be requested after registration approval
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Error message */}
+                        {questionErrors[question.id] && (
+                          <p className="text-xs text-red-400">{questionErrors[question.id]}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => {
+                        if (validateQuestions()) {
+                          const hasPaidPrice = selectedPass.price && selectedPass.price > 0;
+                          if (hasPaidPrice) {
+                            setModalStep("discount");
+                          } else {
+                            handleRegister(selectedPass.id);
+                          }
+                        }
+                      }}
+                      disabled={registering}
+                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                    >
+                      {registering ? "Processing..." : selectedPass.price && selectedPass.price > 0 ? "Continue" : "Request Entry"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowModal(false);
+                        clearQuestions();
                       }}
                       className="w-full py-2 text-sm text-white/50 transition hover:text-white"
                     >

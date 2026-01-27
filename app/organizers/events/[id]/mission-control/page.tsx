@@ -11,6 +11,7 @@ import ActivityFeed from "./components/ActivityFeed";
 import ApprovalsTable from "./components/ApprovalsTable";
 import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
 import DiscountCodesTab from "./components/DiscountCodesTab";
+import RegistrationQuestionsTab from "./components/RegistrationQuestionsTab";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -20,7 +21,7 @@ import {
 } from "@/lib/api";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
-type TabType = "overview" | "approvals" | "attendees" | "discounts" | "ops" | "settings";
+type TabType = "overview" | "approvals" | "attendees" | "discounts" | "questions" | "ops" | "settings";
 
 export interface LinkedAttendee {
   id: string;
@@ -410,6 +411,10 @@ export default function MissionControlPage() {
 
         {activeTab === "discounts" && (
           <DiscountCodesTab eventId={eventId} />
+        )}
+
+        {activeTab === "questions" && (
+          <RegistrationQuestionsTab eventId={eventId} />
         )}
 
         {activeTab === "ops" && (
