@@ -10,9 +10,7 @@ import AlertsPanel from "./components/AlertsPanel";
 import ActivityFeed from "./components/ActivityFeed";
 import ApprovalsTable from "./components/ApprovalsTable";
 import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
-import DiscountCodesTab from "./components/DiscountCodesTab";
-import RegistrationQuestionsTab from "./components/RegistrationQuestionsTab";
-import PaymentSettingsTab from "./components/PaymentSettingsTab";
+import SettingsTab from "./components/SettingsTab";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -22,7 +20,7 @@ import {
 } from "@/lib/api";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
-type TabType = "overview" | "approvals" | "attendees" | "discounts" | "questions" | "payments" | "ops" | "settings";
+type TabType = "overview" | "approvals" | "attendees" | "ops" | "settings";
 
 export interface LinkedAttendee {
   id: string;
@@ -411,18 +409,6 @@ export default function MissionControlPage() {
           </div>
         )}
 
-        {activeTab === "discounts" && (
-          <DiscountCodesTab eventId={eventId} />
-        )}
-
-        {activeTab === "questions" && (
-          <RegistrationQuestionsTab eventId={eventId} />
-        )}
-
-        {activeTab === "payments" && (
-          <PaymentSettingsTab eventId={eventId} />
-        )}
-
         {activeTab === "ops" && (
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12 text-center">
             <h2 className="text-xl font-medium text-white/90 mb-2">Ops Mode</h2>
@@ -433,14 +419,7 @@ export default function MissionControlPage() {
         )}
 
         {activeTab === "settings" && (
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12 text-center">
-            <h2 className="text-xl font-medium text-white/90 mb-2">
-              Settings
-            </h2>
-            <p className="text-white/40 text-sm">
-              Event configuration coming soon
-            </p>
-          </div>
+          <SettingsTab eventId={eventId} />
         )}
       </div>
 
