@@ -241,9 +241,9 @@ export default function ApprovalsTable({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {registration.pass_price !== null && registration.pass_price !== undefined ? (
+                    {registration.price !== null && registration.price !== undefined ? (
                       <span className="text-sm font-medium text-white/70 tabular-nums">
-                        Rs. {registration.pass_price.toLocaleString()}
+                        Rs. {registration.price.toLocaleString()}
                       </span>
                     ) : (
                       <span className="text-white/30">Free</span>
