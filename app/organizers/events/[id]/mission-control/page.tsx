@@ -37,7 +37,7 @@ export interface RegistrationListItem {
   status: string;
   name: string;
   type: string;
-  pass_price: number | null;
+  price: number | null;
   linked_attendees: LinkedAttendee[];
   created_date: string;
   actions: {
