@@ -447,6 +447,7 @@ export interface RegistrationListItem {
   name: string;
   type: string;
   price: number | null;
+  profile_picture?: string;
   linked_attendees: LinkedAttendee[];
   created_date: string;
   actions: {

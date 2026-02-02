@@ -227,11 +227,19 @@ export default function ApprovalsTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                        <span className="text-sm font-medium text-emerald-400">
-                          {registration.name?.charAt(0)?.toUpperCase() || "?"}
-                        </span>
-                      </div>
+                      {registration.profile_picture ? (
+                        <img
+                          src={registration.profile_picture}
+                          alt={registration.name}
+                          className="w-8 h-8 rounded-full object-cover border border-white/[0.08]"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                          <span className="text-sm font-medium text-emerald-400">
+                            {registration.name?.charAt(0)?.toUpperCase() || "?"}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <p className="text-sm font-medium text-white/80">{registration.name}</p>
                         <p className="text-xs text-white/30">{registration.type}</p>
