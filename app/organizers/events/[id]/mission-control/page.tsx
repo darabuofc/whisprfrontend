@@ -15,6 +15,8 @@ import {
   getEventRegistrations,
   approveRegistration,
   rejectRegistration,
+  revokeRegistration,
+  markRegistrationPaid,
   getOrganizerEventDetails,
   type OrganizerEventDetails,
 } from "@/lib/api";
@@ -209,6 +211,26 @@ export default function MissionControlPage() {
     }
   };
 
+  const handleRevoke = async (registrationId: string) => {
+    try {
+      await revokeRegistration(registrationId);
+      fetchRegistrations();
+      fetchEventDetails();
+    } catch (error) {
+      console.error("Failed to revoke registration:", error);
+    }
+  };
+
+  const handleMarkPaid = async (registrationId: string) => {
+    try {
+      await markRegistrationPaid(registrationId);
+      fetchRegistrations();
+      fetchEventDetails();
+    } catch (error) {
+      console.error("Failed to mark registration as paid:", error);
+    }
+  };
+
   const handleRowClick = (registration: RegistrationListItem) => {
     setSelectedRegistration(registration);
     setDrawerOpen(true);
@@ -390,6 +412,8 @@ export default function MissionControlPage() {
             loading={registrationsLoading}
             onApprove={handleApprove}
             onReject={handleReject}
+            onRevoke={handleRevoke}
+            onMarkPaid={handleMarkPaid}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
@@ -428,10 +452,11 @@ export default function MissionControlPage() {
         isOpen={drawerOpen}
         onClose={handleDrawerClose}
         registrationId={selectedRegistration?.registration_id || null}
+        registrationStatus={selectedRegistration?.status || null}
         onApprove={handleApprove}
         onReject={handleReject}
-        canApprove={selectedRegistration?.actions?.canApprove}
-        canReject={selectedRegistration?.actions?.canReject}
+        onRevoke={handleRevoke}
+        onMarkPaid={handleMarkPaid}
       />
     </div>
   );
