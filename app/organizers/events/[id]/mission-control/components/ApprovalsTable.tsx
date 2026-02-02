@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Search, Filter, Users, Loader2 } from "lucide-react";
+import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye } from "lucide-react";
 import { useState } from "react";
 import type { RegistrationListItem, LinkedAttendee } from "../page";
 
@@ -9,6 +9,8 @@ interface ApprovalsTableProps {
   loading: boolean;
   onApprove: (registrationId: string) => void;
   onReject: (registrationId: string) => void;
+  onRevoke: (registrationId: string) => void;
+  onMarkPaid: (registrationId: string) => void;
   statusFilter: string;
   onStatusFilterChange: (status: string) => void;
   searchQuery: string;
@@ -21,6 +23,8 @@ export default function ApprovalsTable({
   loading,
   onApprove,
   onReject,
+  onRevoke,
+  onMarkPaid,
   statusFilter,
   onStatusFilterChange,
   searchQuery,
@@ -29,19 +33,10 @@ export default function ApprovalsTable({
 }: ApprovalsTableProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const handleApprove = async (id: string) => {
+  const handleAction = async (id: string, action: (id: string) => Promise<void> | void) => {
     setActionLoading(id);
     try {
-      await onApprove(id);
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleReject = async (id: string) => {
-    setActionLoading(id);
-    try {
-      await onReject(id);
+      await action(id);
     } finally {
       setActionLoading(null);
     }
@@ -55,6 +50,8 @@ export default function ApprovalsTable({
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "rejected":
         return "bg-red-500/10 text-red-400 border-red-500/20";
+      case "paid":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       case "revoked":
         return "bg-white/[0.04] text-white/40 border-white/[0.08]";
       default:
@@ -156,6 +153,7 @@ export default function ApprovalsTable({
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
                 <option value="rejected">Rejected</option>
+                <option value="paid">Paid</option>
               </select>
             </div>
           </div>
@@ -263,42 +261,112 @@ export default function ApprovalsTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      {registration.actions?.canApprove && (
+                      {registration.status?.toLowerCase() === "pending" && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAction(registration.registration_id, onApprove);
+                            }}
+                            disabled={actionLoading === registration.registration_id}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Approve"
+                          >
+                            {actionLoading === registration.registration_id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <Check size={14} strokeWidth={2.5} />
+                            )}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAction(registration.registration_id, onReject);
+                            }}
+                            disabled={actionLoading === registration.registration_id}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Reject"
+                          >
+                            {actionLoading === registration.registration_id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <X size={14} strokeWidth={2.5} />
+                            )}
+                          </button>
+                        </>
+                      )}
+                      {registration.status?.toLowerCase() === "approved" && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAction(registration.registration_id, onMarkPaid);
+                            }}
+                            disabled={actionLoading === registration.registration_id}
+                            className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                            title="Mark as Paid"
+                          >
+                            {actionLoading === registration.registration_id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <>
+                                <CreditCard size={13} />
+                                Paid
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAction(registration.registration_id, onRevoke);
+                            }}
+                            disabled={actionLoading === registration.registration_id}
+                            className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                            title="Reconsider"
+                          >
+                            {actionLoading === registration.registration_id ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <>
+                                <RotateCcw size={13} />
+                                Reconsider
+                              </>
+                            )}
+                          </button>
+                        </>
+                      )}
+                      {registration.status?.toLowerCase() === "rejected" && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleApprove(registration.registration_id);
+                            handleAction(registration.registration_id, onRevoke);
                           }}
                           disabled={actionLoading === registration.registration_id}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Approve"
+                          className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
+                          title="Reconsider"
                         >
                           {actionLoading === registration.registration_id ? (
                             <Loader2 size={14} className="animate-spin" />
                           ) : (
-                            <Check size={14} strokeWidth={2.5} />
+                            <>
+                              <RotateCcw size={13} />
+                              Reconsider
+                            </>
                           )}
                         </button>
                       )}
-                      {registration.actions?.canReject && (
+                      {registration.status?.toLowerCase() === "paid" && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleReject(registration.registration_id);
+                            onRowClick?.(registration);
                           }}
-                          disabled={actionLoading === registration.registration_id}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Reject"
+                          className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-colors text-xs font-medium"
+                          title="View Attendee"
                         >
-                          {actionLoading === registration.registration_id ? (
-                            <Loader2 size={14} className="animate-spin" />
-                          ) : (
-                            <X size={14} strokeWidth={2.5} />
-                          )}
+                          <Eye size={13} />
+                          View
                         </button>
-                      )}
-                      {!registration.actions?.canApprove && !registration.actions?.canReject && (
-                        <span className="text-xs text-white/20">—</span>
                       )}
                     </div>
                   </td>

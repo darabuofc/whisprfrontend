@@ -13,7 +13,7 @@ export interface Attendee {
     passType: string;
     attendees: Attendee[];
     date: string;
-    status: "pending" | "approved" | "rejected";
+    status: "pending" | "approved" | "rejected" | "paid";
     paid?: boolean;
   }
   

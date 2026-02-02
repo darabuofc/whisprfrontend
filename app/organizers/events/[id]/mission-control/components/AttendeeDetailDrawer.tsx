@@ -18,6 +18,9 @@ import {
   FileText,
   Clock,
   Hash,
+  RotateCcw,
+  CreditCard,
+  Eye,
 } from "lucide-react";
 import { getRegistrationDetail, RegistrationDetail } from "@/lib/api";
 
@@ -25,23 +28,25 @@ interface AttendeeDetailDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   registrationId: string | null;
+  registrationStatus: string | null;
   onApprove?: (registrationId: string) => void;
   onReject?: (registrationId: string) => void;
-  canApprove?: boolean;
-  canReject?: boolean;
+  onRevoke?: (registrationId: string) => void;
+  onMarkPaid?: (registrationId: string) => void;
 }
 
 export default function AttendeeDetailDrawer({
   isOpen,
   onClose,
   registrationId,
+  registrationStatus,
   onApprove,
   onReject,
-  canApprove = false,
-  canReject = false,
+  onRevoke,
+  onMarkPaid,
 }: AttendeeDetailDrawerProps) {
   const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"approve" | "reject" | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [detail, setDetail] = useState<RegistrationDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,27 +70,18 @@ export default function AttendeeDetailDrawer({
     }
   }, [isOpen, registrationId]);
 
-  const handleApprove = async () => {
-    if (!registrationId || !onApprove) return;
-    setActionLoading("approve");
+  const handleAction = async (actionName: string, callback?: (id: string) => void) => {
+    if (!registrationId || !callback) return;
+    setActionLoading(actionName);
     try {
-      await onApprove(registrationId);
+      await callback(registrationId);
       onClose();
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleReject = async () => {
-    if (!registrationId || !onReject) return;
-    setActionLoading("reject");
-    try {
-      await onReject(registrationId);
-      onClose();
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  const status = (registrationStatus || detail?.registration?.fields?.Status || "").toLowerCase();
 
   const getStatusStyles = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -95,6 +91,8 @@ export default function AttendeeDetailDrawer({
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "rejected":
         return "bg-red-500/10 text-red-400 border-red-500/20";
+      case "paid":
+        return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       case "revoked":
         return "bg-white/[0.04] text-white/40 border-white/[0.08]";
       default:
@@ -377,41 +375,104 @@ export default function AttendeeDetailDrawer({
             </div>
 
             {/* Footer Actions */}
-            {detail && (canApprove || canReject) && (
+            {detail && status === "pending" && (
               <div className="px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
                 <div className="flex items-center gap-3">
-                  {canReject && (
-                    <button
-                      onClick={handleReject}
-                      disabled={actionLoading !== null}
-                      className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                      {actionLoading === "reject" ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <>
-                          <XIcon size={16} />
-                          Reject
-                        </>
-                      )}
-                    </button>
-                  )}
-                  {canApprove && (
-                    <button
-                      onClick={handleApprove}
-                      disabled={actionLoading !== null}
-                      className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-                    >
-                      {actionLoading === "approve" ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <>
-                          <Check size={16} />
-                          Approve
-                        </>
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleAction("reject", onReject)}
+                    disabled={actionLoading !== null}
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {actionLoading === "reject" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <XIcon size={16} />
+                        Reject
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleAction("approve", onApprove)}
+                    disabled={actionLoading !== null}
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {actionLoading === "approve" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        Approve
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+            {detail && status === "approved" && (
+              <div className="px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleAction("revoke", onRevoke)}
+                    disabled={actionLoading !== null}
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {actionLoading === "revoke" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <RotateCcw size={16} />
+                        Reconsider
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleAction("markPaid", onMarkPaid)}
+                    disabled={actionLoading !== null}
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {actionLoading === "markPaid" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <CreditCard size={16} />
+                        Mark as Paid
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+            {detail && status === "rejected" && (
+              <div className="px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => handleAction("revoke", onRevoke)}
+                    disabled={actionLoading !== null}
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {actionLoading === "revoke" ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <>
+                        <RotateCcw size={16} />
+                        Reconsider
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+            {detail && status === "paid" && (
+              <div className="px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+                <div className="flex items-center gap-3">
+                  <button
+                    disabled
+                    className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/50 font-medium cursor-default"
+                  >
+                    <Eye size={16} />
+                    View Attendee
+                  </button>
                 </div>
               </div>
             )}

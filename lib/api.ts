@@ -509,6 +509,31 @@ export async function reconsiderRegistration(registrationId: string): Promise<vo
   await api.post(`/registrations/${registrationId}/reconsider`);
 }
 
+export interface MarkPaidResponse {
+  message: string;
+  registration: any;
+  tickets: {
+    created: number;
+    created_for: string[];
+    existing: number;
+    updated: string[];
+  };
+  notifications: {
+    attempted: number;
+    sent: number;
+    skipped: number;
+  };
+}
+
+export async function markRegistrationPaid(
+  registrationId: string,
+  paymentMethod?: "manual" | "online"
+): Promise<MarkPaidResponse> {
+  const body = paymentMethod ? { payment_method: paymentMethod } : undefined;
+  const res = await api.post(`/registrations/${registrationId}/mark-paid`, body);
+  return res.data;
+}
+
 // ----------------------------------------------------------
 // ORGANIZER EVENT DETAILS API
 // ----------------------------------------------------------
