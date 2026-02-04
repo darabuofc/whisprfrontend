@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode } from "lucide-react";
+import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload } from "lucide-react";
+import { motion } from "framer-motion";
 import type { OrganizerTicket, OrganizerTicketsSummary } from "@/lib/api";
 
 interface TicketsTableProps {
@@ -14,6 +15,7 @@ interface TicketsTableProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   passTypes: { id: string; name: string }[];
+  onImportClick?: () => void;
 }
 
 export default function TicketsTable({
@@ -27,6 +29,7 @@ export default function TicketsTable({
   searchQuery,
   onSearchChange,
   passTypes,
+  onImportClick,
 }: TicketsTableProps) {
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
@@ -84,6 +87,18 @@ export default function TicketsTable({
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* Import Button */}
+              {onImportClick && (
+                <motion.button
+                  onClick={onImportClick}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)] hover:shadow-[0_0_30px_rgba(193,255,114,0.4)] transition-shadow"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Upload size={15} />
+                  <span className="text-sm">Import</span>
+                </motion.button>
+              )}
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
