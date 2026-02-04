@@ -144,6 +144,7 @@ export interface RegistrationItem {
   linked_attendees: string[];
   remaining_slots: number;
   is_complete: boolean;
+  gender_mismatch?: boolean;
 
   event: {
     id: string;
@@ -451,6 +452,7 @@ export interface RegistrationListItem {
   linked_attendees: LinkedAttendee[];
   created_date: string;
   is_complete: boolean;
+  gender_mismatch?: boolean;
   actions: {
     canApprove: boolean;
     canReject: boolean;

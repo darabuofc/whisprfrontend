@@ -50,6 +50,7 @@ export interface RegistrationListItem {
   linked_attendees: LinkedAttendee[];
   created_date: string;
   is_complete: boolean;
+  gender_mismatch?: boolean;
   actions: {
     canApprove: boolean;
     canReject: boolean;
@@ -128,6 +129,7 @@ export default function MissionControlPage() {
   const [registrationsLoading, setRegistrationsLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [genderMismatchOnly, setGenderMismatchOnly] = useState(false);
 
   // Tickets state
   const [tickets, setTickets] = useState<OrganizerTicket[]>([]);
@@ -338,6 +340,10 @@ export default function MissionControlPage() {
   const isToday = eventStatus === "Today";
   const daysLeft = eventData ? calculateDaysLeft(eventData.date) : 0;
 
+  const visibleRegistrations = genderMismatchOnly
+    ? registrations.filter((registration) => registration.gender_mismatch)
+    : registrations;
+
   const displayStats = {
     approved: eventData?.stats.approved ?? 0,
     pending: eventData?.stats.pending ?? 0,
@@ -483,7 +489,7 @@ export default function MissionControlPage() {
 
         {activeTab === "approvals" && (
           <ApprovalsTable
-            registrations={registrations}
+            registrations={visibleRegistrations}
             loading={registrationsLoading}
             onApprove={handleApprove}
             onReject={handleReject}
@@ -493,6 +499,8 @@ export default function MissionControlPage() {
             onStatusFilterChange={setStatusFilter}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            genderMismatchOnly={genderMismatchOnly}
+            onGenderMismatchOnlyChange={setGenderMismatchOnly}
             onRowClick={handleRowClick}
           />
         )}

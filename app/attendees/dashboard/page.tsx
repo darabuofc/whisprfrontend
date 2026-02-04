@@ -22,6 +22,7 @@ import {
   Copy,
   Share2,
   ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -901,6 +902,12 @@ function ApplicationsTab({
                 </div>
 
                 {/* Pass Type & Price */}
+                {r.gender_mismatch && (
+                  <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-300">
+                    <AlertTriangle size={12} />
+                    Gender mismatch
+                  </div>
+                )}
                 {r.pass?.type && (
                   <div className="flex items-center justify-between py-3 border-t border-white/5">
                     <div>

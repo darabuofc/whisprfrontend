@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye } from "lucide-react";
+import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import type { RegistrationListItem, LinkedAttendee } from "../page";
 
@@ -15,6 +15,8 @@ interface ApprovalsTableProps {
   onStatusFilterChange: (status: string) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  genderMismatchOnly: boolean;
+  onGenderMismatchOnlyChange: (value: boolean) => void;
   onRowClick?: (registration: RegistrationListItem) => void;
 }
 
@@ -29,6 +31,8 @@ export default function ApprovalsTable({
   onStatusFilterChange,
   searchQuery,
   onSearchChange,
+  genderMismatchOnly,
+  onGenderMismatchOnlyChange,
   onRowClick,
 }: ApprovalsTableProps) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -156,6 +160,20 @@ export default function ApprovalsTable({
                 <option value="paid">Paid</option>
               </select>
             </div>
+            <button
+              type="button"
+              onClick={() => onGenderMismatchOnlyChange(!genderMismatchOnly)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                genderMismatchOnly
+                  ? "border-amber-500/40 bg-amber-500/15 text-amber-200"
+                  : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:text-white/70"
+              }`}
+              aria-pressed={genderMismatchOnly}
+              title="Filter gender mismatches"
+            >
+              <AlertTriangle size={13} />
+              Gender mismatch
+            </button>
           </div>
         </div>
       </div>
@@ -270,6 +288,12 @@ export default function ApprovalsTable({
                       {registration.is_complete === false && (
                         <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border bg-orange-500/10 text-orange-400 border-orange-500/20">
                           Incomplete
+                        </span>
+                      )}
+                      {registration.gender_mismatch && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-200">
+                          <AlertTriangle size={12} />
+                          Gender mismatch (CNIC vs pass type)
                         </span>
                       )}
                     </div>

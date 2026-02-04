@@ -19,6 +19,7 @@ import {
   ExternalLink,
   LogIn,
   X,
+  AlertTriangle,
 } from "lucide-react";
 import {
   getEventById,
@@ -57,6 +58,7 @@ interface EventDetail {
     join_code?: string;
     pass?: { name: string; max_members: number };
     members?: { name: string }[];
+    gender_mismatch?: boolean;
   };
 }
 
@@ -87,6 +89,7 @@ export default function EventDetailPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const passesRef = useRef<HTMLDivElement | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [genderMismatchWarning, setGenderMismatchWarning] = useState(false);
 
   // Discount code state
   const [discountCode, setDiscountCode] = useState("");
@@ -172,6 +175,7 @@ export default function EventDetailPage() {
         answers.length > 0 ? answers : undefined
       );
       const joinCode = res?.registration?.join_code || null;
+      setGenderMismatchWarning(res?.registration?.gender_mismatch === true);
       setCreatedJoinCode(joinCode);
       setModalStep("success");
       setShowModal(true);
@@ -220,10 +224,15 @@ export default function EventDetailPage() {
     if (!joinCode.trim()) return;
     setRegistering(true);
     try {
-      await joinExistingRegistration(joinCode.trim());
+      const res = await joinExistingRegistration(joinCode.trim());
+      setGenderMismatchWarning(res?.registration?.gender_mismatch === true);
       setModalStep("success");
       setCreatedJoinCode(null);
-      setEvent((prev) => (prev ? { ...prev, user_registered: true } : prev));
+      setEvent((prev) =>
+        prev
+          ? { ...prev, user_registered: true, registration: res?.registration || prev.registration }
+          : prev
+      );
     } catch (err: any) {
       setSuccessMsg(`Join failed: ${err.message}`);
       setShowModal(false);
@@ -716,6 +725,34 @@ export default function EventDetailPage() {
               className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-[#C8FF5A]/30 bg-[#C8FF5A]/10 backdrop-blur-lg px-5 py-2 text-sm text-[#C8FF5A]"
             >
               {successMsg}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Gender Mismatch Warning */}
+        <AnimatePresence>
+          {genderMismatchWarning && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="fixed top-24 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-lg px-4 py-3 text-sm text-amber-200 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.5)]"
+            >
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 text-amber-300">
+                  <AlertTriangle size={16} />
+                </div>
+                <div className="flex-1 text-amber-100/90">
+                  We noticed your CNIC gender doesn’t match the pass type. Your registration is still valid and will be reviewed.
+                </div>
+                <button
+                  onClick={() => setGenderMismatchWarning(false)}
+                  className="text-amber-200/70 hover:text-amber-100 transition-colors"
+                  aria-label="Dismiss warning"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
