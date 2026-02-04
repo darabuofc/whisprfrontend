@@ -49,6 +49,7 @@ export interface RegistrationListItem {
   profile_picture?: string;
   linked_attendees: LinkedAttendee[];
   created_date: string;
+  is_complete: boolean;
   actions: {
     canApprove: boolean;
     canReject: boolean;
@@ -532,6 +533,7 @@ export default function MissionControlPage() {
         onClose={handleDrawerClose}
         registrationId={selectedRegistration?.registration_id || null}
         registrationStatus={selectedRegistration?.status || null}
+        isComplete={selectedRegistration?.is_complete}
         onApprove={handleApprove}
         onReject={handleReject}
         onRevoke={handleRevoke}

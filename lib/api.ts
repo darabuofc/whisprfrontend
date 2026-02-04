@@ -450,6 +450,7 @@ export interface RegistrationListItem {
   profile_picture?: string;
   linked_attendees: LinkedAttendee[];
   created_date: string;
+  is_complete: boolean;
   actions: {
     canApprove: boolean;
     canReject: boolean;
