@@ -232,12 +232,20 @@ export default function ApprovalsTable({
                 </td>
               </tr>
             ) : (
-              registrations.map((registration) => (
-                <tr
-                  key={registration.registration_id}
-                  onClick={() => onRowClick?.(registration)}
-                  className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
-                >
+              registrations.map((registration) => {
+                const normalizedStatus = registration.status?.toLowerCase() ?? "";
+                const isReviewable =
+                  (normalizedStatus === "pending" ||
+                    normalizedStatus === "incomplete" ||
+                    registration.is_complete === false) &&
+                  !["approved", "rejected", "paid"].includes(normalizedStatus);
+
+                return (
+                  <tr
+                    key={registration.registration_id}
+                    onClick={() => onRowClick?.(registration)}
+                    className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                  >
                   <td className="px-6 py-4">
                     <span className="text-sm font-mono text-white/70 tabular-nums">
                       {registration.registration_id}
@@ -285,11 +293,6 @@ export default function ApprovalsTable({
                       >
                         {registration.status}
                       </span>
-                      {registration.is_complete === false && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border bg-orange-500/10 text-orange-400 border-orange-500/20">
-                          Incomplete
-                        </span>
-                      )}
                       {registration.gender_mismatch && (
                         <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-200">
                           <AlertTriangle size={12} />
@@ -300,7 +303,7 @@ export default function ApprovalsTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      {registration.status?.toLowerCase() === "pending" && (
+                      {isReviewable && (
                         <>
                           <button
                             onClick={(e) => {
@@ -334,7 +337,7 @@ export default function ApprovalsTable({
                           </button>
                         </>
                       )}
-                      {registration.status?.toLowerCase() === "approved" && (
+                      {normalizedStatus === "approved" && (
                         <>
                           <button
                             onClick={(e) => {
@@ -374,7 +377,7 @@ export default function ApprovalsTable({
                           </button>
                         </>
                       )}
-                      {registration.status?.toLowerCase() === "rejected" && (
+                      {normalizedStatus === "rejected" && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -394,7 +397,7 @@ export default function ApprovalsTable({
                           )}
                         </button>
                       )}
-                      {registration.status?.toLowerCase() === "paid" && (
+                      {normalizedStatus === "paid" && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -410,7 +413,8 @@ export default function ApprovalsTable({
                     </div>
                   </td>
                 </tr>
-              ))
+                );
+              })
             )}
           </tbody>
         </table>

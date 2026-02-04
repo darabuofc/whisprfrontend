@@ -84,6 +84,9 @@ export default function AttendeeDetailDrawer({
   };
 
   const status = (registrationStatus || detail?.registration?.fields?.Status || "").toLowerCase();
+  const isReviewable =
+    (status === "pending" || status === "incomplete" || isComplete === false) &&
+    !["approved", "rejected", "paid"].includes(status);
 
   const getStatusStyles = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -200,11 +203,6 @@ export default function AttendeeDetailDrawer({
                           >
                             {detail.registration?.fields?.Status || "Unknown"}
                           </span>
-                          {isComplete === false && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border bg-orange-500/10 text-orange-400 border-orange-500/20">
-                              Incomplete
-                            </span>
-                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-between">
@@ -384,7 +382,7 @@ export default function AttendeeDetailDrawer({
             </div>
 
             {/* Footer Actions */}
-            {detail && status === "pending" && (
+            {detail && isReviewable && (
               <div className="px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
                 <div className="flex items-center gap-3">
                   <button
