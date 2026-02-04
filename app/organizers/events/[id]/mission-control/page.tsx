@@ -11,6 +11,7 @@ import ActivityFeed from "./components/ActivityFeed";
 import ApprovalsTable from "./components/ApprovalsTable";
 import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
 import SettingsTab from "./components/SettingsTab";
+import TicketsTable from "./components/TicketsTable";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -18,11 +19,14 @@ import {
   revokeRegistration,
   markRegistrationPaid,
   getOrganizerEventDetails,
+  getOrganizerEventTickets,
   type OrganizerEventDetails,
+  type OrganizerTicket,
+  type OrganizerTicketsSummary,
 } from "@/lib/api";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
-type TabType = "overview" | "approvals" | "attendees" | "ops" | "settings";
+type TabType = "overview" | "approvals" | "tickets" | "ops" | "settings";
 
 export interface LinkedAttendee {
   id: string;
@@ -122,6 +126,19 @@ export default function MissionControlPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Tickets state
+  const [tickets, setTickets] = useState<OrganizerTicket[]>([]);
+  const [ticketsSummary, setTicketsSummary] = useState<OrganizerTicketsSummary>({
+    total: 0,
+    by_status: {},
+    by_pass_type: {},
+  });
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [ticketStatusFilter, setTicketStatusFilter] = useState<string>("");
+  const [ticketPassTypeFilter, setTicketPassTypeFilter] = useState<string>("");
+  const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
+  const [passTypes, setPassTypes] = useState<{ id: string; name: string }[]>([]);
+
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<RegistrationListItem | null>(null);
@@ -187,6 +204,41 @@ export default function MissionControlPage() {
       console.error("Failed to fetch registrations:", error);
     } finally {
       setRegistrationsLoading(false);
+    }
+  };
+
+  // Fetch tickets when tickets tab is active
+  useEffect(() => {
+    if (activeTab === "tickets" && eventId && authorized) {
+      fetchTickets();
+    }
+  }, [activeTab, eventId, authorized, ticketStatusFilter, ticketPassTypeFilter, ticketSearchQuery]);
+
+  const fetchTickets = async () => {
+    setTicketsLoading(true);
+    try {
+      const data = await getOrganizerEventTickets(eventId, {
+        status: ticketStatusFilter || undefined,
+        pass_type: ticketPassTypeFilter || undefined,
+        search: ticketSearchQuery || undefined,
+      });
+      setTickets(data.tickets);
+      setTicketsSummary(data.summary);
+
+      // Extract unique pass types for the filter dropdown
+      const uniquePassTypes = new Map<string, string>();
+      data.tickets.forEach((ticket) => {
+        if (ticket.pass_type?.id && ticket.pass_type?.name) {
+          uniquePassTypes.set(ticket.pass_type.id, ticket.pass_type.name);
+        }
+      });
+      setPassTypes(
+        Array.from(uniquePassTypes.entries()).map(([id, name]) => ({ id, name }))
+      );
+    } catch (error) {
+      console.error("Failed to fetch tickets:", error);
+    } finally {
+      setTicketsLoading(false);
     }
   };
 
@@ -423,15 +475,19 @@ export default function MissionControlPage() {
           />
         )}
 
-        {activeTab === "attendees" && (
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12 text-center">
-            <h2 className="text-xl font-medium text-white/90 mb-2">
-              Attendees
-            </h2>
-            <p className="text-white/40 text-sm">
-              Attendee management coming soon
-            </p>
-          </div>
+        {activeTab === "tickets" && (
+          <TicketsTable
+            tickets={tickets}
+            summary={ticketsSummary}
+            loading={ticketsLoading}
+            statusFilter={ticketStatusFilter}
+            onStatusFilterChange={setTicketStatusFilter}
+            passTypeFilter={ticketPassTypeFilter}
+            onPassTypeFilterChange={setTicketPassTypeFilter}
+            searchQuery={ticketSearchQuery}
+            onSearchChange={setTicketSearchQuery}
+            passTypes={passTypes}
+          />
         )}
 
         {activeTab === "ops" && (

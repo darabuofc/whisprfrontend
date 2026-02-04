@@ -756,3 +756,68 @@ export async function getEventRegistrationQuestions(
   const res = await api.get(`/events/${eventId}/registration-questions`);
   return res.data.questions ?? [];
 }
+
+// ----------------------------------------------------------
+// ORGANIZER TICKETS API
+// ----------------------------------------------------------
+
+export interface OrganizerTicketAttendee {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  profile_picture?: string;
+}
+
+export interface OrganizerTicketPassType {
+  id: string;
+  name: string;
+  type: string;
+  price: number;
+}
+
+export interface OrganizerTicketRegistration {
+  id: string;
+  registration_id: string;
+  status: string;
+}
+
+export interface OrganizerTicket {
+  id: string;
+  status: string;
+  purchase_date: string;
+  ticket_url?: string;
+  qr_code_url?: string;
+  attendee: OrganizerTicketAttendee;
+  pass_type: OrganizerTicketPassType;
+  registration: OrganizerTicketRegistration;
+}
+
+export interface OrganizerTicketsSummary {
+  total: number;
+  by_status: Record<string, number>;
+  by_pass_type: Record<string, number>;
+}
+
+export interface OrganizerTicketsResponse {
+  event_id: string;
+  event_name: string;
+  tickets: OrganizerTicket[];
+  summary: OrganizerTicketsSummary;
+}
+
+export async function getOrganizerEventTickets(
+  eventId: string,
+  params?: { status?: string; pass_type?: string; search?: string }
+): Promise<OrganizerTicketsResponse> {
+  const queryParams = new URLSearchParams();
+  if (params?.status) queryParams.append("status", params.status);
+  if (params?.pass_type) queryParams.append("pass_type", params.pass_type);
+  if (params?.search) queryParams.append("search", params.search);
+
+  const queryString = queryParams.toString();
+  const url = `/organizers/events/${eventId}/tickets${queryString ? `?${queryString}` : ""}`;
+
+  const res = await api.get(url);
+  return res.data;
+}
