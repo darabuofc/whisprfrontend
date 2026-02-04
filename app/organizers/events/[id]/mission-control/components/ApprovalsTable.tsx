@@ -259,13 +259,20 @@ export default function ApprovalsTable({
                     {renderLinkedAttendees(registration.linked_attendees)}
                   </td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
-                        registration.status
-                      )}`}
-                    >
-                      {registration.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
+                          registration.status
+                        )}`}
+                      >
+                        {registration.status}
+                      </span>
+                      {registration.is_complete === false && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border bg-orange-500/10 text-orange-400 border-orange-500/20">
+                          Incomplete
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">

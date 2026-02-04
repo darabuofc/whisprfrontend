@@ -29,6 +29,7 @@ interface AttendeeDetailDrawerProps {
   onClose: () => void;
   registrationId: string | null;
   registrationStatus: string | null;
+  isComplete?: boolean;
   onApprove?: (registrationId: string) => void;
   onReject?: (registrationId: string) => void;
   onRevoke?: (registrationId: string) => void;
@@ -40,6 +41,7 @@ export default function AttendeeDetailDrawer({
   onClose,
   registrationId,
   registrationStatus,
+  isComplete,
   onApprove,
   onReject,
   onRevoke,
@@ -190,13 +192,20 @@ export default function AttendeeDetailDrawer({
                           <FileText size={14} />
                           <span className="text-sm">Status</span>
                         </div>
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
-                            detail.registration?.fields?.Status
-                          )}`}
-                        >
-                          {detail.registration?.fields?.Status || "Unknown"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
+                              detail.registration?.fields?.Status
+                            )}`}
+                          >
+                            {detail.registration?.fields?.Status || "Unknown"}
+                          </span>
+                          {isComplete === false && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border bg-orange-500/10 text-orange-400 border-orange-500/20">
+                              Incomplete
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-white/50">
