@@ -12,6 +12,7 @@ import ApprovalsTable from "./components/ApprovalsTable";
 import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
 import SettingsTab from "./components/SettingsTab";
 import TicketsTable from "./components/TicketsTable";
+import ImportAttendeesModal from "./components/ImportAttendeesModal";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -20,6 +21,7 @@ import {
   markRegistrationPaid,
   getOrganizerEventDetails,
   getOrganizerEventTickets,
+  getOrganizer,
   type OrganizerEventDetails,
   type OrganizerTicket,
   type OrganizerTicketsSummary,
@@ -139,6 +141,10 @@ export default function MissionControlPage() {
   const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
   const [passTypes, setPassTypes] = useState<{ id: string; name: string }[]>([]);
 
+  // Import modal state
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [organizerId, setOrganizerId] = useState<string>("");
+
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<RegistrationListItem | null>(null);
@@ -162,6 +168,21 @@ export default function MissionControlPage() {
     setAuthorized(true);
     setLoading(false);
   }, [router]);
+
+  // Fetch organizer info for import functionality
+  useEffect(() => {
+    if (authorized) {
+      getOrganizer()
+        .then((org) => {
+          if (org?.id) {
+            setOrganizerId(org.id);
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch organizer:", err);
+        });
+    }
+  }, [authorized]);
 
   // Fetch event details
   const fetchEventDetails = useCallback(async () => {
@@ -487,6 +508,7 @@ export default function MissionControlPage() {
             searchQuery={ticketSearchQuery}
             onSearchChange={setTicketSearchQuery}
             passTypes={passTypes}
+            onImportClick={() => setImportModalOpen(true)}
           />
         )}
 
@@ -514,6 +536,19 @@ export default function MissionControlPage() {
         onReject={handleReject}
         onRevoke={handleRevoke}
         onMarkPaid={handleMarkPaid}
+      />
+
+      {/* Import Attendees Modal */}
+      <ImportAttendeesModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        organizerId={organizerId}
+        eventId={eventId}
+        passTypes={passTypes}
+        onImportComplete={() => {
+          fetchTickets();
+          fetchEventDetails();
+        }}
       />
     </div>
   );

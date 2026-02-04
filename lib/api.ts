@@ -821,3 +821,63 @@ export async function getOrganizerEventTickets(
   const res = await api.get(url);
   return res.data;
 }
+
+// ----------------------------------------------------------
+// ATTENDEE IMPORT API
+// ----------------------------------------------------------
+
+export interface ImportedTicket {
+  row: number;
+  name: string;
+  attendee_id: string;
+  ticket_id: string;
+  ticket_url: string;
+  qr_url: string;
+  claim_token: string;
+}
+
+export interface ImportDuplicate {
+  row: number;
+  name: string;
+  phone: string;
+  reason: string;
+}
+
+export interface ImportError {
+  row: number;
+  name?: string;
+  reason: string;
+}
+
+export interface ImportAttendeesResponse {
+  message: string;
+  summary: {
+    total_rows: number;
+    imported: number;
+    duplicates_count: number;
+    errors_count: number;
+  };
+  tickets: ImportedTicket[];
+  duplicates: ImportDuplicate[];
+  errors: ImportError[];
+}
+
+export async function importAttendees(
+  organizerId: string,
+  eventId: string,
+  file: File,
+  passTypeId?: string
+): Promise<ImportAttendeesResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (passTypeId) {
+    formData.append("pass_type_id", passTypeId);
+  }
+
+  const res = await api.post(
+    `/organizers/${organizerId}/events/${eventId}/attendees/import`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data;
+}
