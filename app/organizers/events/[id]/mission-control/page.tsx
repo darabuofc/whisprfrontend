@@ -26,6 +26,7 @@ import {
   type OrganizerTicket,
   type OrganizerTicketsSummary,
 } from "@/lib/api";
+import { toast } from "sonner";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
 type TabType = "overview" | "approvals" | "tickets" | "ops" | "settings";
@@ -187,21 +188,27 @@ export default function MissionControlPage() {
     }
   }, [authorized]);
 
-  // Fetch event details
-  const fetchEventDetails = useCallback(async () => {
+  // Fetch event details (silent=true skips loading skeleton, used after actions)
+  const fetchEventDetails = useCallback(async (silent = false) => {
     if (!eventId || !authorized) return;
 
-    setEventLoading(true);
-    setEventError(null);
+    if (!silent) {
+      setEventLoading(true);
+      setEventError(null);
+    }
 
     try {
       const data = await getOrganizerEventDetails(eventId);
       setEventData(data);
     } catch (error: any) {
-      console.error("Failed to fetch event details:", error);
-      setEventError(error?.response?.data?.message || "Failed to load event details");
+      if (!silent) {
+        console.error("Failed to fetch event details:", error);
+        setEventError(error?.response?.data?.message || "Failed to load event details");
+      }
     } finally {
-      setEventLoading(false);
+      if (!silent) {
+        setEventLoading(false);
+      }
     }
   }, [eventId, authorized]);
 
@@ -266,45 +273,74 @@ export default function MissionControlPage() {
     }
   };
 
+  // Optimistic update helper: update a registration's status locally
+  const optimisticStatusUpdate = (registrationId: string, newStatus: string) => {
+    setRegistrations((prev) =>
+      prev.map((r) =>
+        r.registration_id === registrationId ? { ...r, status: newStatus } : r
+      )
+    );
+    // Also update the selected registration if the drawer is showing it
+    setSelectedRegistration((prev) =>
+      prev && prev.registration_id === registrationId
+        ? { ...prev, status: newStatus }
+        : prev
+    );
+  };
+
   const handleApprove = async (registrationId: string) => {
+    const prev = registrations.find((r) => r.registration_id === registrationId);
+    optimisticStatusUpdate(registrationId, "approved");
     try {
       await approveRegistration(registrationId);
-      fetchRegistrations();
-      // Refresh event details to update stats
-      fetchEventDetails();
+      toast.success("Registration approved");
+      fetchEventDetails(true);
     } catch (error) {
       console.error("Failed to approve registration:", error);
+      if (prev) optimisticStatusUpdate(registrationId, prev.status);
+      toast.error("Failed to approve registration");
     }
   };
 
   const handleReject = async (registrationId: string) => {
+    const prev = registrations.find((r) => r.registration_id === registrationId);
+    optimisticStatusUpdate(registrationId, "rejected");
     try {
       await rejectRegistration(registrationId);
-      fetchRegistrations();
-      // Refresh event details to update stats
-      fetchEventDetails();
+      toast.success("Registration rejected");
+      fetchEventDetails(true);
     } catch (error) {
       console.error("Failed to reject registration:", error);
+      if (prev) optimisticStatusUpdate(registrationId, prev.status);
+      toast.error("Failed to reject registration");
     }
   };
 
   const handleRevoke = async (registrationId: string) => {
+    const prev = registrations.find((r) => r.registration_id === registrationId);
+    optimisticStatusUpdate(registrationId, "pending");
     try {
       await revokeRegistration(registrationId);
-      fetchRegistrations();
-      fetchEventDetails();
+      toast.success("Registration revoked — moved back to pending");
+      fetchEventDetails(true);
     } catch (error) {
       console.error("Failed to revoke registration:", error);
+      if (prev) optimisticStatusUpdate(registrationId, prev.status);
+      toast.error("Failed to revoke registration");
     }
   };
 
   const handleMarkPaid = async (registrationId: string) => {
+    const prev = registrations.find((r) => r.registration_id === registrationId);
+    optimisticStatusUpdate(registrationId, "paid");
     try {
       await markRegistrationPaid(registrationId);
-      fetchRegistrations();
-      fetchEventDetails();
+      toast.success("Registration marked as paid");
+      fetchEventDetails(true);
     } catch (error) {
       console.error("Failed to mark registration as paid:", error);
+      if (prev) optimisticStatusUpdate(registrationId, prev.status);
+      toast.error("Failed to mark as paid");
     }
   };
 
@@ -431,7 +467,7 @@ export default function MissionControlPage() {
           <div className="max-w-6xl mx-auto px-6 py-8">
             <div className="text-red-400 text-sm">{eventError}</div>
             <button
-              onClick={fetchEventDetails}
+              onClick={() => fetchEventDetails()}
               className="mt-2 text-sm text-white/60 hover:text-white transition-colors"
             >
               Try again
