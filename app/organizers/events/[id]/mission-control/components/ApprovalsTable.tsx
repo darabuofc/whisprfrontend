@@ -1,7 +1,7 @@
 "use client";
 
-import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle, MoreHorizontal } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import type { RegistrationListItem, LinkedAttendee } from "../page";
 
 interface ApprovalsTableProps {
@@ -20,6 +20,146 @@ interface ApprovalsTableProps {
   onRowClick?: (registration: RegistrationListItem) => void;
 }
 
+interface ActionLoadingState {
+  id: string;
+  action: string;
+}
+
+function ActionMenu({
+  registration,
+  actionLoading,
+  onAction,
+  onMarkPaid,
+  onRevoke,
+  onRowClick,
+}: {
+  registration: RegistrationListItem;
+  actionLoading: ActionLoadingState | null;
+  onAction: (id: string, actionName: string, callback: (id: string) => Promise<void> | void) => void;
+  onMarkPaid: (id: string) => void;
+  onRevoke: (id: string) => void;
+  onRowClick?: (registration: RegistrationListItem) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const normalizedStatus = registration.status?.toLowerCase() ?? "";
+  const isLoading = actionLoading?.id === registration.registration_id;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const menuItems: {
+    label: string;
+    icon: React.ReactNode;
+    action: () => void;
+    className: string;
+  }[] = [];
+
+  if (normalizedStatus === "approved") {
+    menuItems.push({
+      label: "Mark as Paid",
+      icon: isLoading && actionLoading?.action === "markPaid" ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <CreditCard size={14} />
+      ),
+      action: () => {
+        onAction(registration.registration_id, "markPaid", onMarkPaid);
+        setOpen(false);
+      },
+      className: "text-blue-400 hover:bg-blue-500/10",
+    });
+    menuItems.push({
+      label: "Reconsider",
+      icon: isLoading && actionLoading?.action === "revoke" ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <RotateCcw size={14} />
+      ),
+      action: () => {
+        onAction(registration.registration_id, "revoke", onRevoke);
+        setOpen(false);
+      },
+      className: "text-amber-400 hover:bg-amber-500/10",
+    });
+  }
+
+  if (normalizedStatus === "rejected") {
+    menuItems.push({
+      label: "Reconsider",
+      icon: isLoading && actionLoading?.action === "revoke" ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <RotateCcw size={14} />
+      ),
+      action: () => {
+        onAction(registration.registration_id, "revoke", onRevoke);
+        setOpen(false);
+      },
+      className: "text-amber-400 hover:bg-amber-500/10",
+    });
+  }
+
+  if (normalizedStatus === "paid") {
+    menuItems.push({
+      label: "View Details",
+      icon: <Eye size={14} />,
+      action: () => {
+        onRowClick?.(registration);
+        setOpen(false);
+      },
+      className: "text-white/60 hover:bg-white/[0.06]",
+    });
+  }
+
+  if (menuItems.length === 0) return null;
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
+        disabled={isLoading}
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/70 transition-colors disabled:opacity-50"
+      >
+        {isLoading ? (
+          <Loader2 size={14} className="animate-spin" />
+        ) : (
+          <MoreHorizontal size={15} />
+        )}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-30 min-w-[160px] py-1 bg-[#141414] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
+          {menuItems.map((item) => (
+            <button
+              key={item.label}
+              onClick={(e) => {
+                e.stopPropagation();
+                item.action();
+              }}
+              disabled={isLoading}
+              className={`w-full px-3 py-2 flex items-center gap-2.5 text-sm transition-colors disabled:opacity-50 ${item.className}`}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ApprovalsTable({
   registrations,
   loading,
@@ -35,10 +175,10 @@ export default function ApprovalsTable({
   onGenderMismatchOnlyChange,
   onRowClick,
 }: ApprovalsTableProps) {
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<ActionLoadingState | null>(null);
 
-  const handleAction = async (id: string, action: (id: string) => Promise<void> | void) => {
-    setActionLoading(id);
+  const handleAction = async (id: string, actionName: string, action: (id: string) => Promise<void> | void) => {
+    setActionLoading({ id, action: actionName });
     try {
       await action(id);
     } finally {
@@ -302,19 +442,19 @@ export default function ApprovalsTable({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-end gap-1.5">
                       {isReviewable && (
                         <>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleAction(registration.registration_id, onApprove);
+                              handleAction(registration.registration_id, "approve", onApprove);
                             }}
-                            disabled={actionLoading === registration.registration_id}
+                            disabled={actionLoading?.id === registration.registration_id}
                             className="w-8 h-8 flex items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Approve"
                           >
-                            {actionLoading === registration.registration_id ? (
+                            {actionLoading?.id === registration.registration_id && actionLoading.action === "approve" ? (
                               <Loader2 size={14} className="animate-spin" />
                             ) : (
                               <Check size={14} strokeWidth={2.5} />
@@ -323,13 +463,13 @@ export default function ApprovalsTable({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleAction(registration.registration_id, onReject);
+                              handleAction(registration.registration_id, "reject", onReject);
                             }}
-                            disabled={actionLoading === registration.registration_id}
+                            disabled={actionLoading?.id === registration.registration_id}
                             className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Reject"
                           >
-                            {actionLoading === registration.registration_id ? (
+                            {actionLoading?.id === registration.registration_id && actionLoading.action === "reject" ? (
                               <Loader2 size={14} className="animate-spin" />
                             ) : (
                               <X size={14} strokeWidth={2.5} />
@@ -337,78 +477,15 @@ export default function ApprovalsTable({
                           </button>
                         </>
                       )}
-                      {normalizedStatus === "approved" && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAction(registration.registration_id, onMarkPaid);
-                            }}
-                            disabled={actionLoading === registration.registration_id}
-                            className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-                            title="Mark as Paid"
-                          >
-                            {actionLoading === registration.registration_id ? (
-                              <Loader2 size={14} className="animate-spin" />
-                            ) : (
-                              <>
-                                <CreditCard size={13} />
-                                Paid
-                              </>
-                            )}
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAction(registration.registration_id, onRevoke);
-                            }}
-                            disabled={actionLoading === registration.registration_id}
-                            className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-                            title="Reconsider"
-                          >
-                            {actionLoading === registration.registration_id ? (
-                              <Loader2 size={14} className="animate-spin" />
-                            ) : (
-                              <>
-                                <RotateCcw size={13} />
-                                Reconsider
-                              </>
-                            )}
-                          </button>
-                        </>
-                      )}
-                      {normalizedStatus === "rejected" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAction(registration.registration_id, onRevoke);
-                          }}
-                          disabled={actionLoading === registration.registration_id}
-                          className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white hover:border-amber-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-                          title="Reconsider"
-                        >
-                          {actionLoading === registration.registration_id ? (
-                            <Loader2 size={14} className="animate-spin" />
-                          ) : (
-                            <>
-                              <RotateCcw size={13} />
-                              Reconsider
-                            </>
-                          )}
-                        </button>
-                      )}
-                      {normalizedStatus === "paid" && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onRowClick?.(registration);
-                          }}
-                          className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-colors text-xs font-medium"
-                          title="View Attendee"
-                        >
-                          <Eye size={13} />
-                          View
-                        </button>
+                      {(normalizedStatus === "approved" || normalizedStatus === "rejected" || normalizedStatus === "paid") && (
+                        <ActionMenu
+                          registration={registration}
+                          actionLoading={actionLoading}
+                          onAction={handleAction}
+                          onMarkPaid={onMarkPaid}
+                          onRevoke={onRevoke}
+                          onRowClick={onRowClick}
+                        />
                       )}
                     </div>
                   </td>
