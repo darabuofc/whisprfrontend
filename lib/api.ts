@@ -367,6 +367,10 @@ export async function joinExistingRegistration(joinCode: string) {
   return (await api.post(`/registrations/join`, { join_code: joinCode })).data;
 }
 
+export async function cancelRegistration(registrationId: string): Promise<void> {
+  await api.post(`/registrations/${registrationId}/cancel`);
+}
+
 // ----------------------------------------------------------
 // ORGANIZER API
 // ----------------------------------------------------------
