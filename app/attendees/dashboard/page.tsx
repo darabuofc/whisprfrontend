@@ -23,7 +23,9 @@ import {
   Share2,
   ExternalLink,
   AlertTriangle,
+  XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { generateEventSlug } from "@/lib/utils";
@@ -33,6 +35,7 @@ import {
   getAttendeeEvents,
   getRegistrations,
   getTickets,
+  cancelRegistration,
   Profile,
   ExploreEvent,
   RegistrationItem,
@@ -146,6 +149,18 @@ function DashboardContent() {
     fetchData();
   }, [activeTab]);
 
+  const handleCancelRegistration = async (registrationId: string) => {
+    const prev = registrations;
+    setRegistrations(registrations.filter(r => r.registration_airtable_id !== registrationId));
+    try {
+      await cancelRegistration(registrationId);
+      toast.success("Registration cancelled successfully");
+    } catch (err: any) {
+      setRegistrations(prev);
+      toast.error(err.message || "Failed to cancel registration");
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#000000]">
@@ -251,7 +266,7 @@ function DashboardContent() {
                   router.push(`/attendees/dashboard?tab=applications&highlight=${regId}`);
                 }} />
               ) : activeTab === "applications" ? (
-                <ApplicationsTab registrations={registrations} highlightedId={highlightedAppId} />
+                <ApplicationsTab registrations={registrations} highlightedId={highlightedAppId} onCancel={handleCancelRegistration} />
               ) : (
                 <TicketsTab tickets={tickets} />
               )}
@@ -740,11 +755,15 @@ function ExploreTab({
 function ApplicationsTab({
   registrations,
   highlightedId,
+  onCancel,
 }: {
   registrations: RegistrationItem[];
   highlightedId?: string | null;
+  onCancel: (registrationId: string) => Promise<void>;
 }) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const highlightedRef = useRef<HTMLDivElement>(null);
 
   // Scroll to highlighted application
@@ -762,6 +781,22 @@ function ApplicationsTab({
     } catch {
       // fallback
     }
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelConfirmId) return;
+    setCancelling(true);
+    try {
+      await onCancel(cancelConfirmId);
+    } finally {
+      setCancelling(false);
+      setCancelConfirmId(null);
+    }
+  };
+
+  const canCancel = (status: string) => {
+    const blocked = ["paid", "rejected", "cancelled"];
+    return !blocked.includes(status.toLowerCase());
   };
 
   const handleShare = async (r: RegistrationItem) => {
@@ -960,11 +995,72 @@ function ApplicationsTab({
                   <Share2 size={14} />
                   Share Registration
                 </button>
+
+                {/* Cancel Button */}
+                {canCancel(r.status) && (
+                  <button
+                    onClick={() => setCancelConfirmId(r.registration_airtable_id)}
+                    className="mt-2 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
+                  >
+                    <XCircle size={14} />
+                    Cancel Registration
+                  </button>
+                )}
               </div>
             </motion.div>
           );
         })}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      <AnimatePresence>
+        {cancelConfirmId && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+              onClick={() => !cancelling && setCancelConfirmId(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0a0a0a] p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                    <XCircle size={20} className="text-red-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Cancel Registration</h3>
+                </div>
+                <p className="text-sm text-neutral-400 mb-6">
+                  Are you sure you want to cancel this registration? You can re-register afterwards if you'd like.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setCancelConfirmId(null)}
+                    disabled={cancelling}
+                    className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all disabled:opacity-50"
+                  >
+                    Keep It
+                  </button>
+                  <button
+                    onClick={handleConfirmCancel}
+                    disabled={cancelling}
+                    className="flex-1 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-sm font-medium text-red-400 transition-all disabled:opacity-50"
+                  >
+                    {cancelling ? "Cancelling..." : "Yes, Cancel"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
