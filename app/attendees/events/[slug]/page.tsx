@@ -119,7 +119,13 @@ export default function EventDetailPage() {
         const data = await getEventById(eventId);
         setEvent(data);
         const passData = await getEventPasses(eventId);
-        setPasses(passData);
+        // Hide guest passes from attendee ticket purchasing view
+        const visiblePasses = passData.filter(
+          (p: Pass) =>
+            !p.type?.toLowerCase().includes("guest") &&
+            !p.name?.toLowerCase().includes("guest")
+        );
+        setPasses(visiblePasses);
         // Fetch registration questions
         try {
           const questions = await getEventRegistrationQuestions(eventId);
