@@ -9,7 +9,7 @@ import MaintenancePage from "@/components/MaintenancePage";
 // maintenance page on ALL routes, set to false
 // to restore normal operation.
 // ──────────────────────────────────────────────
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 export const metadata: Metadata = {
   title: "Whispr",
