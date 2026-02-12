@@ -4,13 +4,19 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  sendWhatsappOtp,
-  verifyWhatsappOtp,
   saveBasics,
   saveProfile,
   getOnboardingStatus,
+  verifyFirebasePhone,
 } from "@/lib/api";
 import { getAndClearPostAuthRedirect } from "@/lib/oauth";
+import {
+  setupRecaptcha,
+  sendFirebaseOtp,
+  verifyFirebaseOtp,
+  clearRecaptcha,
+} from "@/lib/firebase";
+import type { ConfirmationResult } from "firebase/auth";
 
 // Step icons as SVG components for crisp rendering
 const PhoneIcon = () => (
@@ -259,6 +265,8 @@ export default function AttendeesOnboarding() {
   const [showConfetti, setShowConfetti] = useState(false);
   const inputsRef = useRef<(HTMLInputElement | null)[]>(new Array(6).fill(null));
 
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
   const [profile, setProfile] = useState({
     whatsapp: "",
     whatsappVerified: false,
@@ -281,27 +289,43 @@ export default function AttendeesOnboarding() {
     { icon: CheckIcon, title: "You're all set", subtitle: "Welcome to the Whispr experience" },
   ];
 
+  // Initialize reCAPTCHA on mount
+  useEffect(() => {
+    return () => {
+      clearRecaptcha();
+    };
+  }, []);
+
   // Handlers
   const handleSendOtp = async () => {
     try {
       setLoading(true);
-      await sendWhatsappOtp(profile.whatsapp);
+      const verifier = setupRecaptcha("recaptcha-container");
+      const result = await sendFirebaseOtp(profile.whatsapp);
+      setConfirmationResult(result);
       setOtpSent(true);
     } catch (err: any) {
-      alert(err.message);
+      clearRecaptcha();
+      alert(err.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
+    if (!confirmationResult) {
+      alert("Please request an OTP first.");
+      return;
+    }
     try {
       setLoading(true);
-      await verifyWhatsappOtp(profile.whatsapp, otp);
+      const firebaseIdToken = await verifyFirebaseOtp(confirmationResult, otp);
+      // Send the Firebase ID token to our backend to verify and link the phone number
+      await verifyFirebasePhone(profile.whatsapp, firebaseIdToken);
       setProfile({ ...profile, whatsappVerified: true });
       setStep(2);
     } catch (err: any) {
-      alert(err.message);
+      alert(err.message || "Invalid OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -431,6 +455,9 @@ export default function AttendeesOnboarding() {
 
       {/* Noise texture overlay */}
       <div className="fixed inset-0 bg-[url('/noise.png')] bg-[length:200px] opacity-[0.03] pointer-events-none" />
+
+      {/* Invisible reCAPTCHA container for Firebase phone auth */}
+      <div id="recaptcha-container" />
 
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
