@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
 import {
-  sendAttendeeForgotPasswordOtp,
   resetAttendeePassword,
-  sendOrganizerForgotPasswordOtp,
   resetOrganizerPassword,
 } from "@/lib/api";
+import {
+  setupRecaptcha,
+  sendFirebaseOtp,
+  verifyFirebaseOtp,
+  clearRecaptcha,
+} from "@/lib/firebase";
+import type { ConfirmationResult } from "firebase/auth";
 
-type Step = "phone" | "reset" | "success";
+type Step = "phone" | "verify" | "reset" | "success";
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -32,8 +37,17 @@ export default function ForgotPasswordModal({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [firebaseVerified, setFirebaseVerified] = useState(false);
 
   const accent = mode === "attendee" ? "#c1ff72" : "#b472ff";
+
+  // Cleanup reCAPTCHA on unmount
+  useEffect(() => {
+    return () => {
+      clearRecaptcha();
+    };
+  }, []);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,14 +57,31 @@ export default function ForgotPasswordModal({
     setError("");
 
     try {
-      const sendOtp =
-        mode === "attendee"
-          ? sendAttendeeForgotPasswordOtp
-          : sendOrganizerForgotPasswordOtp;
-      await sendOtp(whatsapp.trim());
+      const verifier = setupRecaptcha("forgot-recaptcha-container");
+      const result = await sendFirebaseOtp(whatsapp.trim());
+      setConfirmationResult(result);
+      setStep("verify");
+    } catch (err: any) {
+      clearRecaptcha();
+      setError(err?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading || !confirmationResult) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      await verifyFirebaseOtp(confirmationResult, otp.trim());
+      setFirebaseVerified(true);
       setStep("reset");
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Failed to send OTP");
+      setError(err?.message || "Invalid OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -92,6 +123,9 @@ export default function ForgotPasswordModal({
     setNewPassword("");
     setConfirmPassword("");
     setError("");
+    setConfirmationResult(null);
+    setFirebaseVerified(false);
+    clearRecaptcha();
     onClose();
   };
 
@@ -121,13 +155,16 @@ export default function ForgotPasswordModal({
               <X size={20} />
             </button>
 
+            {/* Invisible reCAPTCHA container */}
+            <div id="forgot-recaptcha-container" />
+
             {step === "phone" && (
               <>
                 <h2 className="text-xl font-semibold text-white mb-2">
                   Forgot Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
-                  Enter your WhatsApp number to receive an OTP
+                  Enter your phone number to receive an SMS verification code
                 </p>
 
                 <form onSubmit={handleSendOtp} className="space-y-4">
@@ -136,7 +173,7 @@ export default function ForgotPasswordModal({
                       htmlFor="whatsapp"
                       className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
                     >
-                      WhatsApp Number
+                      Phone Number
                     </label>
                     <input
                       id="whatsapp"
@@ -144,7 +181,7 @@ export default function ForgotPasswordModal({
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(e.target.value)}
                       required
-                      placeholder="03001234567"
+                      placeholder="+923001234567"
                       className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
                     />
                   </div>
@@ -169,11 +206,83 @@ export default function ForgotPasswordModal({
                     {loading ? (
                       <span className="inline-flex items-center justify-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Sending OTP...
+                        Sending code...
                       </span>
                     ) : (
-                      "Send OTP"
+                      "Send Verification Code"
                     )}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {step === "verify" && (
+              <>
+                <h2 className="text-xl font-semibold text-white mb-2">
+                  Verify Your Number
+                </h2>
+                <p className="text-sm text-white/50 mb-6">
+                  Enter the 6-digit code sent to {whatsapp}
+                </p>
+
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="otp"
+                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
+                    >
+                      Verification Code
+                    </label>
+                    <input
+                      id="otp"
+                      type="text"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                      placeholder="Enter 6-digit code"
+                      maxLength={6}
+                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all text-center tracking-[0.5em] text-lg"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300"
+                    style={{
+                      background: loading ? "rgba(255,255,255,0.05)" : accent,
+                      color: loading ? "rgba(255,255,255,0.4)" : "#000",
+                      boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
+                      cursor: loading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {loading ? (
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Verifying...
+                      </span>
+                    ) : (
+                      "Verify Code"
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("phone");
+                      setOtp("");
+                      setError("");
+                      clearRecaptcha();
+                    }}
+                    className="w-full py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
+                  >
+                    Back to phone number
                   </button>
                 </form>
               </>
@@ -185,29 +294,10 @@ export default function ForgotPasswordModal({
                   Reset Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
-                  Enter the OTP sent to your WhatsApp and create a new password
+                  Create a new password for your account
                 </p>
 
                 <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="otp"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
-                    >
-                      OTP Code
-                    </label>
-                    <input
-                      id="otp"
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      required
-                      placeholder="Enter 6-digit OTP"
-                      maxLength={6}
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all text-center tracking-[0.5em] text-lg"
-                    />
-                  </div>
-
                   <div>
                     <label
                       htmlFor="newPassword"
@@ -296,6 +386,7 @@ export default function ForgotPasswordModal({
                     onClick={() => {
                       setStep("phone");
                       setError("");
+                      clearRecaptcha();
                     }}
                     className="w-full py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
                   >

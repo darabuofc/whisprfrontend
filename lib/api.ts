@@ -239,6 +239,14 @@ export async function verifyWhatsappOtp(whatsapp: string, otp: string) {
   return (await api.post("/attendees/onboarding/whatsapp/verify", { whatsapp, otp })).data;
 }
 
+/**
+ * Verify a Firebase phone auth token with the backend.
+ * Sends the Firebase ID token so the backend can verify and link the phone number to the user's profile.
+ */
+export async function verifyFirebasePhone(phone: string, firebase_id_token: string) {
+  return (await api.post("/attendees/onboarding/phone/verify-firebase", { phone, firebase_id_token })).data;
+}
+
 export async function saveBasics(dob: string, cnic: string) {
   return (await api.post("/attendees/onboarding/basics", { dob, cnic })).data;
 }
