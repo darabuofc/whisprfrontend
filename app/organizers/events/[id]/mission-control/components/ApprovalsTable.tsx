@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle, MoreHorizontal } from "lucide-react";
+import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle, MoreHorizontal, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import type { RegistrationListItem, LinkedAttendee } from "../page";
 
@@ -11,8 +11,8 @@ interface ApprovalsTableProps {
   onReject: (registrationId: string) => void;
   onRevoke: (registrationId: string) => void;
   onMarkPaid: (registrationId: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (status: string) => void;
+  statusFilter: string[];
+  onStatusFilterChange: (status: string[]) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   genderMismatchOnly: boolean;
@@ -176,6 +176,8 @@ export default function ApprovalsTable({
   onRowClick,
 }: ApprovalsTableProps) {
   const [actionLoading, setActionLoading] = useState<ActionLoadingState | null>(null);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
 
   const handleAction = async (id: string, actionName: string, action: (id: string) => Promise<void> | void) => {
     setActionLoading({ id, action: actionName });
@@ -184,6 +186,32 @@ export default function ApprovalsTable({
     } finally {
       setActionLoading(null);
     }
+  };
+
+  useEffect(() => {
+    if (!statusOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (statusRef.current && !statusRef.current.contains(e.target as Node)) {
+        setStatusOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [statusOpen]);
+
+  const statusOptions = [
+    { value: "pending", label: "Pending" },
+    { value: "approved", label: "Approved" },
+    { value: "rejected", label: "Rejected" },
+    { value: "paid", label: "Paid" },
+  ];
+  const statusLabelMap = new Map(statusOptions.map((option) => [option.value, option.label]));
+
+  const handleStatusToggle = (value: string) => {
+    const next = statusFilter.includes(value)
+      ? statusFilter.filter((s) => s !== value)
+      : [...statusFilter, value];
+    onStatusFilterChange(next);
   };
 
   const getStatusStyles = (status: string) => {
@@ -286,19 +314,57 @@ export default function ApprovalsTable({
               />
             </div>
             {/* Status filter */}
-            <div className="relative">
+            <div ref={statusRef} className="relative">
               <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
-              <select
-                value={statusFilter}
-                onChange={(e) => onStatusFilterChange(e.target.value)}
-                className="pl-9 pr-8 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 appearance-none cursor-pointer"
+              <button
+                type="button"
+                onClick={() => setStatusOpen((prev) => !prev)}
+                className="pl-9 pr-9 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 cursor-pointer inline-flex items-center gap-2"
+                aria-expanded={statusOpen}
+                aria-haspopup="listbox"
               >
-                <option value="">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-                <option value="paid">Paid</option>
-              </select>
+                <span className="text-white/80">
+                  {statusFilter.length === 0 ? "All Status" : `Status (${statusFilter.length})`}
+                </span>
+                <ChevronDown size={14} className="text-white/40" />
+              </button>
+              {statusOpen && (
+                <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2">
+                  {statusOptions.map((option) => {
+                    const checked = statusFilter.includes(option.value);
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => handleStatusToggle(option.value)}
+                        className="w-full px-2 py-2 rounded-lg flex items-center gap-2 text-sm text-white/80 hover:bg-white/[0.06]"
+                        role="option"
+                        aria-selected={checked}
+                      >
+                        <span
+                          className={`w-4 h-4 rounded border flex items-center justify-center ${
+                            checked
+                              ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                              : "border-white/[0.2] text-transparent"
+                          }`}
+                        >
+                          <Check size={12} />
+                        </span>
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                  {statusFilter.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => onStatusFilterChange([])}
+                      className="mt-1 w-full px-2 py-2 rounded-lg text-xs text-white/50 hover:text-white/70 hover:bg-white/[0.06]"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <button
               type="button"
@@ -363,7 +429,7 @@ export default function ApprovalsTable({
                     <div>
                       <p className="text-white/70 text-sm font-medium">No registrations found</p>
                       <p className="text-white/30 text-xs mt-1">
-                        {statusFilter || searchQuery
+                        {statusFilter.length > 0 || searchQuery
                           ? "Try adjusting your filters"
                           : "Registrations will appear here"}
                       </p>
@@ -503,9 +569,9 @@ export default function ApprovalsTable({
           <p className="text-sm text-white/30">
             Showing <span className="text-white/60 font-medium">{registrations.length}</span>{" "}
             registration{registrations.length !== 1 ? "s" : ""}
-            {statusFilter && (
+            {statusFilter.length > 0 && (
               <span>
-                {" "}with status <span className="text-white/60">{statusFilter}</span>
+                {" "}with status <span className="text-white/60">{statusFilter.map((s) => statusLabelMap.get(s) || s).join(", ")}</span>
               </span>
             )}
           </p>

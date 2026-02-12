@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload } from "lucide-react";
+import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { OrganizerTicket, OrganizerTicketsSummary } from "@/lib/api";
 
@@ -8,10 +9,10 @@ interface TicketsTableProps {
   tickets: OrganizerTicket[];
   summary: OrganizerTicketsSummary;
   loading: boolean;
-  statusFilter: string;
-  onStatusFilterChange: (status: string) => void;
-  passTypeFilter: string;
-  onPassTypeFilterChange: (passType: string) => void;
+  statusFilter: string[];
+  onStatusFilterChange: (status: string[]) => void;
+  passTypeFilter: string[];
+  onPassTypeFilterChange: (passType: string[]) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   passTypes: { id: string; name: string }[];
@@ -31,6 +32,46 @@ export default function TicketsTable({
   passTypes,
   onImportClick,
 }: TicketsTableProps) {
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [passTypeOpen, setPassTypeOpen] = useState(false);
+  const statusRef = useRef<HTMLDivElement>(null);
+  const passTypeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!statusOpen && !passTypeOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (statusRef.current && statusRef.current.contains(e.target as Node)) return;
+      if (passTypeRef.current && passTypeRef.current.contains(e.target as Node)) return;
+      setStatusOpen(false);
+      setPassTypeOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [statusOpen, passTypeOpen]);
+
+  const statusOptions = [
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "used", label: "Used" },
+    { value: "cancelled", label: "Cancelled" },
+  ];
+
+  const statusLabelMap = new Map(statusOptions.map((option) => [option.value, option.label]));
+  const passTypeLabelMap = new Map(passTypes.map((pt) => [pt.id, pt.name]));
+
+  const handleStatusToggle = (value: string) => {
+    const next = statusFilter.includes(value)
+      ? statusFilter.filter((s) => s !== value)
+      : [...statusFilter, value];
+    onStatusFilterChange(next);
+  };
+
+  const handlePassTypeToggle = (value: string) => {
+    const next = passTypeFilter.includes(value)
+      ? passTypeFilter.filter((s) => s !== value)
+      : [...passTypeFilter, value];
+    onPassTypeFilterChange(next);
+  };
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
@@ -111,36 +152,111 @@ export default function TicketsTable({
                 />
               </div>
               {/* Status filter */}
-              <div className="relative">
+              <div ref={statusRef} className="relative">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
-                <select
-                  value={statusFilter}
-                  onChange={(e) => onStatusFilterChange(e.target.value)}
-                  className="pl-9 pr-8 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 appearance-none cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setStatusOpen((prev) => !prev)}
+                  className="pl-9 pr-9 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 cursor-pointer inline-flex items-center gap-2"
+                  aria-expanded={statusOpen}
+                  aria-haspopup="listbox"
                 >
-                  <option value="">All Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Used">Used</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
+                  <span className="text-white/80">
+                    {statusFilter.length === 0 ? "All Status" : `Status (${statusFilter.length})`}
+                  </span>
+                  <ChevronDown size={14} className="text-white/40" />
+                </button>
+                {statusOpen && (
+                  <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2">
+                    {statusOptions.map((option) => {
+                      const checked = statusFilter.includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleStatusToggle(option.value)}
+                          className="w-full px-2 py-2 rounded-lg flex items-center gap-2 text-sm text-white/80 hover:bg-white/[0.06]"
+                          role="option"
+                          aria-selected={checked}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded border flex items-center justify-center ${
+                              checked
+                                ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                                : "border-white/[0.2] text-transparent"
+                            }`}
+                          >
+                            <Check size={12} />
+                          </span>
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                    {statusFilter.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => onStatusFilterChange([])}
+                        className="mt-1 w-full px-2 py-2 rounded-lg text-xs text-white/50 hover:text-white/70 hover:bg-white/[0.06]"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               {/* Pass Type filter */}
               {passTypes.length > 0 && (
-                <div className="relative">
+                <div ref={passTypeRef} className="relative">
                   <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
-                  <select
-                    value={passTypeFilter}
-                    onChange={(e) => onPassTypeFilterChange(e.target.value)}
-                    className="pl-9 pr-8 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 appearance-none cursor-pointer"
+                  <button
+                    type="button"
+                    onClick={() => setPassTypeOpen((prev) => !prev)}
+                    className="pl-9 pr-9 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-white/90 text-sm focus:outline-none focus:border-white/20 cursor-pointer inline-flex items-center gap-2"
+                    aria-expanded={passTypeOpen}
+                    aria-haspopup="listbox"
                   >
-                    <option value="">All Passes</option>
-                    {passTypes.map((pt) => (
-                      <option key={pt.id} value={pt.id}>
-                        {pt.name}
-                      </option>
-                    ))}
-                  </select>
+                    <span className="text-white/80">
+                      {passTypeFilter.length === 0 ? "All Passes" : `Passes (${passTypeFilter.length})`}
+                    </span>
+                    <ChevronDown size={14} className="text-white/40" />
+                  </button>
+                  {passTypeOpen && (
+                    <div className="absolute right-0 mt-2 min-w-[220px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2 max-h-64 overflow-auto">
+                      {passTypes.map((pt) => {
+                        const checked = passTypeFilter.includes(pt.id);
+                        return (
+                          <button
+                            key={pt.id}
+                            type="button"
+                            onClick={() => handlePassTypeToggle(pt.id)}
+                            className="w-full px-2 py-2 rounded-lg flex items-center gap-2 text-sm text-white/80 hover:bg-white/[0.06]"
+                            role="option"
+                            aria-selected={checked}
+                          >
+                            <span
+                              className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                checked
+                                  ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                                  : "border-white/[0.2] text-transparent"
+                              }`}
+                            >
+                              <Check size={12} />
+                            </span>
+                            {pt.name}
+                          </button>
+                        );
+                      })}
+                      {passTypeFilter.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => onPassTypeFilterChange([])}
+                          className="mt-1 w-full px-2 py-2 rounded-lg text-xs text-white/50 hover:text-white/70 hover:bg-white/[0.06]"
+                        >
+                          Clear all
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -192,7 +308,7 @@ export default function TicketsTable({
                       <div>
                         <p className="text-white/70 text-sm font-medium">No tickets found</p>
                         <p className="text-white/30 text-xs mt-1">
-                          {statusFilter || passTypeFilter || searchQuery
+                          {statusFilter.length > 0 || passTypeFilter.length > 0 || searchQuery
                             ? "Try adjusting your filters"
                             : "Tickets will appear here after registrations are paid"}
                         </p>
@@ -296,14 +412,19 @@ export default function TicketsTable({
             <p className="text-sm text-white/30">
               Showing <span className="text-white/60 font-medium">{tickets.length}</span>{" "}
               ticket{tickets.length !== 1 ? "s" : ""}
-              {statusFilter && (
-                <span>
-                  {" "}with status <span className="text-white/60">{statusFilter}</span>
-                </span>
-              )}
-            </p>
-          </div>
-        )}
+            {statusFilter.length > 0 && (
+              <span>
+                {" "}with status <span className="text-white/60">{statusFilter.map((s) => statusLabelMap.get(s) || s).join(", ")}</span>
+              </span>
+            )}
+            {passTypeFilter.length > 0 && (
+              <span>
+                {" "}and pass <span className="text-white/60">{passTypeFilter.map((id) => passTypeLabelMap.get(id) || id).join(", ")}</span>
+              </span>
+            )}
+          </p>
+        </div>
+      )}
       </div>
     </div>
   );

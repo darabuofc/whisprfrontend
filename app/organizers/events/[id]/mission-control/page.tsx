@@ -128,7 +128,7 @@ export default function MissionControlPage() {
   // Approvals state
   const [registrations, setRegistrations] = useState<RegistrationListItem[]>([]);
   const [registrationsLoading, setRegistrationsLoading] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [genderMismatchOnly, setGenderMismatchOnly] = useState(false);
 
@@ -140,8 +140,8 @@ export default function MissionControlPage() {
     by_pass_type: {},
   });
   const [ticketsLoading, setTicketsLoading] = useState(false);
-  const [ticketStatusFilter, setTicketStatusFilter] = useState<string>("");
-  const [ticketPassTypeFilter, setTicketPassTypeFilter] = useState<string>("");
+  const [ticketStatusFilter, setTicketStatusFilter] = useState<string[]>([]);
+  const [ticketPassTypeFilter, setTicketPassTypeFilter] = useState<string[]>([]);
   const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
   const [passTypes, setPassTypes] = useState<{ id: string; name: string }[]>([]);
 
@@ -221,15 +221,12 @@ export default function MissionControlPage() {
     if (activeTab === "approvals" && eventId && authorized) {
       fetchRegistrations();
     }
-  }, [activeTab, eventId, authorized, statusFilter, searchQuery]);
+  }, [activeTab, eventId, authorized]);
 
   const fetchRegistrations = async () => {
     setRegistrationsLoading(true);
     try {
-      const data = await getEventRegistrations(eventId, {
-        status: statusFilter || undefined,
-        search: searchQuery || undefined,
-      });
+      const data = await getEventRegistrations(eventId);
       setRegistrations(data);
     } catch (error) {
       console.error("Failed to fetch registrations:", error);
@@ -243,16 +240,12 @@ export default function MissionControlPage() {
     if (activeTab === "tickets" && eventId && authorized) {
       fetchTickets();
     }
-  }, [activeTab, eventId, authorized, ticketStatusFilter, ticketPassTypeFilter, ticketSearchQuery]);
+  }, [activeTab, eventId, authorized]);
 
   const fetchTickets = async () => {
     setTicketsLoading(true);
     try {
-      const data = await getOrganizerEventTickets(eventId, {
-        status: ticketStatusFilter || undefined,
-        pass_type: ticketPassTypeFilter || undefined,
-        search: ticketSearchQuery || undefined,
-      });
+      const data = await getOrganizerEventTickets(eventId);
       setTickets(data.tickets);
       setTicketsSummary(data.summary);
 
@@ -376,9 +369,39 @@ export default function MissionControlPage() {
   const isToday = eventStatus === "Today";
   const daysLeft = eventData ? calculateDaysLeft(eventData.date) : 0;
 
-  const visibleRegistrations = genderMismatchOnly
-    ? registrations.filter((registration) => registration.gender_mismatch)
-    : registrations;
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const visibleRegistrations = registrations.filter((registration) => {
+    if (genderMismatchOnly && !registration.gender_mismatch) return false;
+    if (statusFilter.length > 0) {
+      const normalizedStatus = (registration.status || "").toLowerCase();
+      if (!statusFilter.includes(normalizedStatus)) return false;
+    }
+    if (!normalizedSearch) return true;
+    const primaryMatch = (registration.name || "").toLowerCase().includes(normalizedSearch);
+    const linkedMatch = (registration.linked_attendees || []).some((attendee) =>
+      (attendee.name || "").toLowerCase().includes(normalizedSearch)
+    );
+    return primaryMatch || linkedMatch;
+  });
+
+  const normalizedTicketSearch = ticketSearchQuery.trim().toLowerCase();
+  const visibleTickets = tickets.filter((ticket) => {
+    if (ticketStatusFilter.length > 0) {
+      const normalizedStatus = (ticket.status || "").toLowerCase();
+      if (!ticketStatusFilter.includes(normalizedStatus)) return false;
+    }
+    if (ticketPassTypeFilter.length > 0) {
+      const passId = ticket.pass_type?.id;
+      if (!passId || !ticketPassTypeFilter.includes(passId)) return false;
+    }
+    if (!normalizedTicketSearch) return true;
+    const attendee = ticket.attendee || { name: "", email: "", phone: "" };
+    return (
+      (attendee.name || "").toLowerCase().includes(normalizedTicketSearch) ||
+      (attendee.email || "").toLowerCase().includes(normalizedTicketSearch) ||
+      (attendee.phone || "").toLowerCase().includes(normalizedTicketSearch)
+    );
+  });
 
   const displayStats = {
     approved: eventData?.stats.approved ?? 0,
@@ -543,7 +566,7 @@ export default function MissionControlPage() {
 
         {activeTab === "tickets" && (
           <TicketsTable
-            tickets={tickets}
+            tickets={visibleTickets}
             summary={ticketsSummary}
             loading={ticketsLoading}
             statusFilter={ticketStatusFilter}
