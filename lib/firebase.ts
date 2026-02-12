@@ -8,12 +8,12 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyB496ciKsVuNRzHVEo8RFKWFx4zz1D6sjE",
+  authDomain: "whispr-auth-9a6ea.firebaseapp.com",
+  projectId: "whispr-auth-9a6ea",
+  storageBucket: "whispr-auth-9a6ea.firebasestorage.app",
+  messagingSenderId: "375690980826",
+  appId: "1:375690980826:web:b8a26f138e98194c2f24e3",
 };
 
 // Lazy-initialize Firebase to avoid SSR/SSG errors (no API key at build time)
