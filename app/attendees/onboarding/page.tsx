@@ -1,22 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  saveBasics,
-  saveProfile,
-  getOnboardingStatus,
-  verifyFirebasePhone,
-} from "@/lib/api";
+import { saveBasics, saveProfile, getOnboardingStatus, savePhoneNoOtp } from "@/lib/api";
 import { getAndClearPostAuthRedirect } from "@/lib/oauth";
-import {
-  setupRecaptcha,
-  sendFirebaseOtp,
-  verifyFirebaseOtp,
-  clearRecaptcha,
-} from "@/lib/firebase";
-import type { ConfirmationResult } from "firebase/auth";
 
 // Step icons as SVG components for crisp rendering
 const PhoneIcon = () => (
@@ -259,17 +247,11 @@ export default function AttendeesOnboarding() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
   const [underage, setUnderage] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const inputsRef = useRef<(HTMLInputElement | null)[]>(new Array(6).fill(null));
-
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   const [profile, setProfile] = useState({
     whatsapp: "",
-    whatsappVerified: false,
     dob: "",
     cnic: "",
     profession: "",
@@ -283,53 +265,18 @@ export default function AttendeesOnboarding() {
 
   // Step metadata
   const steps = [
-    { icon: PhoneIcon, title: "Verify your number", subtitle: "We'll send a quick OTP to your WhatsApp" },
+    {
+      icon: PhoneIcon,
+      title: "Add your mobile number",
+      subtitle:
+        "Use a number organizers can reach. If it’s incorrect, they won’t be able to contact you.",
+    },
     { icon: CalendarIcon, title: "A few basics", subtitle: "Help us make sure you're ready for the night" },
     { icon: UserIcon, title: "Create your profile", subtitle: "Let organizers know who's coming" },
     { icon: CheckIcon, title: "You're all set", subtitle: "Welcome to the Whispr experience" },
   ];
 
-  // Initialize reCAPTCHA on mount
-  useEffect(() => {
-    return () => {
-      clearRecaptcha();
-    };
-  }, []);
-
   // Handlers
-  const handleSendOtp = async () => {
-    try {
-      setLoading(true);
-      const verifier = setupRecaptcha("recaptcha-container");
-      const result = await sendFirebaseOtp(profile.whatsapp);
-      setConfirmationResult(result);
-      setOtpSent(true);
-    } catch (err: any) {
-      clearRecaptcha();
-      alert(err.message || "Failed to send OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!confirmationResult) {
-      alert("Please request an OTP first.");
-      return;
-    }
-    try {
-      setLoading(true);
-      const firebaseIdToken = await verifyFirebaseOtp(confirmationResult, otp);
-      // Send the Firebase ID token to our backend to verify and link the phone number
-      await verifyFirebasePhone(profile.whatsapp, firebaseIdToken);
-      setProfile({ ...profile, whatsappVerified: true });
-      setStep(2);
-    } catch (err: any) {
-      alert(err.message || "Invalid OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -423,22 +370,6 @@ export default function AttendeesOnboarding() {
     }
   };
 
-  // OTP input handlers
-  const handleOtpChange = (i: number, val: string) => {
-    if (/^\d?$/.test(val)) {
-      const newOtp = otp.split("");
-      newOtp[i] = val;
-      setOtp(newOtp.join(""));
-      if (val && i < 5) inputsRef.current[i + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (i: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[i] && i > 0) {
-      inputsRef.current[i - 1]?.focus();
-    }
-  };
-
   const handleInstagramChange = (val: string) => {
     let normalized = val.replace(/\s+/g, "");
     if (!normalized.startsWith("@")) {
@@ -455,9 +386,6 @@ export default function AttendeesOnboarding() {
 
       {/* Noise texture overlay */}
       <div className="fixed inset-0 bg-[url('/noise.png')] bg-[length:200px] opacity-[0.03] pointer-events-none" />
-
-      {/* Invisible reCAPTCHA container for Firebase phone auth */}
-      <div id="recaptcha-container" />
 
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-12">
@@ -516,7 +444,7 @@ export default function AttendeesOnboarding() {
         {/* Step content */}
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait">
-            {/* STEP 1: WhatsApp Verification */}
+            {/* STEP 1: Mobile Number */}
             {step === 1 && (
               <motion.div
                 key="step1"
@@ -527,66 +455,34 @@ export default function AttendeesOnboarding() {
                 transition={pageTransition}
                 className="space-y-6"
               >
-                {!otpSent ? (
-                  <>
-                    <OnboardingInput
-                      type="tel"
-                      placeholder="+923001234567"
-                      value={profile.whatsapp}
-                      onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
-                    />
-                    <PrimaryButton
-                      onClick={handleSendOtp}
-                      disabled={!profile.whatsapp}
-                      loading={loading}
-                    >
-                      Send verification code
-                    </PrimaryButton>
-                  </>
-                ) : !profile.whatsappVerified ? (
-                  <>
-                    <div className="flex justify-center gap-3">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <motion.input
-                          key={i}
-                          ref={(el) => { inputsRef.current[i] = el; }}
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={1}
-                          value={otp[i] || ""}
-                          onChange={(e) => handleOtpChange(i, e.target.value)}
-                          onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.05 }}
-                          className="w-12 h-14 sm:w-14 sm:h-16 rounded-xl bg-white/[0.07] border border-white/[0.08]
-                                     text-center text-2xl font-bold text-white outline-none transition-all duration-300
-                                     focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.15)]"
-                        />
-                      ))}
-                    </div>
-                    <p className="text-center text-sm text-white/40">
-                      Didn't receive it?{" "}
-                      <button
-                        onClick={handleSendOtp}
-                        className="text-[#C1FF72] hover:underline"
-                      >
-                        Resend code
-                      </button>
-                    </p>
-                    <PrimaryButton
-                      onClick={handleVerifyOtp}
-                      disabled={otp.length !== 6}
-                      loading={loading}
-                    >
-                      Verify
-                    </PrimaryButton>
-                  </>
-                ) : (
-                  <PrimaryButton onClick={() => setStep(2)}>
+                <>
+                  <OnboardingInput
+                    type="tel"
+                    placeholder="+923001234567"
+                    value={profile.whatsapp}
+                    onChange={(e) => setProfile({ ...profile, whatsapp: e.target.value })}
+                  />
+                  <p className="text-sm text-white/50">
+                    Double-check your number. If it’s incorrect, organizers won’t be able to contact you.
+                  </p>
+                  <PrimaryButton
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        await savePhoneNoOtp(profile.whatsapp.trim());
+                        setStep(2);
+                      } catch (err: any) {
+                        alert(err.message);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={!profile.whatsapp}
+                    loading={loading}
+                  >
                     Continue
                   </PrimaryButton>
-                )}
+                </>
               </motion.div>
             )}
 

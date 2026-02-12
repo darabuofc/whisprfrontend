@@ -247,6 +247,10 @@ export async function verifyFirebasePhone(phone: string, firebase_id_token: stri
   return (await api.post("/attendees/onboarding/phone/verify-firebase", { phone, firebase_id_token })).data;
 }
 
+export async function savePhoneNoOtp(phone: string) {
+  return (await api.post("/attendees/onboarding/phone/save-no-otp", { phone })).data;
+}
+
 export async function saveBasics(dob: string, cnic: string) {
   return (await api.post("/attendees/onboarding/basics", { dob, cnic })).data;
 }
