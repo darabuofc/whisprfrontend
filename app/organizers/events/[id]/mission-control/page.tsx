@@ -21,6 +21,7 @@ import {
   markRegistrationPaid,
   getOrganizerEventDetails,
   getOrganizerEventTickets,
+  resendOrganizerEventTicket,
   getOrganizer,
   type OrganizerEventDetails,
   type OrganizerTicket,
@@ -342,6 +343,16 @@ export default function MissionControlPage() {
     setDrawerOpen(true);
   };
 
+  const handleResendTicket = async (ticketId: string) => {
+    try {
+      const res = await resendOrganizerEventTicket(eventId, ticketId);
+      toast.success(res.message || "Ticket resent successfully");
+    } catch (error: any) {
+      console.error("Failed to resend ticket:", error);
+      toast.error(error?.response?.data?.message || "Failed to resend ticket");
+    }
+  };
+
   const handleDrawerClose = () => {
     setDrawerOpen(false);
     setSelectedRegistration(null);
@@ -577,6 +588,7 @@ export default function MissionControlPage() {
             onSearchChange={setTicketSearchQuery}
             passTypes={passTypes}
             onImportClick={() => setImportModalOpen(true)}
+            onResendTicket={handleResendTicket}
           />
         )}
 

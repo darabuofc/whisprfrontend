@@ -825,6 +825,12 @@ export interface OrganizerTicketsResponse {
   summary: OrganizerTicketsSummary;
 }
 
+export interface ResendOrganizerTicketResponse {
+  message: string;
+  ticket_id: string;
+  sent: boolean;
+}
+
 export async function getOrganizerEventTickets(
   eventId: string,
   params?: { status?: string; pass_type?: string; search?: string }
@@ -838,6 +844,16 @@ export async function getOrganizerEventTickets(
   const url = `/organizers/events/${eventId}/tickets${queryString ? `?${queryString}` : ""}`;
 
   const res = await api.get(url);
+  return res.data;
+}
+
+export async function resendOrganizerEventTicket(
+  eventId: string,
+  ticketId: string
+): Promise<ResendOrganizerTicketResponse> {
+  const res = await api.post(
+    `/organizers/events/${eventId}/tickets/${ticketId}/resend`
+  );
   return res.data;
 }
 

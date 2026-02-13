@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check } from "lucide-react";
+import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check, MoreHorizontal, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { OrganizerTicket, OrganizerTicketsSummary } from "@/lib/api";
@@ -17,6 +17,102 @@ interface TicketsTableProps {
   onSearchChange: (query: string) => void;
   passTypes: { id: string; name: string }[];
   onImportClick?: () => void;
+  onResendTicket?: (ticketId: string) => Promise<void> | void;
+}
+
+function TicketActionMenu({
+  ticket,
+  onResendTicket,
+}: {
+  ticket: OrganizerTicket;
+  onResendTicket?: (ticketId: string) => Promise<void> | void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const canResend = Boolean(onResendTicket);
+
+  const handleResend = async () => {
+    if (!onResendTicket || isResending) return;
+    setIsResending(true);
+    try {
+      await onResendTicket(ticket.id);
+      setOpen(false);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((prev) => !prev);
+        }}
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/70 transition-colors"
+        aria-expanded={open}
+        aria-haspopup="menu"
+      >
+        <MoreHorizontal size={15} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 z-30 min-w-[170px] py-1 bg-[#141414] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
+          {ticket.ticket_url && (
+            <a
+              href={ticket.ticket_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-white/70 hover:bg-white/[0.06]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink size={14} />
+              View Ticket
+            </a>
+          )}
+          {ticket.qr_code_url && (
+            <a
+              href={ticket.qr_code_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-white/70 hover:bg-white/[0.06]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <QrCode size={14} />
+              View QR
+            </a>
+          )}
+          {canResend && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleResend();
+              }}
+              disabled={isResending}
+              className="w-full px-3 py-2 flex items-center gap-2.5 text-sm text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50"
+            >
+              {isResending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+              Resend Ticket
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function TicketsTable({
@@ -31,6 +127,7 @@ export default function TicketsTable({
   onSearchChange,
   passTypes,
   onImportClick,
+  onResendTicket,
 }: TicketsTableProps) {
   const [statusOpen, setStatusOpen] = useState(false);
   const [passTypeOpen, setPassTypeOpen] = useState(false);
@@ -84,19 +181,6 @@ export default function TicketsTable({
         return "bg-red-500/10 text-red-400 border-red-500/20";
       default:
         return "bg-white/[0.04] text-white/50 border-white/[0.08]";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
     }
   };
 
@@ -275,9 +359,6 @@ export default function TicketsTable({
                   Pass Type
                 </th>
                 <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
-                  Purchase Date
-                </th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
                   Status
                 </th>
                 <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">
@@ -291,7 +372,7 @@ export default function TicketsTable({
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center">
+                  <td colSpan={5} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
                       <span className="text-white/40 text-sm">Loading tickets...</span>
@@ -300,7 +381,7 @@ export default function TicketsTable({
                 </tr>
               ) : tickets.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-16 text-center">
+                  <td colSpan={5} className="px-6 py-16 text-center">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-12 h-12 rounded-xl bg-white/[0.02] flex items-center justify-center">
                         <Ticket className="w-5 h-5 text-white/20" />
@@ -354,11 +435,6 @@ export default function TicketsTable({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm text-white/60">
-                        {formatDate(ticket.purchase_date)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border ${getStatusStyles(
                           ticket.status
@@ -373,30 +449,8 @@ export default function TicketsTable({
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {ticket.qr_code_url && (
-                          <a
-                            href={ticket.qr_code_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-colors"
-                            title="View QR Code"
-                          >
-                            <QrCode size={14} />
-                          </a>
-                        )}
-                        {ticket.ticket_url && (
-                          <a
-                            href={ticket.ticket_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="h-8 px-3 flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white/80 transition-colors text-xs font-medium"
-                            title="View Ticket PDF"
-                          >
-                            <ExternalLink size={13} />
-                            Ticket
-                          </a>
-                        )}
+                      <div className="flex items-center justify-end">
+                        <TicketActionMenu ticket={ticket} onResendTicket={onResendTicket} />
                       </div>
                     </td>
                   </tr>
