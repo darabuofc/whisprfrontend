@@ -253,8 +253,9 @@ export default function MissionControlPage() {
       // Extract unique pass types for the filter dropdown
       const uniquePassTypes = new Map<string, string>();
       data.tickets.forEach((ticket) => {
-        if (ticket.pass_type?.id && ticket.pass_type?.name) {
-          uniquePassTypes.set(ticket.pass_type.id, ticket.pass_type.name);
+        const passTypeLabel = ticket.pass_type?.type || ticket.pass_type?.name;
+        if (ticket.pass_type?.id && passTypeLabel) {
+          uniquePassTypes.set(ticket.pass_type.id, passTypeLabel);
         }
       });
       setPassTypes(
@@ -396,23 +397,31 @@ export default function MissionControlPage() {
   });
 
   const normalizedTicketSearch = ticketSearchQuery.trim().toLowerCase();
-  const visibleTickets = tickets.filter((ticket) => {
-    if (ticketStatusFilter.length > 0) {
-      const normalizedStatus = (ticket.status || "").toLowerCase();
-      if (!ticketStatusFilter.includes(normalizedStatus)) return false;
-    }
-    if (ticketPassTypeFilter.length > 0) {
-      const passId = ticket.pass_type?.id;
-      if (!passId || !ticketPassTypeFilter.includes(passId)) return false;
-    }
-    if (!normalizedTicketSearch) return true;
-    const attendee = ticket.attendee || { name: "", email: "", phone: "" };
-    return (
-      (attendee.name || "").toLowerCase().includes(normalizedTicketSearch) ||
-      (attendee.email || "").toLowerCase().includes(normalizedTicketSearch) ||
-      (attendee.phone || "").toLowerCase().includes(normalizedTicketSearch)
+  const visibleTickets = tickets
+    .filter((ticket) => {
+      if (ticketStatusFilter.length > 0) {
+        const normalizedStatus = (ticket.status || "").toLowerCase();
+        if (!ticketStatusFilter.includes(normalizedStatus)) return false;
+      }
+      if (ticketPassTypeFilter.length > 0) {
+        const passId = ticket.pass_type?.id;
+        if (!passId || !ticketPassTypeFilter.includes(passId)) return false;
+      }
+      if (!normalizedTicketSearch) return true;
+      const attendee = ticket.attendee || { name: "", email: "", phone: "" };
+      return (
+        (attendee.name || "").toLowerCase().includes(normalizedTicketSearch) ||
+        (attendee.email || "").toLowerCase().includes(normalizedTicketSearch) ||
+        (attendee.phone || "").toLowerCase().includes(normalizedTicketSearch)
+      );
+    })
+    .sort((a, b) =>
+      (a.registration?.registration_id || "").localeCompare(
+        b.registration?.registration_id || "",
+        undefined,
+        { numeric: true, sensitivity: "base" }
+      )
     );
-  });
 
   const displayStats = {
     approved: eventData?.stats.approved ?? 0,

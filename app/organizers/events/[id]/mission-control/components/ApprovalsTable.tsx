@@ -201,6 +201,7 @@ export default function ApprovalsTable({
 
   const statusOptions = [
     { value: "pending", label: "Pending" },
+    { value: "incomplete", label: "Incomplete" },
     { value: "approved", label: "Approved" },
     { value: "rejected", label: "Rejected" },
     { value: "paid", label: "Paid" },
@@ -218,6 +219,8 @@ export default function ApprovalsTable({
     switch (status.toLowerCase()) {
       case "pending":
         return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+      case "incomplete":
+        return "bg-orange-500/10 text-orange-300 border-orange-500/20";
       case "approved":
         return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
       case "rejected":

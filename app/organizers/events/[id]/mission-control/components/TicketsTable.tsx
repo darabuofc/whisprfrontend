@@ -398,11 +398,13 @@ export default function TicketsTable({
                   </td>
                 </tr>
               ) : (
-                tickets.map((ticket) => (
-                  <tr
-                    key={ticket.id}
-                    className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
-                  >
+                tickets.map((ticket) => {
+                  const passTypeLabel = ticket.pass_type?.type || ticket.pass_type?.name || "—";
+                  return (
+                    <tr
+                      key={ticket.id}
+                      className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+                    >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         {ticket.attendee.profile_picture ? (
@@ -426,7 +428,7 @@ export default function TicketsTable({
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <p className="text-sm text-white/70">{ticket.pass_type.name}</p>
+                        <p className="text-sm text-white/70">{passTypeLabel}</p>
                         {ticket.pass_type.price > 0 && (
                           <p className="text-xs text-white/40 tabular-nums">
                             Rs. {ticket.pass_type.price.toLocaleString()}
@@ -453,8 +455,9 @@ export default function TicketsTable({
                         <TicketActionMenu ticket={ticket} onResendTicket={onResendTicket} />
                       </div>
                     </td>
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
