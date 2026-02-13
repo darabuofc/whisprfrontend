@@ -18,6 +18,7 @@ import {
   approveRegistration,
   rejectRegistration,
   revokeRegistration,
+  cancelOrganizerRegistration,
   markRegistrationPaid,
   getOrganizerEventDetails,
   getOrganizerEventTickets,
@@ -339,6 +340,20 @@ export default function MissionControlPage() {
     }
   };
 
+  const handleCancelRegistration = async (registrationId: string) => {
+    const prev = registrations.find((r) => r.registration_id === registrationId);
+    optimisticStatusUpdate(registrationId, "cancelled");
+    try {
+      await cancelOrganizerRegistration(registrationId);
+      toast.success("Registration cancelled");
+      fetchEventDetails(true);
+    } catch (error: any) {
+      console.error("Failed to cancel registration:", error);
+      if (prev) optimisticStatusUpdate(registrationId, prev.status);
+      toast.error(error?.message || "Failed to cancel registration");
+    }
+  };
+
   const handleRowClick = (registration: RegistrationListItem) => {
     setSelectedRegistration(registration);
     setDrawerOpen(true);
@@ -573,6 +588,7 @@ export default function MissionControlPage() {
             onApprove={handleApprove}
             onReject={handleReject}
             onRevoke={handleRevoke}
+            onCancel={handleCancelRegistration}
             onMarkPaid={handleMarkPaid}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}

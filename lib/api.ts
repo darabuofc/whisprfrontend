@@ -525,6 +525,10 @@ export async function revokeRegistration(registrationId: string): Promise<void> 
   await api.post(`/registrations/${registrationId}/revoke`);
 }
 
+export async function cancelOrganizerRegistration(registrationId: string): Promise<void> {
+  await api.post(`/organizers/registrations/${registrationId}/cancel`);
+}
+
 export async function reconsiderRegistration(registrationId: string): Promise<void> {
   await api.post(`/registrations/${registrationId}/reconsider`);
 }

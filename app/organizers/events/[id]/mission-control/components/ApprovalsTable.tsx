@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle, MoreHorizontal, ChevronDown } from "lucide-react";
+import { Check, X, Search, Filter, Users, Loader2, RotateCcw, CreditCard, Eye, AlertTriangle, MoreHorizontal, ChevronDown, CircleSlash } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import type { RegistrationListItem, LinkedAttendee } from "../page";
 
@@ -10,6 +10,7 @@ interface ApprovalsTableProps {
   onApprove: (registrationId: string) => void;
   onReject: (registrationId: string) => void;
   onRevoke: (registrationId: string) => void;
+  onCancel: (registrationId: string) => void;
   onMarkPaid: (registrationId: string) => void;
   statusFilter: string[];
   onStatusFilterChange: (status: string[]) => void;
@@ -31,6 +32,7 @@ function ActionMenu({
   onAction,
   onMarkPaid,
   onRevoke,
+  onCancel,
   onRowClick,
 }: {
   registration: RegistrationListItem;
@@ -38,6 +40,7 @@ function ActionMenu({
   onAction: (id: string, actionName: string, callback: (id: string) => Promise<void> | void) => void;
   onMarkPaid: (id: string) => void;
   onRevoke: (id: string) => void;
+  onCancel: (id: string) => void;
   onRowClick?: (registration: RegistrationListItem) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -120,6 +123,22 @@ function ActionMenu({
     });
   }
 
+  if (normalizedStatus !== "paid" && normalizedStatus !== "cancelled") {
+    menuItems.push({
+      label: "Cancel Registration",
+      icon: isLoading && actionLoading?.action === "cancel" ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <CircleSlash size={14} />
+      ),
+      action: () => {
+        onAction(registration.registration_id, "cancel", onCancel);
+        setOpen(false);
+      },
+      className: "text-red-300 hover:bg-red-500/10",
+    });
+  }
+
   if (menuItems.length === 0) return null;
 
   return (
@@ -166,6 +185,7 @@ export default function ApprovalsTable({
   onApprove,
   onReject,
   onRevoke,
+  onCancel,
   onMarkPaid,
   statusFilter,
   onStatusFilterChange,
@@ -205,6 +225,7 @@ export default function ApprovalsTable({
     { value: "approved", label: "Approved" },
     { value: "rejected", label: "Rejected" },
     { value: "paid", label: "Paid" },
+    { value: "cancelled", label: "Cancelled" },
   ];
   const statusLabelMap = new Map(statusOptions.map((option) => [option.value, option.label]));
 
@@ -229,6 +250,8 @@ export default function ApprovalsTable({
         return "bg-blue-500/10 text-blue-400 border-blue-500/20";
       case "revoked":
         return "bg-white/[0.04] text-white/40 border-white/[0.08]";
+      case "cancelled":
+        return "bg-red-500/10 text-red-300 border-red-500/20";
       default:
         return "bg-white/[0.04] text-white/50 border-white/[0.08]";
     }
@@ -447,7 +470,7 @@ export default function ApprovalsTable({
                   (normalizedStatus === "pending" ||
                     normalizedStatus === "incomplete" ||
                     registration.is_complete === false) &&
-                  !["approved", "rejected", "paid"].includes(normalizedStatus);
+                  !["approved", "rejected", "paid", "cancelled"].includes(normalizedStatus);
 
                 return (
                   <tr
@@ -546,16 +569,15 @@ export default function ApprovalsTable({
                           </button>
                         </>
                       )}
-                      {(normalizedStatus === "approved" || normalizedStatus === "rejected" || normalizedStatus === "paid") && (
-                        <ActionMenu
-                          registration={registration}
-                          actionLoading={actionLoading}
-                          onAction={handleAction}
-                          onMarkPaid={onMarkPaid}
-                          onRevoke={onRevoke}
-                          onRowClick={onRowClick}
-                        />
-                      )}
+                      <ActionMenu
+                        registration={registration}
+                        actionLoading={actionLoading}
+                        onAction={handleAction}
+                        onMarkPaid={onMarkPaid}
+                        onRevoke={onRevoke}
+                        onCancel={onCancel}
+                        onRowClick={onRowClick}
+                      />
                     </div>
                   </td>
                 </tr>
