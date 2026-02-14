@@ -23,6 +23,7 @@ import {
   getOrganizerEventDetails,
   getOrganizerEventTickets,
   resendOrganizerEventTicket,
+  downloadOrganizerEventTicketsZip,
   getOrganizer,
   type OrganizerEventDetails,
   type OrganizerTicket,
@@ -146,6 +147,7 @@ export default function MissionControlPage() {
   const [ticketPassTypeFilter, setTicketPassTypeFilter] = useState<string[]>([]);
   const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
   const [passTypes, setPassTypes] = useState<{ id: string; name: string }[]>([]);
+  const [ticketsZipDownloading, setTicketsZipDownloading] = useState(false);
 
   // Import modal state
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -366,6 +368,29 @@ export default function MissionControlPage() {
     } catch (error: any) {
       console.error("Failed to resend ticket:", error);
       toast.error(error?.response?.data?.message || "Failed to resend ticket");
+    }
+  };
+
+  const handleDownloadTicketsZip = async () => {
+    if (!eventId || ticketsZipDownloading) return;
+
+    setTicketsZipDownloading(true);
+    try {
+      const { blob, filename } = await downloadOrganizerEventTicketsZip(eventId);
+      const downloadUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(downloadUrl);
+      toast.success("Tickets ZIP download started");
+    } catch (error: any) {
+      console.error("Failed to download tickets ZIP:", error);
+      toast.error(error?.message || "Failed to download tickets ZIP");
+    } finally {
+      setTicketsZipDownloading(false);
     }
   };
 
@@ -614,6 +639,8 @@ export default function MissionControlPage() {
             passTypes={passTypes}
             onImportClick={() => setImportModalOpen(true)}
             onResendTicket={handleResendTicket}
+            onDownloadZip={handleDownloadTicketsZip}
+            zipDownloading={ticketsZipDownloading}
           />
         )}
 

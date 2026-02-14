@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check, MoreHorizontal, Send } from "lucide-react";
+import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check, MoreHorizontal, Send, Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { OrganizerTicket, OrganizerTicketsSummary } from "@/lib/api";
@@ -18,6 +18,8 @@ interface TicketsTableProps {
   passTypes: { id: string; name: string }[];
   onImportClick?: () => void;
   onResendTicket?: (ticketId: string) => Promise<void> | void;
+  onDownloadZip?: () => Promise<void> | void;
+  zipDownloading?: boolean;
 }
 
 function TicketActionMenu({
@@ -128,6 +130,8 @@ export default function TicketsTable({
   passTypes,
   onImportClick,
   onResendTicket,
+  onDownloadZip,
+  zipDownloading = false,
 }: TicketsTableProps) {
   const [statusOpen, setStatusOpen] = useState(false);
   const [passTypeOpen, setPassTypeOpen] = useState(false);
@@ -212,6 +216,23 @@ export default function TicketsTable({
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
+              {/* Download ZIP Button */}
+              {onDownloadZip && (
+                <motion.button
+                  onClick={() => onDownloadZip()}
+                  disabled={zipDownloading}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium bg-white/[0.04] border border-white/[0.08] text-white/80 hover:bg-white/[0.08] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  whileHover={zipDownloading ? undefined : { scale: 1.02 }}
+                  whileTap={zipDownloading ? undefined : { scale: 0.98 }}
+                >
+                  {zipDownloading ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Download size={15} />
+                  )}
+                  <span className="text-sm">Download ZIP</span>
+                </motion.button>
+              )}
               {/* Import Button */}
               {onImportClick && (
                 <motion.button

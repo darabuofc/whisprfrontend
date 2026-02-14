@@ -835,6 +835,11 @@ export interface ResendOrganizerTicketResponse {
   sent: boolean;
 }
 
+export interface OrganizerTicketsZipResponse {
+  blob: Blob;
+  filename: string;
+}
+
 export async function getOrganizerEventTickets(
   eventId: string,
   params?: { status?: string; pass_type?: string; search?: string }
@@ -859,6 +864,28 @@ export async function resendOrganizerEventTicket(
     `/organizers/events/${eventId}/tickets/${ticketId}/resend`
   );
   return res.data;
+}
+
+export async function downloadOrganizerEventTicketsZip(
+  eventId: string
+): Promise<OrganizerTicketsZipResponse> {
+  const res = await api.get(
+    `/organizers/events/${eventId}/tickets/download-zip`,
+    { responseType: "blob" }
+  );
+
+  const disposition = res.headers["content-disposition"] as string | undefined;
+  const filenameMatch =
+    disposition?.match(/filename\*=UTF-8''([^;]+)/i) ||
+    disposition?.match(/filename=\"?([^\";]+)\"?/i);
+  const filename = filenameMatch?.[1]
+    ? decodeURIComponent(filenameMatch[1])
+    : `event-${eventId}-tickets.zip`;
+
+  return {
+    blob: res.data as Blob,
+    filename,
+  };
 }
 
 // ----------------------------------------------------------
