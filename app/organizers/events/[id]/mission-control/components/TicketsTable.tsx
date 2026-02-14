@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check, MoreHorizontal, Send, Download } from "lucide-react";
+import { Search, Filter, Ticket, Loader2, ExternalLink, QrCode, Upload, ChevronDown, Check, MoreHorizontal, Send, Download, MessageSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { OrganizerTicket, OrganizerTicketsSummary } from "@/lib/api";
@@ -17,6 +17,7 @@ interface TicketsTableProps {
   onSearchChange: (query: string) => void;
   passTypes: { id: string; name: string }[];
   onImportClick?: () => void;
+  onMessageAllClick?: () => void;
   onResendTicket?: (ticketId: string) => Promise<void> | void;
   onDownloadZip?: () => Promise<void> | void;
   zipDownloading?: boolean;
@@ -129,6 +130,7 @@ export default function TicketsTable({
   onSearchChange,
   passTypes,
   onImportClick,
+  onMessageAllClick,
   onResendTicket,
   onDownloadZip,
   zipDownloading = false,
@@ -243,6 +245,18 @@ export default function TicketsTable({
                 >
                   <Upload size={15} />
                   <span className="text-sm">Import</span>
+                </motion.button>
+              )}
+              {/* Message All Button */}
+              {onMessageAllClick && (
+                <motion.button
+                  onClick={onMessageAllClick}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium bg-white/[0.04] border border-white/[0.08] text-white/80 hover:bg-white/[0.08] transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <MessageSquare size={15} />
+                  <span className="text-sm">Send Message</span>
                 </motion.button>
               )}
               {/* Search */}

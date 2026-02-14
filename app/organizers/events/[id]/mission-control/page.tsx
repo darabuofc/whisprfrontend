@@ -13,6 +13,7 @@ import AttendeeDetailDrawer from "./components/AttendeeDetailDrawer";
 import SettingsTab from "./components/SettingsTab";
 import TicketsTable from "./components/TicketsTable";
 import ImportAttendeesModal from "./components/ImportAttendeesModal";
+import SendMessageModal from "./components/SendMessageModal";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -151,6 +152,7 @@ export default function MissionControlPage() {
 
   // Import modal state
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [sendMessageModalOpen, setSendMessageModalOpen] = useState(false);
   const [organizerId, setOrganizerId] = useState<string>("");
 
   // Drawer state
@@ -638,6 +640,7 @@ export default function MissionControlPage() {
             onSearchChange={setTicketSearchQuery}
             passTypes={passTypes}
             onImportClick={() => setImportModalOpen(true)}
+            onMessageAllClick={() => setSendMessageModalOpen(true)}
             onResendTicket={handleResendTicket}
             onDownloadZip={handleDownloadTicketsZip}
             zipDownloading={ticketsZipDownloading}
@@ -682,6 +685,12 @@ export default function MissionControlPage() {
           fetchTickets();
           fetchEventDetails();
         }}
+      />
+
+      <SendMessageModal
+        isOpen={sendMessageModalOpen}
+        onClose={() => setSendMessageModalOpen(false)}
+        eventId={eventId}
       />
     </div>
   );

@@ -840,6 +840,14 @@ export interface OrganizerTicketsZipResponse {
   filename: string;
 }
 
+export interface MessageAllTicketHoldersResponse {
+  message?: string;
+  recipients: number;
+  sent: number;
+  skipped: number;
+  failed: number;
+}
+
 export async function getOrganizerEventTickets(
   eventId: string,
   params?: { status?: string; pass_type?: string; search?: string }
@@ -886,6 +894,17 @@ export async function downloadOrganizerEventTicketsZip(
     blob: res.data as Blob,
     filename,
   };
+}
+
+export async function messageAllOrganizerEventTicketHolders(
+  eventId: string,
+  message: string
+): Promise<MessageAllTicketHoldersResponse> {
+  const res = await api.post(
+    `/organizers/events/${eventId}/tickets/message-all`,
+    { message }
+  );
+  return res.data;
 }
 
 // ----------------------------------------------------------
