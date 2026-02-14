@@ -10,6 +10,7 @@ interface ApprovalsTableProps {
   onApprove: (registrationId: string) => void;
   onReject: (registrationId: string) => void;
   onRevoke: (registrationId: string) => void;
+  onCancel?: (registrationId: string) => void;
   onMarkPaid: (registrationId: string) => void;
   statusFilter: string[];
   onStatusFilterChange: (status: string[]) => void;
