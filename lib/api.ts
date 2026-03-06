@@ -296,8 +296,9 @@ export async function getMe(): Promise<Profile> {
 }
 
 export async function updateProfile(data: FormData) {
+  data.append("_method", "PUT");
   return (
-    await api.put("/attendees/me/profile", data, {
+    await api.post("/attendees/me/profile", data, {
       headers: { "Content-Type": "multipart/form-data" },
     })
   ).data;

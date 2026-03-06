@@ -707,13 +707,12 @@ const ProfileTab = memo(function ProfileTab({
     try {
       setSaving(true);
       const form = new FormData();
-      if (fullName.trim()) form.append("full_name", fullName.trim());
-      if (profession) form.append("profession", profession);
-      if (company) form.append("company", company);
-      if (university) form.append("university", university);
-      if (instagramHandle.trim() !== "@")
-        form.append("instagram_handle", instagramHandle.trim());
-      if (bio.trim()) form.append("bio", bio.trim());
+      form.append("full_name", fullName.trim());
+      form.append("profession", profession);
+      form.append("company", company);
+      form.append("university", university);
+      form.append("instagram_handle", instagramHandle.trim() !== "@" ? instagramHandle.trim() : "");
+      form.append("bio", bio.trim());
       if (profilePic) form.append("photo", profilePic);
 
       await updateProfile(form);
