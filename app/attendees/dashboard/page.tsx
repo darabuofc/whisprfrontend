@@ -79,6 +79,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
 
   const highlightedAppId = searchParams.get("highlight");
   const tabParam = searchParams.get("tab");
@@ -191,43 +192,23 @@ function DashboardContent() {
       {...swipeHandlers}
       className="min-h-screen bg-[#060606] text-white font-satoshi"
     >
-      {/* ─── DESKTOP SIDEBAR ─── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-[240px] flex-col border-r border-white/[0.06] bg-[#060606] z-50">
-        <div className="p-6 pb-4">
-          <Image
-            src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
-            alt="Whispr"
-            width={100}
-            height={28}
-            className="h-6 w-auto opacity-80"
-            priority
-          />
-        </div>
+      {/* ─── DESKTOP HEADER ─── */}
+      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#060606]/90 backdrop-blur-lg border-b border-white/[0.06]">
+        <Image
+          src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
+          alt="Whispr"
+          width={100}
+          height={28}
+          className="h-6 w-auto opacity-80"
+          priority
+        />
 
-        <nav className="flex-1 px-3 mt-2">
-          {tabs.map(({ key, label, icon: Icon }) => {
-            const isActive = activeTab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-0.5 text-sm transition-colors ${
-                  isActive
-                    ? "bg-white/[0.08] text-white font-medium"
-                    : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03]"
-                }`}
-              >
-                <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
-                {label}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Sidebar profile summary */}
-        <div className="p-4 mx-3 mb-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-full bg-white/[0.08] flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="relative">
+          <button
+            onClick={() => setDesktopMenuOpen(!desktopMenuOpen)}
+            className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
+          >
+            <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center overflow-hidden flex-shrink-0">
               {profile?.profilePicture ? (
                 <img
                   src={profile.profilePicture}
@@ -240,24 +221,61 @@ function DashboardContent() {
                 </span>
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">
-                {profile?.fullName || "User"}
-              </p>
-              <p className="text-[11px] text-neutral-500 truncate">
-                {profile?.email}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs text-neutral-500 hover:text-red-400 hover:bg-red-500/5 transition-colors"
-          >
-            <LogOut size={13} />
-            Sign out
+            <span className="text-sm text-neutral-300 max-w-[120px] truncate">
+              {profile?.fullName || "User"}
+            </span>
           </button>
+
+          <AnimatePresence>
+            {desktopMenuOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-40"
+                  onClick={() => setDesktopMenuOpen(false)}
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c] p-2 shadow-2xl z-50"
+                >
+                  <div className="px-3 py-2 mb-1">
+                    <p className="text-sm font-medium truncate">
+                      {profile?.fullName || "User"}
+                    </p>
+                    <p className="text-xs text-neutral-500 truncate">
+                      {profile?.email}
+                    </p>
+                  </div>
+                  <div className="h-px bg-white/[0.06] my-1" />
+                  <button
+                    onClick={() => {
+                      setDesktopMenuOpen(false);
+                      setActiveTab("profile");
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  >
+                    <Pencil size={15} />
+                    Edit Profile
+                  </button>
+                  <div className="h-px bg-white/[0.06] my-1" />
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut size={15} />
+                    Sign out
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
-      </aside>
+      </header>
 
       {/* ─── MOBILE HEADER ─── */}
       <header className="lg:hidden sticky top-0 z-40 bg-[#060606]/90 backdrop-blur-lg border-b border-white/[0.06]">
@@ -353,8 +371,8 @@ function DashboardContent() {
       </header>
 
       {/* ─── MAIN CONTENT ─── */}
-      <div className="lg:ml-[240px]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-10 pb-28 lg:pb-12">
+      <div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-24 pb-28 lg:pb-12">
           {/* Welcome + Event */}
           <section className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">
