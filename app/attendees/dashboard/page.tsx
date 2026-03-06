@@ -33,6 +33,11 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { generateEventSlug } from "@/lib/utils";
+import SpotlightCard from "@/components/ui/SpotlightCard";
+import TiltCard from "@/components/ui/TiltCard";
+import ShimmerText from "@/components/ui/ShimmerText";
+import TextReveal from "@/components/ui/TextReveal";
+import AnimatedBorder from "@/components/ui/AnimatedBorder";
 
 import {
   getMe,
@@ -402,20 +407,26 @@ function DashboardContent() {
           {/* Welcome + Event */}
           <section className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">
-              Welcome back
+              <TextReveal text="Welcome back" delay={0.1} />
               {profile?.fullName
-                ? <span className="bg-gradient-to-r from-[#C1FF72] to-[#a8e650] bg-clip-text text-transparent">{`, ${profile.fullName.split(" ")[0]}`}</span>
+                ? <>{", "}<ShimmerText className="text-2xl sm:text-3xl font-bold">{profile.fullName.split(" ")[0]}</ShimmerText></>
                 : ""}
             </h1>
-            <p className="text-sm text-neutral-500 mb-6">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-sm text-neutral-500 mb-6"
+            >
               Here&apos;s what&apos;s happening with your events
-            </p>
+            </motion.p>
 
             <HeroEventCard event={mainEvent} />
           </section>
 
           {/* Tab Bar */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6 relative">
+          <AnimatedBorder borderRadius="0.75rem" animationDuration="4s">
+          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] mb-6 relative">
             {TABS.map(({ key, label, icon: Icon }) => {
               const isActive = activeTab === key;
               return (
@@ -446,6 +457,7 @@ function DashboardContent() {
               );
             })}
           </div>
+          </AnimatedBorder>
 
           {/* Tab Content */}
           <AnimatePresence mode="wait">
@@ -566,7 +578,7 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
   }
 
   return (
-    <div
+    <SpotlightCard
       className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/20 transition-all duration-500 cursor-pointer relative hover:shadow-[0_0_40px_rgba(193,255,114,0.06)]"
       onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
@@ -643,7 +655,7 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
           {ctaLabel}
         </button>
       </div>
-    </div>
+    </SpotlightCard>
   );
 });
 
@@ -934,7 +946,7 @@ const ProfileTab = memo(function ProfileTab({
       </div>
 
       {/* Profile card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
+      <SpotlightCard className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6 mb-4 relative overflow-hidden group/profile" spotlightColor="rgba(108, 45, 255, 0.08)">
         <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] via-transparent to-[#6C2DFF]/[0.02] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-500" />
         <div className="relative">
           <div className="flex items-center gap-4 mb-4">
@@ -981,11 +993,11 @@ const ProfileTab = memo(function ProfileTab({
             )}
           </div>
         </div>
-      </div>
+      </SpotlightCard>
 
       {/* Details grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
+        <SpotlightCard className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
           <h4 className="text-[11px] text-[#C1FF72]/60 uppercase tracking-wider mb-3 font-medium">
             Contact
           </h4>
@@ -1013,9 +1025,9 @@ const ProfileTab = memo(function ProfileTab({
               </a>
             )}
           </div>
-        </div>
+        </SpotlightCard>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
+        <SpotlightCard className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300" spotlightColor="rgba(108, 45, 255, 0.08)">
           <h4 className="text-[11px] text-[#6C2DFF]/80 uppercase tracking-wider mb-3 font-medium">
             Details
           </h4>
@@ -1037,7 +1049,7 @@ const ProfileTab = memo(function ProfileTab({
               <p className="text-sm text-neutral-600">No details added yet</p>
             )}
           </div>
-        </div>
+        </SpotlightCard>
       </div>
     </div>
   );
@@ -1207,6 +1219,9 @@ const ApplicationsTab = memo(function ApplicationsTab({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+            <TiltCard
+              maxTilt={4}
               className={`rounded-2xl border bg-white/[0.02] overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
                 isHighlighted
                   ? "border-[#C1FF72]/40 ring-1 ring-[#C1FF72]/20 shadow-[0_0_30px_rgba(193,255,114,0.08)]"
@@ -1334,6 +1349,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                   </div>
                 </div>
               </div>
+            </TiltCard>
             </motion.div>
           );
         })}
@@ -1437,39 +1453,42 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
-            onClick={() => router.push(`/attendees/tickets/${t.id}`)}
           >
-            <div className="p-4 flex items-center gap-4">
-              {/* Ticket icon */}
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C1FF72]/15 to-[#C1FF72]/5 border border-[#C1FF72]/10 flex items-center justify-center flex-shrink-0">
-                <Ticket
-                  size={20}
-                  className="text-[#C1FF72] group-hover:scale-110 transition-transform duration-300"
+            <TiltCard
+              className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
+              onClick={() => router.push(`/attendees/tickets/${t.id}`)}
+            >
+              <div className="p-4 flex items-center gap-4">
+                {/* Ticket icon */}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C1FF72]/15 to-[#C1FF72]/5 border border-[#C1FF72]/10 flex items-center justify-center flex-shrink-0">
+                  <Ticket
+                    size={20}
+                    className="text-[#C1FF72] group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm mb-0.5 line-clamp-1">
+                    {t.event?.name || "Event"}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-neutral-500">
+                    <span className="flex items-center gap-1">
+                      <Calendar size={11} />
+                      {formatEventDate(t.event?.date)}
+                    </span>
+                    {t.pass_type && (
+                      <span className="text-neutral-400">{t.pass_type}</span>
+                    )}
+                  </div>
+                </div>
+
+                <ChevronRight
+                  size={18}
+                  className="text-neutral-600 group-hover:text-[#C1FF72] transition-colors flex-shrink-0"
                 />
               </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm mb-0.5 line-clamp-1">
-                  {t.event?.name || "Event"}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-neutral-500">
-                  <span className="flex items-center gap-1">
-                    <Calendar size={11} />
-                    {formatEventDate(t.event?.date)}
-                  </span>
-                  {t.pass_type && (
-                    <span className="text-neutral-400">{t.pass_type}</span>
-                  )}
-                </div>
-              </div>
-
-              <ChevronRight
-                size={18}
-                className="text-neutral-600 group-hover:text-[#C1FF72] transition-colors flex-shrink-0"
-              />
-            </div>
+            </TiltCard>
           </motion.div>
         ))}
       </div>

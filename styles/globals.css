@@ -198,6 +198,30 @@ select option {
   padding: 10px;
 }
 
+/* React Bits-inspired animations */
+@keyframes shimmer-text {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes border-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spotlight-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.animate-shimmer-text {
+  animation: shimmer-text 4s ease-in-out infinite;
+}
+
+.animate-border-rotate {
+  animation: border-rotate 3s linear infinite;
+}
+
 /* Attendee Dashboard Animations (from redesign-attendee-dashboard) */
 @keyframes shimmer {
   0% { background-position: -200% center; }
