@@ -5,25 +5,26 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
 import {
-  Search,
   ClipboardList,
   Ticket,
-  Play,
   ChevronRight,
   Calendar,
   MapPin,
-  Sparkles,
-  Clock,
   LogOut,
   Instagram,
   User,
-  Globe,
   Building2,
   Copy,
   Share2,
-  ExternalLink,
   AlertTriangle,
   XCircle,
+  Camera,
+  Pencil,
+  Loader2,
+  Mail,
+  Phone,
+  Briefcase,
+  GraduationCap,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -36,15 +37,15 @@ import {
   getRegistrations,
   getTickets,
   cancelRegistration,
+  updateProfile,
   Profile,
   ExploreEvent,
   RegistrationItem,
   TicketItem,
-  EventOrganization,
 } from "@/lib/api";
 
 // ═══════════════════════════════════════════════════════════
-// MAIN DASHBOARD PAGE — PREMIUM APPLE × SPOTIFY × WHISPR
+// MAIN DASHBOARD PAGE
 // ═══════════════════════════════════════════════════════════
 export default function AttendeeDashboardPage() {
   return (
@@ -65,8 +66,8 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
-    "explore" | "applications" | "tickets"
-  >("explore");
+    "profile" | "applications" | "tickets"
+  >("profile");
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [events, setEvents] = useState<ExploreEvent[]>([]);
@@ -80,14 +81,14 @@ function DashboardContent() {
   const highlightedAppId = searchParams.get('highlight');
   const tabParam = searchParams.get('tab');
 
-  // Switch to applications tab if highlight param is present
+  // Switch tab based on URL params
   useEffect(() => {
     if (highlightedAppId || tabParam === 'applications') {
       setActiveTab('applications');
     } else if (tabParam === 'tickets') {
       setActiveTab('tickets');
-    } else if (tabParam === 'explore') {
-      setActiveTab('explore');
+    } else if (tabParam === 'profile') {
+      setActiveTab('profile');
     }
   }, [highlightedAppId, tabParam]);
 
@@ -100,7 +101,7 @@ function DashboardContent() {
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () =>
       setActiveTab((t) =>
-        t === "explore"
+        t === "profile"
           ? "applications"
           : t === "applications"
           ? "tickets"
@@ -111,18 +112,24 @@ function DashboardContent() {
         t === "tickets"
           ? "applications"
           : t === "applications"
-          ? "explore"
-          : "explore"
+          ? "profile"
+          : "profile"
       ),
     trackMouse: true,
   });
 
-  // Fetch profile first
+  // Fetch profile and events on mount
   useEffect(() => {
     (async () => {
-      const me = await getMe();
-      setProfile(me);
-      setLoading(false);
+      try {
+        const [me, evts] = await Promise.all([getMe(), getAttendeeEvents()]);
+        setProfile(me);
+        setEvents(evts);
+      } catch {
+        // Profile fetch failed - likely not authenticated
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 
@@ -132,9 +139,6 @@ function DashboardContent() {
       setTabLoading(true);
 
       try {
-        if (activeTab === "explore" && events.length === 0) {
-          setEvents(await getAttendeeEvents());
-        }
         if (activeTab === "applications" && registrations.length === 0) {
           setRegistrations(await getRegistrations());
         }
@@ -161,6 +165,10 @@ function DashboardContent() {
     }
   };
 
+  const handleProfileUpdated = (updated: Profile) => {
+    setProfile(updated);
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-[#000000]">
@@ -176,6 +184,8 @@ function DashboardContent() {
       </div>
     );
   }
+
+  const mainEvent = events[0] || null;
 
   return (
     <div
@@ -195,13 +205,16 @@ function DashboardContent() {
       />
 
       {/* Mobile Header */}
-      <MobileHeader profile={profile} />
+      <MobileHeader
+        profile={profile}
+        onEditProfile={() => setActiveTab("profile")}
+      />
 
       <div className="lg:ml-[280px]">
         {/* HERO SECTION */}
         <motion.section
           style={{ opacity: heroOpacity, scale: heroScale }}
-          className="relative px-6 lg:px-12 pt-8 pb-12"
+          className="relative px-6 lg:px-12 pt-8 pb-6"
         >
           <div className="max-w-7xl mx-auto">
             {/* Welcome Header */}
@@ -209,7 +222,7 @@ function DashboardContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="mb-8"
+              className="mb-6"
             >
               <h1 className="text-4xl lg:text-5xl font-bold tracking-tight whitespace-nowrap">
                 <span className="text-neutral-400">Welcome back,</span>{" "}
@@ -217,33 +230,8 @@ function DashboardContent() {
               </h1>
             </motion.div>
 
-            {/* Stats Cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="grid grid-cols-3 gap-4 mb-4"
-            >
-              <StatsCard
-                icon={<Sparkles size={20} />}
-                value={events.length}
-                label="Events"
-                color="from-[#C1FF72] to-[#A5E652]"
-              />
-              <StatsCard
-                icon={<Clock size={20} />}
-                value={registrations.length}
-                label="Applications"
-                color="from-[#6C2DFF] to-[#8B5CF6]"
-              />
-              <StatsCard
-                icon={<Ticket size={20} />}
-                value={tickets.length}
-                label="Tickets"
-                color="from-[#FF6B6B] to-[#FF8E53]"
-              />
-            </motion.div>
-
+            {/* Hero Event Card */}
+            <HeroEventCard event={mainEvent} />
           </div>
         </motion.section>
 
@@ -261,10 +249,8 @@ function DashboardContent() {
                 <div className="flex justify-center py-20">
                   <div className="w-12 h-12 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
                 </div>
-              ) : activeTab === "explore" ? (
-                <ExploreTab events={events} onViewApplication={(regId) => {
-                  router.push(`/attendees/dashboard?tab=applications&highlight=${regId}`);
-                }} />
+              ) : activeTab === "profile" ? (
+                <ProfileTab profile={profile} onProfileUpdated={handleProfileUpdated} />
               ) : activeTab === "applications" ? (
                 <ApplicationsTab registrations={registrations} highlightedId={highlightedAppId} onCancel={handleCancelRegistration} />
               ) : (
@@ -281,33 +267,553 @@ function DashboardContent() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// STATS CARD COMPONENT
+// HERO EVENT CARD
 // ═══════════════════════════════════════════════════════════
-function StatsCard({
-  icon,
-  value,
-  label,
-  color,
-}: {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-  color: string;
-}) {
+function HeroEventCard({ event }: { event: ExploreEvent | null }) {
+  const router = useRouter();
+
+  const formatEventDate = (dateStr: string | null) => {
+    if (!dateStr) return "Date TBA";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  if (!event) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="rounded-3xl bg-white/[0.02] border border-white/5 p-8 text-center"
+      >
+        <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
+          <Calendar size={24} className="text-neutral-600" />
+        </div>
+        <p className="text-neutral-500 text-sm">No upcoming events</p>
+      </motion.div>
+    );
+  }
+
+  const r = event.user_relation;
+  const org = event.organization;
+  const eventSlug = generateEventSlug(event.name, event.id);
+
+  let ctaLabel = "Get Your Pass";
+  let ctaAction = () => router.push(`/attendees/events/${eventSlug}`);
+
+  if (r?.has_ticket) {
+    ctaLabel = "View Ticket";
+    ctaAction = () => router.push(`/attendees/tickets/${r.ticket?.id}`);
+  } else if (r?.is_registered) {
+    ctaLabel = "View Application";
+    ctaAction = () => router.push(`/attendees/dashboard?tab=applications&highlight=${r.registration?.id}`);
+  }
+
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="relative overflow-hidden rounded-2xl bg-white/[0.02] backdrop-blur-xl border border-white/10 p-6 group cursor-default"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-[#C1FF72]/30 transition-all cursor-pointer"
+      onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
-      {/* Gradient Glow */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+      {/* Event Cover */}
+      <div className="relative h-48 sm:h-64 overflow-hidden">
+        <img
+          src={event.cover || "/event-placeholder.jpg"}
+          alt={event.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
-      <div className="relative">
-        <div className="text-neutral-400 mb-3">{icon}</div>
-        <div className="text-3xl font-bold mb-1">{value}</div>
-        <div className="text-xs text-neutral-500 uppercase tracking-wider">{label}</div>
+        {/* Organization Badge */}
+        {org && (
+          <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
+            {org.logo ? (
+              <img
+                src={org.logo}
+                alt={org.name || 'Organization'}
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            ) : (
+              <Building2 size={14} className="text-white/70" />
+            )}
+            <span className="text-xs text-white/80 font-medium">{org.name || 'Organizer'}</span>
+          </div>
+        )}
+
+        {/* Registration Status */}
+        {r?.is_registered && (
+          <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/40 backdrop-blur-md">
+            <span className="text-xs text-[#C1FF72] font-medium">Registered</span>
+          </div>
+        )}
+
+        {/* Bottom info overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 group-hover:text-[#C1FF72] transition-colors">
+            {event.name}
+          </h2>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
+            {event.date && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                <Calendar size={13} className="text-[#C1FF72]" />
+                <span>{formatEventDate(event.date)}</span>
+              </div>
+            )}
+            {event.location && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm">
+                <MapPin size={13} className="text-[#C1FF72]" />
+                <span className="line-clamp-1">{event.location}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="p-6 pt-4">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            ctaAction();
+          }}
+          className={`w-full py-3.5 rounded-full text-sm font-semibold transition-all ${
+            r?.has_ticket
+              ? "bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/30 hover:bg-[#C1FF72]/30"
+              : r?.is_registered
+              ? "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+              : "bg-gradient-to-r from-[#C1FF72] to-[#A5E652] text-black hover:shadow-[0_8px_30px_-8px_rgba(193,255,114,0.4)] hover:scale-[1.02]"
+          }`}
+        >
+          {ctaLabel}
+        </button>
       </div>
     </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE TAB
+// ═══════════════════════════════════════════════════════════
+function ProfileTab({
+  profile,
+  onProfileUpdated,
+}: {
+  profile: Profile | null;
+  onProfileUpdated: (updated: Profile) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Edit form state
+  const [fullName, setFullName] = useState("");
+  const [bio, setBio] = useState("");
+  const [profession, setProfession] = useState("");
+  const [company, setCompany] = useState("");
+  const [university, setUniversity] = useState("");
+  const [instagramHandle, setInstagramHandle] = useState("@");
+  const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [profilePicPreview, setProfilePicPreview] = useState("");
+
+  // Initialize form fields when entering edit mode
+  const startEditing = () => {
+    if (!profile) return;
+    setFullName(profile.fullName || "");
+    setBio(profile.bio || "");
+    setProfession(profile.profession || "");
+    setCompany(profile.company || "");
+    setUniversity(profile.university || "");
+    setInstagramHandle(profile.instagramHandle || "@");
+    setProfilePic(null);
+    setProfilePicPreview(profile.profilePicture || "");
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setProfilePic(null);
+    setProfilePicPreview(profile?.profilePicture || "");
+  };
+
+  const handleProfilePic = (file: File | null) => {
+    if (!file) return;
+    setProfilePic(file);
+    setProfilePicPreview(URL.createObjectURL(file));
+  };
+
+  const handleInstagramChange = (val: string) => {
+    let normalized = val.replace(/\s+/g, "");
+    if (!normalized.startsWith("@")) {
+      normalized = "@" + normalized.replace(/^@+/, "");
+    }
+    if (normalized === "@") normalized = "@";
+    setInstagramHandle(normalized);
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      const form = new FormData();
+      if (fullName.trim()) form.append("full_name", fullName.trim());
+      if (profession) form.append("profession", profession);
+      if (company) form.append("company", company);
+      if (university) form.append("university", university);
+      if (instagramHandle.trim() !== "@") form.append("instagram_handle", instagramHandle.trim());
+      if (bio.trim()) form.append("bio", bio.trim());
+      if (profilePic) form.append("photo", profilePic);
+
+      await updateProfile(form);
+      const refreshed = await getMe();
+      onProfileUpdated(refreshed);
+      setIsEditing(false);
+      toast.success("Profile updated successfully");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!profile) return null;
+
+  // ─── EDIT MODE ───
+  if (isEditing) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-2xl font-bold mb-1">Edit Profile</h2>
+            <p className="text-sm text-neutral-500">Update your information</p>
+          </div>
+          <button
+            onClick={cancelEditing}
+            className="px-4 py-2 rounded-xl text-sm text-neutral-400 hover:text-white hover:bg-white/5 border border-white/10 transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <div className="max-w-lg mx-auto space-y-6">
+          {/* Profile Picture Upload */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center"
+          >
+            <motion.div
+              onClick={() => document.getElementById("editProfilePicInput")?.click()}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative w-28 h-28 rounded-full cursor-pointer group"
+            >
+              {profilePicPreview ? (
+                <img
+                  src={profilePicPreview}
+                  alt="Profile"
+                  className="w-full h-full rounded-full object-cover border-2 border-[#C1FF72]/50"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-white/[0.07] border-2 border-dashed border-white/20 flex items-center justify-center transition-colors group-hover:border-[#C1FF72]/50">
+                  <User size={32} className="text-white/40" />
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#C1FF72] flex items-center justify-center">
+                <Camera size={16} className="text-black" />
+              </div>
+              <input
+                id="editProfilePicInput"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleProfilePic(e.target.files?.[0] || null)}
+                className="hidden"
+              />
+            </motion.div>
+            <p className="text-sm text-white/40 mt-3">Tap to change photo</p>
+          </motion.div>
+
+          {/* Full Name */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-white/60">Full Name</label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Your full name"
+              className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg placeholder:text-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+            />
+          </div>
+
+          {/* Profession */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-white/60">What do you do?</label>
+            <select
+              value={profession}
+              onChange={(e) => setProfession(e.target.value)}
+              className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg outline-none transition-all duration-300 cursor-pointer appearance-none focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 1rem center',
+                backgroundSize: '1.5rem',
+              }}
+            >
+              <option value="" className="bg-[#0a0a0a] text-white">Select your profession</option>
+              <option value="student" className="bg-[#0a0a0a] text-white">Student</option>
+              <option value="employed" className="bg-[#0a0a0a] text-white">Employed</option>
+              <option value="freelancer" className="bg-[#0a0a0a] text-white">Freelancer</option>
+              <option value="entrepreneur" className="bg-[#0a0a0a] text-white">Entrepreneur</option>
+            </select>
+          </div>
+
+          {/* Conditional University / Company */}
+          <AnimatePresence>
+            {profession === "student" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2"
+              >
+                <label className="block text-sm font-medium text-white/60">University</label>
+                <input
+                  type="text"
+                  value={university}
+                  onChange={(e) => setUniversity(e.target.value)}
+                  placeholder="Your university"
+                  className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg placeholder:text-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+                />
+              </motion.div>
+            )}
+            {profession === "employed" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-2"
+              >
+                <label className="block text-sm font-medium text-white/60">Company</label>
+                <input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Your company"
+                  className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg placeholder:text-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Instagram */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-white/60">Instagram</label>
+            <input
+              type="text"
+              value={instagramHandle}
+              onChange={(e) => handleInstagramChange(e.target.value)}
+              placeholder="@yourhandle"
+              className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg placeholder:text-white/30 outline-none transition-all duration-300 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+            />
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-white/60">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Tell us a little about yourself..."
+              rows={3}
+              className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg placeholder:text-white/30 outline-none transition-all duration-300 resize-none focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)] hover:bg-white/[0.09]"
+            />
+          </div>
+
+          {/* Save Button */}
+          <motion.button
+            whileHover={{ scale: saving ? 1 : 1.02 }}
+            whileTap={{ scale: saving ? 1 : 0.98 }}
+            onClick={handleSave}
+            disabled={saving}
+            className={`w-full py-4 px-8 rounded-2xl text-lg font-semibold transition-all duration-300 ${
+              saving
+                ? 'bg-white/10 text-white/40 cursor-not-allowed'
+                : 'bg-[#C1FF72] text-black shadow-[0_0_40px_rgba(193,255,114,0.3)] hover:shadow-[0_0_60px_rgba(193,255,114,0.4)]'
+            }`}
+          >
+            {saving ? (
+              <Loader2 size={24} className="mx-auto animate-spin" />
+            ) : (
+              "Save Changes"
+            )}
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── READ-ONLY VIEW ───
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold mb-1">My Profile</h2>
+          <p className="text-sm text-neutral-500">Your personal information</p>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={startEditing}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-[#C1FF72]/10 text-[#C1FF72] border border-[#C1FF72]/30 hover:bg-[#C1FF72]/20 transition-all"
+        >
+          <Pencil size={14} />
+          Edit Profile
+        </motion.button>
+      </div>
+
+      <div className="max-w-2xl mx-auto">
+        {/* Profile Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="rounded-3xl bg-white/[0.02] border border-white/5 p-6 sm:p-8 mb-6"
+        >
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Avatar */}
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border-2 border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {profile.profilePicture ? (
+                <img
+                  src={profile.profilePicture}
+                  alt={profile.fullName || 'Profile'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-bold text-white/70">
+                  {profile.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                </span>
+              )}
+            </div>
+
+            {/* Name & Quick Info */}
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <h3 className="text-2xl font-bold mb-1">{profile.fullName || 'User'}</h3>
+              {profile.bio && (
+                <p className="text-sm text-neutral-400 mb-3 line-clamp-2">{profile.bio}</p>
+              )}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                {profile.profession && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-xs text-neutral-300 capitalize">
+                    <Briefcase size={12} className="text-[#C1FF72]" />
+                    {profile.profession}
+                  </span>
+                )}
+                {profile.age && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-xs text-neutral-300">
+                    {profile.age} years old
+                  </span>
+                )}
+                {profile.gender && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-xs text-neutral-300 capitalize">
+                    {profile.gender}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Details Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Contact Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="rounded-2xl bg-white/[0.02] border border-white/5 p-5"
+          >
+            <h4 className="text-xs text-neutral-500 uppercase tracking-wider mb-4 font-medium">Contact</h4>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                  <Mail size={14} className="text-neutral-400" />
+                </div>
+                <span className="text-sm text-neutral-300 truncate">{profile.email}</span>
+              </div>
+              {profile.registeredNumber && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <Phone size={14} className="text-neutral-400" />
+                  </div>
+                  <span className="text-sm text-neutral-300">{profile.registeredNumber}</span>
+                </div>
+              )}
+              {profile.instagramHandle && (
+                <a
+                  href={`https://instagram.com/${profile.instagramHandle.replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 group/ig"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <Instagram size={14} className="text-neutral-400 group-hover/ig:text-[#C1FF72] transition-colors" />
+                  </div>
+                  <span className="text-sm text-neutral-300 group-hover/ig:text-[#C1FF72] transition-colors">
+                    {profile.instagramHandle.startsWith('@') ? profile.instagramHandle : `@${profile.instagramHandle}`}
+                  </span>
+                </a>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Professional Info */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="rounded-2xl bg-white/[0.02] border border-white/5 p-5"
+          >
+            <h4 className="text-xs text-neutral-500 uppercase tracking-wider mb-4 font-medium">Details</h4>
+            <div className="space-y-3">
+              {profile.profession && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <Briefcase size={14} className="text-neutral-400" />
+                  </div>
+                  <span className="text-sm text-neutral-300 capitalize">{profile.profession}</span>
+                </div>
+              )}
+              {profile.company && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <Building2 size={14} className="text-neutral-400" />
+                  </div>
+                  <span className="text-sm text-neutral-300">{profile.company}</span>
+                </div>
+              )}
+              {profile.university && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                    <GraduationCap size={14} className="text-neutral-400" />
+                  </div>
+                  <span className="text-sm text-neutral-300">{profile.university}</span>
+                </div>
+              )}
+              {!profile.profession && !profile.company && !profile.university && (
+                <p className="text-sm text-neutral-600">No details added yet</p>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -319,9 +825,9 @@ function Sidebar({
   setActiveTab,
   profile,
 }: {
-  activeTab: "explore" | "applications" | "tickets";
+  activeTab: "profile" | "applications" | "tickets";
   setActiveTab: React.Dispatch<
-    React.SetStateAction<"explore" | "applications" | "tickets">
+    React.SetStateAction<"profile" | "applications" | "tickets">
   >;
   profile: Profile | null;
 }) {
@@ -341,8 +847,11 @@ function Sidebar({
       </div>
 
       {/* Profile Section */}
-      <div className="mb-10">
-        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center mb-4 overflow-hidden group">
+      <button
+        onClick={() => setActiveTab("profile")}
+        className="mb-10 text-left group"
+      >
+        <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center mb-4 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72] to-[#6C2DFF] opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
           {profile?.profilePicture ? (
             <img
@@ -356,12 +865,11 @@ function Sidebar({
             </span>
           )}
         </div>
-
-        <h2 className="text-lg font-semibold mb-1">
+        <h2 className="text-lg font-semibold mb-1 group-hover:text-[#C1FF72] transition-colors">
           {profile?.fullName}
         </h2>
         <p className="text-sm text-neutral-500">{profile?.email}</p>
-      </div>
+      </button>
 
       {/* Navigation */}
       <nav className="flex-1">
@@ -370,7 +878,7 @@ function Sidebar({
         </p>
         <div className="flex flex-col gap-2">
           {[
-            { key: "explore", label: "Explore", icon: Search },
+            { key: "profile", label: "Profile", icon: User },
             { key: "applications", label: "Applications", icon: ClipboardList },
             { key: "tickets", label: "Tickets", icon: Ticket },
           ].map(({ key, label, icon: Icon }) => {
@@ -399,7 +907,7 @@ function Sidebar({
       {/* Bottom Section */}
       <div className="mt-auto pt-6 border-t border-white/5">
         <p className="text-xs text-neutral-600">
-          © 2026 whispr underground
+          &copy; 2026 whispr underground
         </p>
       </div>
     </aside>
@@ -409,7 +917,13 @@ function Sidebar({
 // ═══════════════════════════════════════════════════════════
 // MOBILE HEADER
 // ═══════════════════════════════════════════════════════════
-function MobileHeader({ profile }: { profile: Profile | null }) {
+function MobileHeader({
+  profile,
+  onEditProfile,
+}: {
+  profile: Profile | null;
+  onEditProfile: () => void;
+}) {
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -504,6 +1018,18 @@ function MobileHeader({ profile }: { profile: Profile | null }) {
                 </div>
               </div>
 
+              {/* Edit Profile */}
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  onEditProfile();
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/5 hover:text-[#C1FF72] transition-colors mb-1"
+              >
+                <Pencil size={18} />
+                <span>Edit Profile</span>
+              </button>
+
               {/* Instagram Handle */}
               {profile?.instagramHandle && (
                 <a
@@ -540,9 +1066,9 @@ function MobileNav({
   activeTab,
   setActiveTab,
 }: {
-  activeTab: "explore" | "applications" | "tickets";
+  activeTab: "profile" | "applications" | "tickets";
   setActiveTab: React.Dispatch<
-    React.SetStateAction<"explore" | "applications" | "tickets">
+    React.SetStateAction<"profile" | "applications" | "tickets">
   >;
 }) {
   return (
@@ -550,7 +1076,7 @@ function MobileNav({
       <div className="mx-4 mb-4 rounded-3xl bg-black/80 backdrop-blur-2xl border border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         <div className="grid grid-cols-3 p-2">
           {[
-            { key: "explore", label: "Explore", icon: Search },
+            { key: "profile", label: "Profile", icon: User },
             { key: "applications", label: "Applications", icon: ClipboardList },
             { key: "tickets", label: "Tickets", icon: Ticket },
           ].map(({ key, label, icon: Icon }) => {
@@ -559,7 +1085,7 @@ function MobileNav({
               <button
                 key={key}
                 onClick={() =>
-                  setActiveTab(key as "explore" | "applications" | "tickets")
+                  setActiveTab(key as "profile" | "applications" | "tickets")
                 }
                 className={`relative flex flex-col items-center justify-center py-4 px-3 rounded-2xl transition-all ${
                   isActive
@@ -584,168 +1110,6 @@ function MobileNav({
         </div>
       </div>
     </nav>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════
-// EXPLORE TAB
-// ═══════════════════════════════════════════════════════════
-function ExploreTab({
-  events,
-  onViewApplication,
-}: {
-  events: ExploreEvent[];
-  onViewApplication: (registrationId: string) => void;
-}) {
-  const router = useRouter();
-
-  const formatEventDate = (dateStr: string | null) => {
-    if (!dateStr) return "Date TBA";
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  if (!events.length)
-    return (
-      <div className="text-center py-20">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-          <Search size={24} className="text-neutral-600" />
-        </div>
-        <p className="text-neutral-500">No events available yet.</p>
-      </div>
-    );
-
-  const displayEvents = events;
-
-  return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-1">Discover Events</h2>
-        <p className="text-sm text-neutral-500">Find your next underground experience</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {displayEvents.map((event, index) => {
-          const r = event.user_relation;
-          const org = event.organization;
-
-          const eventSlug = generateEventSlug(event.name, event.id);
-          let ctaLabel = "Get Pass";
-          let ctaAction = () => router.push(`/attendees/events/${eventSlug}`);
-
-          if (r?.has_ticket) {
-            ctaLabel = "View Ticket";
-            ctaAction = () =>
-              router.push(`/attendees/tickets/${r.ticket?.id}`);
-          } else if (r?.is_registered) {
-            ctaLabel = "View Application";
-            ctaAction = () => {
-              // Navigate to applications tab with highlight
-              if (r.registration?.id) {
-                onViewApplication(r.registration.id);
-              }
-            };
-          }
-
-          return (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="group rounded-3xl overflow-hidden bg-white/[0.02] border border-white/5 hover:border-[#C1FF72]/30 transition-all cursor-pointer"
-              onClick={() => router.push(`/attendees/events/${eventSlug}`)}
-            >
-              {/* Event Image */}
-              <div className="relative h-72 overflow-hidden">
-                <img
-                  src={event.cover || "/event-placeholder.jpg"}
-                  alt={event.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-
-                {/* Organization Badge - Top Left */}
-                {org && (
-                  <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10">
-                    {org.logo ? (
-                      <img
-                        src={org.logo}
-                        alt={org.name || 'Organization'}
-                        className="w-5 h-5 rounded-full object-cover"
-                      />
-                    ) : (
-                      <Building2 size={14} className="text-white/70" />
-                    )}
-                    <span className="text-xs text-white/80 font-medium">{org.name || 'Organizer'}</span>
-                  </div>
-                )}
-
-                {/* Status Badge - Top Right */}
-                {r?.is_registered && (
-                  <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/40 backdrop-blur-md">
-                    <span className="text-xs text-[#C1FF72] font-medium">Registered</span>
-                  </div>
-                )}
-
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="w-16 h-16 rounded-full bg-[#C1FF72]/20 backdrop-blur-md border border-[#C1FF72]/40 flex items-center justify-center">
-                    <Play size={24} className="text-[#C1FF72] ml-1" fill="currentColor" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Event Info */}
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-3 line-clamp-1 group-hover:text-[#C1FF72] transition-colors">
-                  {event.name}
-                </h3>
-
-                <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-400 mb-5">
-                  {event.date && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5">
-                      <Calendar size={13} className="text-[#C1FF72]" />
-                      <span>{formatEventDate(event.date)}</span>
-                    </div>
-                  )}
-                  {event.location && (
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5">
-                      <MapPin size={13} className="text-[#C1FF72]" />
-                      <span className="line-clamp-1">{event.location}</span>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    ctaAction();
-                  }}
-                  className={`w-full py-3.5 rounded-full text-sm font-semibold transition-all ${
-                    r?.has_ticket
-                      ? "bg-[#C1FF72]/20 text-[#C1FF72] border border-[#C1FF72]/30 hover:bg-[#C1FF72]/30"
-                      : r?.is_registered
-                      ? "bg-white/5 text-white border border-white/10 hover:bg-white/10"
-                      : "bg-gradient-to-r from-[#C1FF72] to-[#A5E652] text-black hover:shadow-[0_8px_30px_-8px_rgba(193,255,114,0.4)] hover:scale-[1.02]"
-                  }`}
-                >
-                  {ctaLabel}
-                </button>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-    </div>
   );
 }
 
