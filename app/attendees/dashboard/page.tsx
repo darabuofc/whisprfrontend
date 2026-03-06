@@ -524,7 +524,7 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
       onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
       {/* Cover Image */}
-      <div className="relative h-40 sm:h-52 overflow-hidden">
+      <div className="relative aspect-video overflow-hidden">
         <img
           src={event.cover || "/event-placeholder.jpg"}
           alt={event.name}
