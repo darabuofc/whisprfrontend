@@ -82,6 +82,8 @@ export interface Profile {
   whatsappVerified: boolean;
   instagramHandle?: string;
   profession?: string;
+  company?: string;
+  university?: string;
   bio?: string;
   isOnboarded: boolean;
   profilePicture: string | null;
@@ -283,12 +285,22 @@ export async function getMe(): Promise<Profile> {
     whatsappVerified: a.whatsapp_verified,
     instagramHandle: a.instagram_handle,
     profession: a.profession,
+    company: a.company ?? undefined,
+    university: a.university ?? undefined,
     bio: a.bio,
     isOnboarded: a.is_onboarded,
     gender: a.gender,
     age: a.age,
     profilePicture: a.profile_picture ?? null,
   };
+}
+
+export async function updateProfile(data: FormData) {
+  return (
+    await api.put("/attendees/me/profile", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  ).data;
 }
 
 // ----------------------------------------------------------
