@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, memo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSwipeable } from "react-swipeable";
@@ -46,6 +46,16 @@ import {
   RegistrationItem,
   TicketItem,
 } from "@/lib/api";
+
+// ─── STATIC CONSTANTS (outside component to avoid re-creation) ───
+const AMBIENT_DELAY_STYLE = { animationDelay: '-1.5s' } as const;
+const TABS = [
+  { key: "profile" as const, label: "Profile", icon: User },
+  { key: "applications" as const, label: "Applications", icon: ClipboardList },
+  { key: "tickets" as const, label: "Tickets", icon: Ticket },
+] as const;
+const SPRING_TRANSITION = { type: "spring" as const, bounce: 0.2, duration: 0.5 };
+const TAB_CONTENT_TRANSITION = { duration: 0.25 };
 
 // ═══════════════════════════════════════════════════════════
 // MAIN DASHBOARD PAGE
@@ -132,51 +142,60 @@ function DashboardContent() {
     const fetchData = async () => {
       setTabLoading(true);
       try {
-        if (activeTab === "applications" && registrations.length === 0) {
-          setRegistrations(await getRegistrations());
+        if (activeTab === "applications") {
+          setRegistrations(prev => prev.length === 0 ? [] : prev);
+          if (registrations.length === 0) {
+            const data = await getRegistrations();
+            setRegistrations(data);
+          }
         }
-        if (activeTab === "tickets" && tickets.length === 0) {
-          setTickets(await getTickets());
+        if (activeTab === "tickets") {
+          setTickets(prev => prev.length === 0 ? [] : prev);
+          if (tickets.length === 0) {
+            const data = await getTickets();
+            setTickets(data);
+          }
         }
       } finally {
         setTabLoading(false);
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
-  const handleCancelRegistration = async (registrationId: string) => {
-    const prev = registrations;
-    setRegistrations(
-      registrations.filter(
-        (r) => r.registration_airtable_id !== registrationId
-      )
-    );
+  const handleCancelRegistration = useCallback(async (registrationId: string) => {
+    // Optimistic update — capture snapshot for rollback
+    let snapshot: RegistrationItem[] = [];
+    setRegistrations(prev => {
+      snapshot = prev;
+      return prev.filter((r) => r.registration_airtable_id !== registrationId);
+    });
     try {
       await cancelRegistration(registrationId);
       toast.success("Registration cancelled successfully");
     } catch (err: any) {
-      setRegistrations(prev);
+      setRegistrations(snapshot);
       toast.error(err.message || "Failed to cancel registration");
     }
-  };
+  }, []);
 
-  const handleProfileUpdated = (updated: Profile) => {
+  const handleProfileUpdated = useCallback((updated: Profile) => {
     setProfile(updated);
-  };
+  }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
     localStorage.removeItem("whispr_token");
     localStorage.removeItem("token");
     localStorage.removeItem("whispr_role");
     router.push("/auth");
-  };
+  }, [router]);
 
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#060606] relative overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[120px] animate-float" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[100px] animate-float" style={{ animationDelay: '-1.5s' }} />
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[80px] animate-float will-change-transform" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
         <div className="relative">
           <div className="w-10 h-10 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
           <div className="absolute inset-0 w-10 h-10 rounded-full bg-[#C1FF72]/10 blur-md animate-pulse" />
@@ -186,11 +205,6 @@ function DashboardContent() {
   }
 
   const mainEvent = events[0] || null;
-  const tabs = [
-    { key: "profile" as const, label: "Profile", icon: User },
-    { key: "applications" as const, label: "Applications", icon: ClipboardList },
-    { key: "tickets" as const, label: "Tickets", icon: Ticket },
-  ];
 
   return (
     <div
@@ -198,10 +212,10 @@ function DashboardContent() {
       className="min-h-screen bg-[#060606] text-white font-satoshi relative overflow-hidden"
     >
       {/* ─── AMBIENT BACKGROUND ─── */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[120px] animate-float" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[100px] animate-float" style={{ animationDelay: '-1.5s' }} />
-        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#C1FF72]/[0.02] blur-[80px] animate-glow" />
+      <div className="fixed inset-0 pointer-events-none" style={{ contain: 'strict' }}>
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[80px] animate-float will-change-transform" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
+        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#C1FF72]/[0.02] blur-[60px] animate-glow will-change-transform" />
       </div>
 
       {/* ─── DESKTOP HEADER ─── */}
@@ -401,8 +415,8 @@ function DashboardContent() {
           </section>
 
           {/* Tab Bar */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6 backdrop-blur-sm relative">
-            {tabs.map(({ key, label, icon: Icon }) => {
+          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6 relative">
+            {TABS.map(({ key, label, icon: Icon }) => {
               const isActive = activeTab === key;
               return (
                 <button
@@ -418,7 +432,7 @@ function DashboardContent() {
                     <motion.div
                       layoutId="activeTab"
                       className="absolute inset-0 rounded-lg bg-white/[0.08] border border-white/[0.08]"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                      transition={SPRING_TRANSITION}
                     />
                   )}
                   <span className="relative z-10 flex items-center gap-2">
@@ -440,7 +454,7 @@ function DashboardContent() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
+              transition={TAB_CONTENT_TRANSITION}
             >
               {tabLoading ? (
                 <div className="flex justify-center py-16">
@@ -471,7 +485,7 @@ function DashboardContent() {
       {/* ─── MOBILE BOTTOM NAV ─── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#060606]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
         <div className="grid grid-cols-3 h-16">
-          {tabs.map(({ key, label, icon: Icon }) => {
+          {TABS.map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
             return (
               <button
@@ -504,7 +518,7 @@ function DashboardContent() {
 // ═══════════════════════════════════════════════════════════
 // HERO EVENT CARD
 // ═══════════════════════════════════════════════════════════
-function HeroEventCard({ event }: { event: ExploreEvent | null }) {
+const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEvent | null }) {
   const router = useRouter();
 
   const formatEventDate = (dateStr: string | null) => {
@@ -523,7 +537,7 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
 
   if (!event) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-8 text-center relative overflow-hidden">
+      <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-8 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] to-[#6C2DFF]/[0.02]" />
         <Calendar size={28} className="mx-auto mb-3 text-neutral-500 relative" />
         <p className="text-sm text-neutral-400 relative">No upcoming events</p>
@@ -553,7 +567,7 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
 
   return (
     <div
-      className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:border-[#C1FF72]/20 transition-all duration-500 cursor-pointer relative hover:shadow-[0_0_40px_rgba(193,255,114,0.06)]"
+      className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/20 transition-all duration-500 cursor-pointer relative hover:shadow-[0_0_40px_rgba(193,255,114,0.06)]"
       onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
       {/* Cover Image */}
@@ -631,12 +645,12 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
       </div>
     </div>
   );
-}
+});
 
 // ═══════════════════════════════════════════════════════════
 // PROFILE TAB
 // ═══════════════════════════════════════════════════════════
-function ProfileTab({
+const ProfileTab = memo(function ProfileTab({
   profile,
   onProfileUpdated,
 }: {
@@ -921,7 +935,7 @@ function ProfileTab({
       </div>
 
       {/* Profile card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
         <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] via-transparent to-[#6C2DFF]/[0.02] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-500" />
         <div className="relative">
           <div className="flex items-center gap-4 mb-4">
@@ -972,7 +986,7 @@ function ProfileTab({
 
       {/* Details grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-4 hover:border-white/[0.12] transition-colors duration-300">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
           <h4 className="text-[11px] text-[#C1FF72]/60 uppercase tracking-wider mb-3 font-medium">
             Contact
           </h4>
@@ -1002,7 +1016,7 @@ function ProfileTab({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-4 hover:border-white/[0.12] transition-colors duration-300">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
           <h4 className="text-[11px] text-[#6C2DFF]/80 uppercase tracking-wider mb-3 font-medium">
             Details
           </h4>
@@ -1028,7 +1042,7 @@ function ProfileTab({
       </div>
     </div>
   );
-}
+});
 
 function InfoRow({
   icon: Icon,
@@ -1063,14 +1077,14 @@ function InfoRow({
 // ═══════════════════════════════════════════════════════════
 // APPLICATIONS TAB
 // ═══════════════════════════════════════════════════════════
-function ApplicationsTab({
+const ApplicationsTab = memo(function ApplicationsTab({
   registrations,
   highlightedId,
   onCancel,
 }: {
   registrations: RegistrationItem[];
   highlightedId?: string | null;
-  onCancel: (registrationId: string) => Promise<void>;
+  onCancel: (registrationId: string) => void;
 }) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
@@ -1194,7 +1208,7 @@ function ApplicationsTab({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`rounded-2xl border bg-white/[0.02] backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
+              className={`rounded-2xl border bg-white/[0.02] overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
                 isHighlighted
                   ? "border-[#C1FF72]/40 ring-1 ring-[#C1FF72]/20 shadow-[0_0_30px_rgba(193,255,114,0.08)]"
                   : "border-white/[0.08]"
@@ -1378,12 +1392,12 @@ function ApplicationsTab({
       </AnimatePresence>
     </div>
   );
-}
+});
 
 // ═══════════════════════════════════════════════════════════
 // TICKETS TAB
 // ═══════════════════════════════════════════════════════════
-function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
+const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
   const router = useRouter();
 
   const formatEventDate = (dateStr: string | null | undefined) => {
@@ -1424,7 +1438,7 @@ function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
+            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
             onClick={() => router.push(`/attendees/tickets/${t.id}`)}
           >
             <div className="p-4 flex items-center gap-4">
@@ -1462,4 +1476,4 @@ function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
       </div>
     </div>
   );
-}
+});
