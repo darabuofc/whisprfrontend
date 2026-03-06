@@ -174,8 +174,13 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#060606]">
-        <div className="w-8 h-8 rounded-full border-2 border-[#C1FF72]/30 border-t-[#C1FF72] animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-[#060606] relative overflow-hidden">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[120px] animate-float" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[100px] animate-float" style={{ animationDelay: '-1.5s' }} />
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
+          <div className="absolute inset-0 w-10 h-10 rounded-full bg-[#C1FF72]/10 blur-md animate-pulse" />
+        </div>
       </div>
     );
   }
@@ -190,10 +195,17 @@ function DashboardContent() {
   return (
     <div
       {...swipeHandlers}
-      className="min-h-screen bg-[#060606] text-white font-satoshi"
+      className="min-h-screen bg-[#060606] text-white font-satoshi relative overflow-hidden"
     >
+      {/* ─── AMBIENT BACKGROUND ─── */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[120px] animate-float" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[100px] animate-float" style={{ animationDelay: '-1.5s' }} />
+        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#C1FF72]/[0.02] blur-[80px] animate-glow" />
+      </div>
+
       {/* ─── DESKTOP HEADER ─── */}
-      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#060606]/90 backdrop-blur-lg border-b border-white/[0.06]">
+      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#060606]/70 backdrop-blur-2xl border-b border-white/[0.06]">
         <Image
           src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
           alt="Whispr"
@@ -241,7 +253,7 @@ function DashboardContent() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c] p-2 shadow-2xl z-50"
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
                 >
                   <div className="px-3 py-2 mb-1">
                     <p className="text-sm font-medium truncate">
@@ -278,7 +290,7 @@ function DashboardContent() {
       </header>
 
       {/* ─── MOBILE HEADER ─── */}
-      <header className="lg:hidden sticky top-0 z-40 bg-[#060606]/90 backdrop-blur-lg border-b border-white/[0.06]">
+      <header className="lg:hidden sticky top-0 z-40 bg-[#060606]/70 backdrop-blur-2xl border-b border-white/[0.06]">
         <div className="flex items-center justify-between px-4 h-14">
           <Image
             src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
@@ -322,7 +334,7 @@ function DashboardContent() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-3 top-[58px] w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c] p-2 shadow-2xl z-50"
+                className="absolute right-3 top-[58px] w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
               >
                 <div className="px-3 py-2 mb-1">
                   <p className="text-sm font-medium truncate">
@@ -378,7 +390,7 @@ function DashboardContent() {
             <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">
               Welcome back
               {profile?.fullName
-                ? `, ${profile.fullName.split(" ")[0]}`
+                ? <span className="bg-gradient-to-r from-[#C1FF72] to-[#a8e650] bg-clip-text text-transparent">{`, ${profile.fullName.split(" ")[0]}`}</span>
                 : ""}
             </h1>
             <p className="text-sm text-neutral-500 mb-6">
@@ -389,23 +401,32 @@ function DashboardContent() {
           </section>
 
           {/* Tab Bar */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6">
+          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6 backdrop-blur-sm relative">
             {tabs.map(({ key, label, icon: Icon }) => {
               const isActive = activeTab === key;
               return (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${
                     isActive
-                      ? "bg-white/[0.08] text-white"
-                      : "text-neutral-500 hover:text-neutral-300"
+                      ? "bg-white/[0.08] text-white shadow-[0_0_20px_rgba(193,255,114,0.08)]"
+                      : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03]"
                   }`}
                 >
-                  <Icon size={15} strokeWidth={isActive ? 2 : 1.5} />
-                  <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden">
-                    {key === "applications" ? "Apps" : label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 rounded-lg bg-white/[0.08] border border-white/[0.08]"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Icon size={15} strokeWidth={isActive ? 2 : 1.5} className={isActive ? "text-[#C1FF72]" : ""} />
+                    <span className="hidden sm:inline">{label}</span>
+                    <span className="sm:hidden">
+                      {key === "applications" ? "Apps" : label}
+                    </span>
                   </span>
                 </button>
               );
@@ -423,7 +444,10 @@ function DashboardContent() {
             >
               {tabLoading ? (
                 <div className="flex justify-center py-16">
-                  <div className="w-8 h-8 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
+                  <div className="relative">
+                    <div className="w-8 h-8 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
+                    <div className="absolute inset-0 w-8 h-8 rounded-full bg-[#C1FF72]/10 blur-md animate-pulse" />
+                  </div>
                 </div>
               ) : activeTab === "profile" ? (
                 <ProfileTab
@@ -445,7 +469,7 @@ function DashboardContent() {
       </div>
 
       {/* ─── MOBILE BOTTOM NAV ─── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#060606]/95 backdrop-blur-lg border-t border-white/[0.06] pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#060606]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
         <div className="grid grid-cols-3 h-16">
           {tabs.map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
@@ -453,10 +477,17 @@ function DashboardContent() {
               <button
                 key={key}
                 onClick={() => setActiveTab(key)}
-                className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
                   isActive ? "text-[#C1FF72]" : "text-neutral-600"
                 }`}
               >
+                {isActive && (
+                  <motion.div
+                    layoutId="mobileNavIndicator"
+                    className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#C1FF72] shadow-[0_0_8px_rgba(193,255,114,0.5)]"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+                  />
+                )}
                 <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
                 <span className="text-[10px] font-medium">
                   {key === "applications" ? "Apps" : label}
@@ -492,9 +523,11 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
 
   if (!event) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/[0.08] p-8 text-center">
-        <Calendar size={24} className="mx-auto mb-3 text-neutral-600" />
-        <p className="text-sm text-neutral-500">No upcoming events</p>
+      <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-8 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] to-[#6C2DFF]/[0.02]" />
+        <Calendar size={28} className="mx-auto mb-3 text-neutral-500 relative" />
+        <p className="text-sm text-neutral-400 relative">No upcoming events</p>
+        <p className="text-xs text-neutral-600 mt-1 relative">Check back soon for new events</p>
       </div>
     );
   }
@@ -520,7 +553,7 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
 
   return (
     <div
-      className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] hover:border-white/[0.15] transition-all cursor-pointer"
+      className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:border-[#C1FF72]/20 transition-all duration-500 cursor-pointer relative hover:shadow-[0_0_40px_rgba(193,255,114,0.06)]"
       onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
       {/* Cover Image */}
@@ -528,9 +561,10 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
         <img
           src={event.cover || "/event-placeholder.jpg"}
           alt={event.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Status pills */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
@@ -549,7 +583,7 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
             </div>
           )}
           {r?.is_registered && (
-            <div className="px-2.5 py-1 rounded-full bg-[#C1FF72]/15 text-[11px] font-medium text-[#C1FF72]">
+            <div className="px-2.5 py-1 rounded-full bg-[#C1FF72]/15 border border-[#C1FF72]/20 text-[11px] font-medium text-[#C1FF72] shadow-[0_0_10px_rgba(193,255,114,0.2)]">
               Registered
             </div>
           )}
@@ -584,12 +618,12 @@ function HeroEventCard({ event }: { event: ExploreEvent | null }) {
             e.stopPropagation();
             ctaAction();
           }}
-          className={`w-full py-3 rounded-xl text-sm font-semibold transition-all ${
+          className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
             r?.has_ticket
-              ? "bg-[#C1FF72]/10 text-[#C1FF72] border border-[#C1FF72]/20 hover:bg-[#C1FF72]/15"
+              ? "bg-[#C1FF72]/10 text-[#C1FF72] border border-[#C1FF72]/20 hover:bg-[#C1FF72]/20 hover:shadow-[0_0_20px_rgba(193,255,114,0.15)]"
               : r?.is_registered
               ? "bg-white/[0.06] text-white border border-white/[0.08] hover:bg-white/[0.1]"
-              : "bg-[#C1FF72] text-black hover:brightness-110"
+              : "bg-gradient-to-r from-[#C1FF72] to-[#a8e650] text-black hover:shadow-[0_0_30px_rgba(193,255,114,0.3)] hover:scale-[1.01]"
           }`}
         >
           {ctaLabel}
@@ -855,10 +889,10 @@ function ProfileTab({
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`w-full py-3 rounded-xl text-sm font-semibold transition-all ${
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
               saving
                 ? "bg-white/[0.06] text-neutral-500 cursor-not-allowed"
-                : "bg-[#C1FF72] text-black hover:brightness-110"
+                : "bg-gradient-to-r from-[#C1FF72] to-[#a8e650] text-black hover:shadow-[0_0_30px_rgba(193,255,114,0.3)] hover:scale-[1.01]"
             }`}
           >
             {saving ? (
@@ -879,7 +913,7 @@ function ProfileTab({
         <h2 className="text-lg font-semibold">Profile</h2>
         <button
           onClick={startEditing}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C1FF72] bg-[#C1FF72]/10 hover:bg-[#C1FF72]/15 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C1FF72] bg-[#C1FF72]/10 hover:bg-[#C1FF72]/15 border border-[#C1FF72]/15 hover:shadow-[0_0_15px_rgba(193,255,114,0.1)] transition-all duration-300"
         >
           <Pencil size={12} />
           Edit
@@ -887,56 +921,59 @@ function ProfileTab({
       </div>
 
       {/* Profile card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6 mb-4">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden flex-shrink-0">
-            {profile.profilePicture ? (
-              <img
-                src={profile.profilePicture}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-xl font-bold text-neutral-500">
-                {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] via-transparent to-[#6C2DFF]/[0.02] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-500" />
+        <div className="relative">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-16 h-16 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/[0.06] ring-offset-2 ring-offset-[#060606]">
+              {profile.profilePicture ? (
+                <img
+                  src={profile.profilePicture}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xl font-bold text-neutral-500">
+                  {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl font-bold">{profile.fullName || "User"}</h3>
+              {profile.bio && (
+                <p className="text-sm text-neutral-400 mt-0.5 line-clamp-2">
+                  {profile.bio}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2">
+            {profile.profession && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C1FF72]/[0.06] border border-[#C1FF72]/[0.1] text-xs text-[#C1FF72]/80 capitalize">
+                <Briefcase size={11} className="text-[#C1FF72]/60" />
+                {profile.profession}
+              </span>
+            )}
+            {profile.age && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-neutral-300">
+                {profile.age} years old
+              </span>
+            )}
+            {profile.gender && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-neutral-300 capitalize">
+                {profile.gender}
               </span>
             )}
           </div>
-          <div className="min-w-0">
-            <h3 className="text-xl font-bold">{profile.fullName || "User"}</h3>
-            {profile.bio && (
-              <p className="text-sm text-neutral-400 mt-0.5 line-clamp-2">
-                {profile.bio}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2">
-          {profile.profession && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] text-xs text-neutral-300 capitalize">
-              <Briefcase size={11} className="text-neutral-500" />
-              {profile.profession}
-            </span>
-          )}
-          {profile.age && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] text-xs text-neutral-300">
-              {profile.age} years old
-            </span>
-          )}
-          {profile.gender && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] text-xs text-neutral-300 capitalize">
-              {profile.gender}
-            </span>
-          )}
         </div>
       </div>
 
       {/* Details grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <h4 className="text-[11px] text-neutral-500 uppercase tracking-wider mb-3 font-medium">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-4 hover:border-white/[0.12] transition-colors duration-300">
+          <h4 className="text-[11px] text-[#C1FF72]/60 uppercase tracking-wider mb-3 font-medium">
             Contact
           </h4>
           <div className="space-y-2.5">
@@ -965,8 +1002,8 @@ function ProfileTab({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <h4 className="text-[11px] text-neutral-500 uppercase tracking-wider mb-3 font-medium">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm p-4 hover:border-white/[0.12] transition-colors duration-300">
+          <h4 className="text-[11px] text-[#6C2DFF]/80 uppercase tracking-wider mb-3 font-medium">
             Details
           </h4>
           <div className="space-y-2.5">
@@ -1008,7 +1045,7 @@ function InfoRow({
     <div
       className={`flex items-center gap-2.5 ${hoverable ? "group-hover/ig:text-[#C1FF72]" : ""}`}
     >
-      <div className="w-7 h-7 rounded-md bg-white/[0.04] flex items-center justify-center flex-shrink-0">
+      <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center flex-shrink-0">
         <Icon
           size={13}
           className={`text-neutral-500 ${hoverable ? "group-hover/ig:text-[#C1FF72]" : ""} transition-colors`}
@@ -1126,12 +1163,14 @@ function ApplicationsTab({
 
   if (!registrations.length)
     return (
-      <div className="text-center py-16">
-        <ClipboardList
-          size={28}
-          className="mx-auto mb-3 text-neutral-600"
-        />
-        <p className="text-sm text-neutral-500">No applications yet</p>
+      <div className="text-center py-16 relative">
+        <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
+          <ClipboardList
+            size={24}
+            className="text-neutral-500"
+          />
+        </div>
+        <p className="text-sm text-neutral-400">No applications yet</p>
         <p className="text-xs text-neutral-600 mt-1">
           Apply to events to see them here
         </p>
@@ -1155,9 +1194,9 @@ function ApplicationsTab({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`rounded-2xl border bg-white/[0.02] overflow-hidden transition-all ${
+              className={`rounded-2xl border bg-white/[0.02] backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
                 isHighlighted
-                  ? "border-[#C1FF72]/40 ring-1 ring-[#C1FF72]/20"
+                  ? "border-[#C1FF72]/40 ring-1 ring-[#C1FF72]/20 shadow-[0_0_30px_rgba(193,255,114,0.08)]"
                   : "border-white/[0.08]"
               }`}
             >
@@ -1232,7 +1271,7 @@ function ApplicationsTab({
                   )}
 
                   {/* Registration code */}
-                  <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                  <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-black/30 border border-[#C1FF72]/[0.08]">
                     <div className="min-w-0">
                       <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
                         Code
@@ -1263,7 +1302,7 @@ function ApplicationsTab({
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleShare(r)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.06] text-xs font-medium transition-colors"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#C1FF72]/[0.08] border border-white/[0.06] hover:border-[#C1FF72]/20 text-xs font-medium transition-all duration-300"
                     >
                       <Share2 size={12} />
                       Share
@@ -1305,7 +1344,7 @@ function ApplicationsTab({
               transition={{ duration: 0.15 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
-              <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0c0c0c] p-5 shadow-2xl">
+              <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/50">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center">
                     <XCircle size={18} className="text-red-400" />
@@ -1364,8 +1403,10 @@ function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
   if (!tickets.length)
     return (
       <div className="text-center py-16">
-        <Ticket size={28} className="mx-auto mb-3 text-neutral-600" />
-        <p className="text-sm text-neutral-500">No tickets yet</p>
+        <div className="w-16 h-16 rounded-2xl bg-[#C1FF72]/[0.05] border border-[#C1FF72]/[0.1] flex items-center justify-center mx-auto mb-4">
+          <Ticket size={24} className="text-[#C1FF72]/50" />
+        </div>
+        <p className="text-sm text-neutral-400">No tickets yet</p>
         <p className="text-xs text-neutral-600 mt-1">
           Your confirmed tickets will appear here
         </p>
@@ -1383,15 +1424,15 @@ function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/20 transition-all cursor-pointer group"
+            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
             onClick={() => router.push(`/attendees/tickets/${t.id}`)}
           >
             <div className="p-4 flex items-center gap-4">
               {/* Ticket icon */}
-              <div className="w-12 h-12 rounded-xl bg-[#C1FF72]/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C1FF72]/15 to-[#C1FF72]/5 border border-[#C1FF72]/10 flex items-center justify-center flex-shrink-0">
                 <Ticket
                   size={20}
-                  className="text-[#C1FF72] group-hover:scale-110 transition-transform"
+                  className="text-[#C1FF72] group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
 
