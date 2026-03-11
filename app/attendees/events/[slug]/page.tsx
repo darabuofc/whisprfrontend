@@ -1218,7 +1218,7 @@ export default function EventDetailPage() {
 
                   <button
                     onClick={() => setShowModal(false)}
-                    className="w-full rounded-full bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(212,165,116,0.5)] transition hover:scale-[1.01]"
+                    className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition"
                   >
                     Got it
                   </button>
