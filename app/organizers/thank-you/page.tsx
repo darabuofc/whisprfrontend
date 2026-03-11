@@ -177,7 +177,7 @@ export default function ThankYou() {
                           </span>
                         )}
                         {item.status === "in-progress" && (
-                          <span className="rounded-full bg-blue-400/20 px-2 py-[2px] text-[11px] font-semibold text-blue-100">
+                          <span className="rounded-full bg-[#8E8E93]/20 px-2 py-[2px] text-[11px] font-semibold text-[#8E8E93]">
                             In progress
                           </span>
                         )}

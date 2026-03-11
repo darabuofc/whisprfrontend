@@ -160,7 +160,7 @@ export default function ForgotPasswordModal({
 
             {step === "phone" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
                   Forgot Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
@@ -171,7 +171,7 @@ export default function ForgotPasswordModal({
                   <div>
                     <label
                       htmlFor="whatsapp"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
+                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
                     >
                       Phone Number
                     </label>
@@ -218,7 +218,7 @@ export default function ForgotPasswordModal({
 
             {step === "verify" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
                   Verify Your Number
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
@@ -229,7 +229,7 @@ export default function ForgotPasswordModal({
                   <div>
                     <label
                       htmlFor="otp"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
+                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
                     >
                       Verification Code
                     </label>
@@ -290,7 +290,7 @@ export default function ForgotPasswordModal({
 
             {step === "reset" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
                   Reset Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
@@ -301,7 +301,7 @@ export default function ForgotPasswordModal({
                   <div>
                     <label
                       htmlFor="newPassword"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
+                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
                     >
                       New Password
                     </label>
@@ -329,7 +329,7 @@ export default function ForgotPasswordModal({
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2"
+                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
                     >
                       Confirm Password
                     </label>
@@ -404,7 +404,7 @@ export default function ForgotPasswordModal({
                 >
                   <CheckCircle size={32} style={{ color: accent }} />
                 </div>
-                <h2 className="text-xl font-semibold text-white mb-2">
+                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
                   Password Reset
                 </h2>
                 <p className="text-sm text-white/50 mb-6">

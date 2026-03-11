@@ -75,7 +75,7 @@ export default function GoogleOAuthButton({
               fill="#EA4335"
             />
           </svg>
-          <span>{buttonText}</span>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>{buttonText}</span>
         </>
       )}
     </button>

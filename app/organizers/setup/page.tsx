@@ -175,7 +175,7 @@ const PrimaryButton = ({
                  ? 'bg-white/[0.05] text-white/70 hover:bg-white/[0.1] border border-white/[0.08]'
                  : disabled || loading
                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                   : 'bg-[#D4A574] text-white shadow-[0_0_40px_rgba(44,44,46,0.3)] hover:shadow-[0_0_60px_rgba(44,44,46,0.4)]'
+                   : 'bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]'
                }`}
   >
     {loading ? (

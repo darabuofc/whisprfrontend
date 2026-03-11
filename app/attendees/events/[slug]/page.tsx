@@ -475,7 +475,7 @@ export default function EventDetailPage() {
 
             {/* Details */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold">
+              <h3 className="text-lg font-bold" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
                 {event.organization?.name || event.organizer || "Organizer"}
               </h3>
 
