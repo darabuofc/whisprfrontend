@@ -188,7 +188,7 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Pass Types</h3>
+          <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>Pass Types</h3>
           <p className="text-sm text-white/40 mt-1">
             Configure ticket types and pricing for your event
           </p>
@@ -216,7 +216,7 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-300
               ${
                 hasChanges
-                  ? "bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)] hover:shadow-[0_0_30px_rgba(193,255,114,0.4)]"
+                  ? "bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)] hover:shadow-[0_0_30px_rgba(212,165,116,0.4)]"
                   : "bg-white/[0.05] text-white/30 cursor-not-allowed"
               }`}
           >
@@ -257,13 +257,13 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
       </AnimatePresence>
 
       {/* Info card */}
-      <div className="p-4 rounded-xl bg-[#C1FF72]/10 border border-[#C1FF72]/20">
+      <div className="p-4 rounded-xl bg-[#D4A574]/10 border border-[#D4A574]/20">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#C1FF72]/20 flex items-center justify-center flex-shrink-0">
-            <Users size={16} className="text-[#C1FF72]" />
+          <div className="w-8 h-8 rounded-lg bg-[#D4A574]/20 flex items-center justify-center flex-shrink-0">
+            <Users size={16} className="text-[#D4A574]" />
           </div>
           <div>
-            <p className="text-sm font-medium text-[#C1FF72]">Manage your passes</p>
+            <p className="text-sm font-medium text-[#D4A574]">Manage your passes</p>
             <p className="text-xs text-white/50 mt-1">
               Configure up to 4 different ticket types with custom pricing. Each pass type can only be used once.
             </p>
@@ -311,13 +311,13 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
                           onClick={() => updatePass(index, "type", type)}
                           className={`p-3 rounded-xl border transition-all duration-300 text-left ${
                             pass.type === type
-                              ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                              ? "bg-[#D4A574]/20 border-[#D4A574]/50 text-white"
                               : "bg-white/[0.02] border-white/[0.06] text-white/70 hover:bg-white/[0.05]"
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-1">
                             <span
-                              className={pass.type === type ? "text-[#C1FF72]" : "text-white/40"}
+                              className={pass.type === type ? "text-[#D4A574]" : "text-white/40"}
                             >
                               {passTypeIcons[type]}
                             </span>
@@ -351,7 +351,7 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
                         }
                         className="w-full pl-14 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                                  placeholder:text-white/30 outline-none transition-all duration-300
-                                 focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]"
+                                 focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]"
                       />
                     </div>
                     <p className="text-xs text-white/40 pl-1">
@@ -371,7 +371,7 @@ export default function PassTypesTab({ eventId }: PassTypesTabProps) {
             whileTap={{ scale: 0.99 }}
             onClick={addPass}
             className="w-full py-4 rounded-xl border-2 border-dashed border-white/[0.1] text-white/50
-                     hover:border-[#C1FF72]/30 hover:text-[#C1FF72] transition-all duration-300
+                     hover:border-[#D4A574]/30 hover:text-[#D4A574] transition-all duration-300
                      flex items-center justify-center gap-2"
           >
             <Plus size={18} />

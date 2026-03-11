@@ -163,7 +163,7 @@ export default function OrganizerDashboard() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Subtle gradient background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0a0a0a] to-[#0d0d12]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0a0a0a] to-[#0A0A0A]" />
         <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-gradient-radial from-white/[0.015] to-transparent opacity-60" />
       </div>
 
@@ -212,7 +212,7 @@ export default function OrganizerDashboard() {
         {/* Section Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold text-white/90">Your Events</h2>
+            <h2 className="text-lg font-semibold text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Your Events</h2>
             <p className="text-sm text-white/40 mt-0.5">
               {events.length === 0
                 ? "No events yet"
@@ -238,12 +238,12 @@ export default function OrganizerDashboard() {
               ) : (
                 <Plus size={16} />
               )}
-              New Event
+              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>New Event</span>
             </button>
 
             {/* Pending Tooltip */}
             {showPendingTooltip && isPending && (
-              <div className="absolute top-full mt-2 right-0 w-56 p-3 rounded-xl bg-[#1a1a1a] border border-white/[0.08] shadow-2xl z-50">
+              <div className="absolute top-full mt-2 right-0 w-56 p-3 rounded-xl bg-[#1C1C1E] border border-white/[0.08] shadow-2xl z-50">
                 <div className="flex items-start gap-2.5">
                   <AlertCircle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
                   <p className="text-xs text-white/50">
@@ -312,17 +312,10 @@ function DashboardHeader({
         <div className="flex items-center justify-between gap-4">
           {/* Left: Logo + Welcome */}
           <div className="flex items-center gap-4 min-w-0">
-            <Image
-              src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
-              alt="Whispr"
-              width={100}
-              height={28}
-              className="h-6 w-auto flex-shrink-0 hidden sm:block"
-              priority
-            />
+            <span className="text-[#FAFAFA] tracking-[0.1em] uppercase hidden sm:block flex-shrink-0" style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem" }}>WHISPR</span>
             <span className="text-white/20 hidden sm:inline">|</span>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-semibold text-white/95 tracking-tight truncate">
+              <h1 className="text-xl sm:text-2xl font-semibold text-white/95 tracking-tight truncate" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
                 {organizer?.name ? `Welcome, ${organizer.name.split(" ")[0]}` : "Dashboard"}
               </h1>
               <div className="flex items-center gap-2 mt-0.5">
@@ -350,7 +343,7 @@ function DashboardHeader({
                             : "bg-red-400"
                         }`}
                       />
-                      {organizer.approval_status}
+                      <span style={{ fontFamily: "var(--font-mono)" }}>{organizer.approval_status}</span>
                     </span>
                   </>
                 )}
@@ -429,7 +422,7 @@ function DashboardHeader({
                     className="fixed inset-0 z-10"
                     onClick={() => setMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-64 bg-[#141414] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20">
+                  <div className="absolute right-0 mt-2 w-64 bg-[#1C1C1E] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20">
                     {/* User info */}
                     <div className="px-4 py-3 border-b border-white/[0.06]">
                       <p className="text-sm font-medium text-white/80 truncate">{organizer?.name}</p>
@@ -583,11 +576,11 @@ function StatCard({
       )}
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <div className="opacity-80">{icon}</div>
-        <div className="text-xl sm:text-2xl font-semibold text-white/90 tabular-nums font-mono">
+        <div className="text-xl sm:text-2xl font-semibold text-white/90 tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
           {value}
         </div>
       </div>
-      <div className="text-[11px] font-medium text-white/40 uppercase tracking-wider">
+      <div className="text-[11px] font-medium text-white/40 uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>
         {label}
       </div>
     </div>
@@ -609,7 +602,7 @@ function EmptyState({
       <div className="w-14 h-14 mx-auto mb-5 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
         <CalendarDays size={24} className="text-white/20" />
       </div>
-      <h3 className="text-lg font-medium text-white/80 mb-1.5">No events yet</h3>
+      <h3 className="text-lg font-medium text-white/80 mb-1.5" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>No events yet</h3>
       <p className="text-sm text-white/40 mb-6 max-w-sm mx-auto">
         {isPending
           ? "Your events will appear here once your account is approved."
@@ -621,7 +614,7 @@ function EmptyState({
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-lg text-sm font-medium hover:bg-white/90 transition-colors"
         >
           <Plus size={16} />
-          Create Event
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Create Event</span>
         </button>
       )}
     </div>
@@ -685,14 +678,14 @@ function EventCard({ event }: { event: Event }) {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="text-[15px] font-semibold text-white/90 mb-2.5 line-clamp-1 group-hover:text-white transition-colors">
+        <h3 className="text-[15px] font-semibold text-white/90 mb-2.5 line-clamp-1 group-hover:text-white transition-colors" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
           {event.fields.Name || "Untitled Event"}
         </h3>
 
         <div className="flex flex-col gap-1.5 text-sm text-white/40 mb-4">
           <div className="flex items-center gap-2">
             <Calendar size={13} className="opacity-60" />
-            <span className="text-white/50 text-[13px]">{formatDate(event.fields.Date)}</span>
+            <span className="text-white/50 text-[13px]" style={{ fontFamily: "var(--font-mono)" }}>{formatDate(event.fields.Date)}</span>
           </div>
           {event.fields.Location && (
             <div className="flex items-center gap-2">
@@ -709,7 +702,7 @@ function EventCard({ event }: { event: Event }) {
           }}
           className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-sm font-medium text-white/60 hover:text-white/80 transition-colors"
         >
-          Mission Control
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Mission Control</span>
           <ArrowUpRight size={14} />
         </button>
       </div>
@@ -740,7 +733,7 @@ function MobileBottomNav({
           {/* Dashboard */}
           <button className="flex flex-col items-center justify-center py-3 gap-1 text-white/80">
             <CalendarDays size={20} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium tracking-wide text-white/60">Events</span>
+            <span className="text-[10px] font-medium tracking-wide text-white/60" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>Events</span>
           </button>
 
           {/* Create */}
@@ -764,7 +757,7 @@ function MobileBottomNav({
             </button>
 
             {showPendingTooltip && isPending && (
-              <div className="absolute bottom-full mb-3 w-44 p-2.5 rounded-lg bg-[#1a1a1a] border border-white/[0.08] text-center shadow-2xl">
+              <div className="absolute bottom-full mb-3 w-44 p-2.5 rounded-lg bg-[#1C1C1E] border border-white/[0.08] text-center shadow-2xl">
                 <p className="text-[11px] text-white/50">Account pending approval</p>
               </div>
             )}
@@ -782,7 +775,7 @@ function MobileBottomNav({
             }`}
           >
             <Settings size={20} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium tracking-wide">Settings</span>
+            <span className="text-[10px] font-medium tracking-wide" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>Settings</span>
           </button>
         </div>
       </div>

@@ -69,7 +69,7 @@ export default function HealthStrip({ stats, isToday, loading }: HealthStripProp
             />
           )}
           <StatCard
-            icon={<Calendar className="text-violet-400" size={18} />}
+            icon={<Calendar className="text-[#D4A574]" size={18} />}
             label={isToday ? "Status" : "Days Left"}
             value={isToday ? "LIVE" : stats.daysLeft}
             variant={isToday ? "live" : "default"}
@@ -114,7 +114,7 @@ function StatCard({ icon, label, value, variant }: StatCardProps) {
           {value}
         </div>
       </div>
-      <div className="text-[11px] font-medium text-white/40 uppercase tracking-wider">
+      <div className="text-[11px] font-medium text-white/40 uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>
         {label}
       </div>
     </div>

@@ -22,9 +22,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="relative min-h-screen overflow-x-hidden antialiased">
+      <body className="relative min-h-screen overflow-x-hidden antialiased" style={{ fontFamily: "var(--font-body)" }}>
         {/* unified background layer */}
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#050505] via-[#0a0015] to-[#1a001a]" />
+        <div className="fixed inset-0 -z-10 bg-[#0A0A0A]" />
 
         {MAINTENANCE_MODE ? (
           <MaintenancePage />
@@ -36,10 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               position="bottom-right"
               toastOptions={{
                 style: {
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(255,255,255,0.9)",
+                  background: "#1C1C1E",
+                  border: "1px solid #2C2C2E",
+                  color: "#F2F2F7",
                   backdropFilter: "blur(12px)",
+                  fontFamily: "var(--font-body)",
                 },
               }}
             />

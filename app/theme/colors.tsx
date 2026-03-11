@@ -1,10 +1,10 @@
 export const whisprTheme = {
-    background: "#0A0226",
-    text: "#E5E5E5",
-    muted: "#7D7D7D",
-    accent: "#C1FF00",
-    purple: "#6C2DFF",
-    glow: "rgba(193,255,0,0.3)",
-    gradient: "radial-gradient(circle at 30% 50%, #0A0226 0%, #1A004D 100%)",
+    void: "#0A0A0A",
+    smoke: "#1C1C1E",
+    concrete: "#2C2C2E",
+    whisperGray: "#8E8E93",
+    chalk: "#F2F2F7",
+    paper: "#FAFAFA",
+    copper: "#D4A574",
+    ember: "#B8785C",
   };
-  

@@ -18,7 +18,7 @@ export default function OpsSummaryCard({
     <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-medium text-white/90">Action Required</h3>
+          <h3 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Action Required</h3>
           <p className="text-sm text-white/40 mt-1">Registrations awaiting review</p>
         </div>
         <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
@@ -44,7 +44,8 @@ export default function OpsSummaryCard({
 
       <button
         onClick={onGoToApprovals}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black rounded-xl text-sm font-medium transition-colors hover:bg-white/90"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] rounded-xl text-sm font-medium transition-colors"
+              style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
       >
         <span>Go to Approvals</span>
         <ArrowRight size={16} />

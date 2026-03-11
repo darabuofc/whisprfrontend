@@ -107,7 +107,7 @@ export default function PaymentSettingsTab({ eventId }: PaymentSettingsTabProps)
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-medium text-white/90">Payment Settings</h2>
+          <h2 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Payment Settings</h2>
           <p className="text-sm text-white/40 mt-1">
             Configure how attendees will pay after their registration is approved
           </p>
@@ -148,15 +148,15 @@ export default function PaymentSettingsTab({ eventId }: PaymentSettingsTabProps)
         ) : (
           <div className="p-6 space-y-6">
             {/* Info Box */}
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+            <div className="p-4 rounded-xl bg-[#D4A574]/10 border border-[#D4A574]/20">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <div className="w-8 h-8 rounded-lg bg-[#D4A574]/20 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-4 h-4 text-[#D4A574]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-purple-400">How payment modes work</p>
+                  <p className="text-sm font-medium text-[#D4A574]">How payment modes work</p>
                   <ul className="text-xs text-white/50 mt-2 space-y-1">
                     <li><strong className="text-white/70">Online:</strong> Approved attendees receive an Abhipay payment link via WhatsApp</li>
                     <li><strong className="text-white/70">Manual:</strong> Approved attendees receive your custom payment instructions via WhatsApp</li>
@@ -288,7 +288,7 @@ IBAN: PK00ABCD1234567890123456"
                 <button
                   onClick={handleSave}
                   disabled={!hasChanges || !isValid() || saving}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black rounded-xl text-sm font-semibold hover:bg-white/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] rounded-xl text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <>

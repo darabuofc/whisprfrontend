@@ -171,11 +171,11 @@ export default function ImportAttendeesModal({
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-[#111113] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-[#0A0A0A] border border-white/[0.08] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
                 <div>
-                  <h2 className="text-lg font-semibold text-white/90">Import Attendees</h2>
+                  <h2 className="text-lg font-semibold text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Import Attendees</h2>
                   <p className="text-sm text-white/40 mt-0.5">
                     Bulk import from CSV or Excel file
                   </p>
@@ -199,7 +199,7 @@ export default function ImportAttendeesModal({
                       onClick={() => fileInputRef.current?.click()}
                       className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
                         selectedFile
-                          ? "border-[#C1FF72]/30 bg-[#C1FF72]/[0.02]"
+                          ? "border-[#D4A574]/30 bg-[#D4A574]/[0.02]"
                           : "border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02]"
                       }`}
                     >
@@ -212,8 +212,8 @@ export default function ImportAttendeesModal({
                       />
                       {selectedFile ? (
                         <div className="flex flex-col items-center gap-2">
-                          <div className="w-12 h-12 rounded-xl bg-[#C1FF72]/10 flex items-center justify-center">
-                            <FileSpreadsheet className="w-6 h-6 text-[#C1FF72]" />
+                          <div className="w-12 h-12 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
+                            <FileSpreadsheet className="w-6 h-6 text-[#D4A574]" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-white/80">{selectedFile.name}</p>
@@ -239,7 +239,7 @@ export default function ImportAttendeesModal({
                           </div>
                           <div>
                             <p className="text-sm text-white/60">
-                              Drop your file here or <span className="text-[#C1FF72]">browse</span>
+                              Drop your file here or <span className="text-[#D4A574]">browse</span>
                             </p>
                             <p className="text-xs text-white/30 mt-1">
                               CSV, TXT, XLS, or XLSX (max 5MB)
@@ -273,13 +273,13 @@ export default function ImportAttendeesModal({
 
                     {/* File Format Info */}
                     <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
-                      <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+                      <p className="text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                         Required Columns
                       </p>
                       <p className="text-sm text-white/70">
-                        <span className="text-[#C1FF72]">name</span> (or full_name, attendee)
+                        <span className="text-[#D4A574]">name</span> (or full_name, attendee)
                       </p>
-                      <p className="text-xs font-medium text-white/50 uppercase tracking-wider mt-3 mb-2">
+                      <p className="text-xs font-medium text-white/50 uppercase tracking-wider mt-3 mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                         Optional Columns
                       </p>
                       <p className="text-sm text-white/50">
@@ -298,7 +298,7 @@ export default function ImportAttendeesModal({
 
                 {importState === "uploading" && (
                   <div className="flex flex-col items-center justify-center py-12">
-                    <Loader2 className="w-10 h-10 text-[#C1FF72] animate-spin mb-4" />
+                    <Loader2 className="w-10 h-10 text-[#D4A574] animate-spin mb-4" />
                     <p className="text-white/70 text-sm font-medium">Importing attendees...</p>
                     <p className="text-white/40 text-xs mt-1">
                       Creating records, registrations, and tickets
@@ -322,7 +322,7 @@ export default function ImportAttendeesModal({
                     {/* Stats Grid */}
                     <div className="grid grid-cols-3 gap-3">
                       <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 text-center">
-                        <p className="text-xl font-semibold text-[#C1FF72]">
+                        <p className="text-xl font-semibold text-[#D4A574]">
                           {importResult.summary.imported}
                         </p>
                         <p className="text-xs text-white/40 mt-0.5">Imported</p>
@@ -373,7 +373,7 @@ export default function ImportAttendeesModal({
                                     href={ticket.ticket_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-xs text-[#C1FF72] hover:underline"
+                                    className="text-xs text-[#D4A574] hover:underline"
                                   >
                                     View PDF
                                   </a>
@@ -489,7 +489,7 @@ export default function ImportAttendeesModal({
                       disabled={!selectedFile}
                       className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
                         selectedFile
-                          ? "bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)] hover:shadow-[0_0_30px_rgba(193,255,114,0.4)]"
+                          ? "bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)] hover:shadow-[0_0_30px_rgba(212,165,116,0.4)]"
                           : "bg-white/[0.06] text-white/30 cursor-not-allowed"
                       }`}
                       whileHover={selectedFile ? { scale: 1.02 } : {}}
@@ -516,7 +516,7 @@ export default function ImportAttendeesModal({
                     )}
                     <motion.button
                       onClick={handleClose}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)]"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >

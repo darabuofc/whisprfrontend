@@ -19,7 +19,7 @@ export default function AlertsPanel({ alerts, onFix }: AlertsPanelProps) {
     <div className="bg-amber-500/[0.04] border border-amber-500/20 rounded-2xl p-6">
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h3 className="text-lg font-medium text-white/90">Attention Needed</h3>
+          <h3 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Attention Needed</h3>
           <p className="text-sm text-white/40 mt-1">{alerts.length} issue{alerts.length !== 1 ? 's' : ''} requiring action</p>
         </div>
         <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">

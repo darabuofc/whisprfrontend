@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
-  const [accentColor, setAccentColor] = useState("#c1ff72");
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -14,16 +13,6 @@ export default function Navbar() {
     const handleScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // read accent from CSS var
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const accent = getComputedStyle(document.documentElement)
-        .getPropertyValue("--accent")
-        ?.trim();
-      setAccentColor(accent || "#c1ff72");
-    }
   }, []);
 
   return (
@@ -35,34 +24,36 @@ export default function Navbar() {
     >
       {/* Floating pill */}
       <div
-        className={`relative flex w-full max-w-5xl items-center justify-between rounded-full border px-5 py-2.5 md:px-8 transition-all duration-500
+        className={`relative flex w-full max-w-5xl items-center justify-between rounded-lg border px-5 py-2.5 md:px-8 transition-all duration-500
           ${scrolled
-            ? "border-white/10 bg-black/40 backdrop-blur-xl shadow-[0_0_20px_-4px_rgba(0,0,0,0.6)]"
-            : "border-white/10 bg-black/20 backdrop-blur-md"
+            ? "border-[#2C2C2E] bg-[#0A0A0A]/80 backdrop-blur-xl shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+            : "border-[#2C2C2E]/50 bg-[#0A0A0A]/40 backdrop-blur-md"
           }`}
-        style={{
-          boxShadow: scrolled ? `0 0 12px -3px ${accentColor}50` : "none",
-        }}
       >
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div
-            className="grid h-8 w-8 place-items-center rounded-lg border border-white/15 bg-white/5 font-semibold text-[color:var(--accent)]"
-            style={{ boxShadow: `0 0 6px -1px ${accentColor}90` }}
+          <span
+            className="text-[#FAFAFA] tracking-[0.1em] uppercase"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: "1.2rem",
+              letterSpacing: "0.1em",
+            }}
           >
-            W
-          </div>
-          <span className="font-semibold text-white tracking-wide">Whispr</span>
+            WHISPR
+          </span>
         </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
-          <a href="#" className="hover:text-white transition-colors">Discover</a>
-          <a href="#" className="hover:text-white transition-colors">Events</a>
-          <a href="#" className="hover:text-white transition-colors">Partners</a>
-          <a href="#" className="hover:text-white transition-colors">Support</a>
+        <nav className="hidden md:flex items-center gap-8 text-sm text-[#8E8E93]" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>
+          <a href="#" className="hover:text-[#F2F2F7] transition-colors duration-150">Discover</a>
+          <a href="#" className="hover:text-[#F2F2F7] transition-colors duration-150">Events</a>
+          <a href="#" className="hover:text-[#F2F2F7] transition-colors duration-150">Partners</a>
+          <a href="#" className="hover:text-[#F2F2F7] transition-colors duration-150">Support</a>
           <button
-            className="rounded-full bg-[color:var(--accent)] px-4 py-1.5 text-black font-semibold hover:brightness-95 active:translate-y-[1px] transition"
+            className="rounded-md bg-[#D4A574] px-4 py-1.5 text-[#0A0A0A] font-semibold hover:bg-[#B8785C] active:translate-y-[1px] transition-all duration-150"
+            style={{ fontFamily: "var(--font-display)" }}
           >
             Sign In
           </button>
@@ -71,7 +62,7 @@ export default function Navbar() {
         {/* Mobile toggle */}
         <button
           onClick={() => setMenuOpen((p) => !p)}
-          className="md:hidden rounded-lg border border-white/10 p-2 text-white/70 hover:text-white transition"
+          className="md:hidden rounded-md border border-[#2C2C2E] p-2 text-[#8E8E93] hover:text-[#F2F2F7] transition-colors duration-150"
           aria-label="Toggle menu"
         >
           {menuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -85,15 +76,16 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25 }}
-              className="absolute top-full right-0 mt-3 w-48 rounded-2xl border border-white/10 bg-black/60 p-4 backdrop-blur-xl md:hidden"
+              className="absolute top-full right-0 mt-3 w-48 rounded-lg border border-[#2C2C2E] bg-[#1C1C1E]/95 p-4 backdrop-blur-xl md:hidden"
             >
-              <div className="flex flex-col gap-3 text-sm font-medium text-white/80">
-                <a href="#" onClick={() => setMenuOpen(false)}>Discover</a>
-                <a href="#" onClick={() => setMenuOpen(false)}>Events</a>
-                <a href="#" onClick={() => setMenuOpen(false)}>Partners</a>
-                <a href="#" onClick={() => setMenuOpen(false)}>Support</a>
+              <div className="flex flex-col gap-3 text-sm text-[#8E8E93]" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>
+                <a href="#" onClick={() => setMenuOpen(false)} className="hover:text-[#F2F2F7] transition-colors duration-150">Discover</a>
+                <a href="#" onClick={() => setMenuOpen(false)} className="hover:text-[#F2F2F7] transition-colors duration-150">Events</a>
+                <a href="#" onClick={() => setMenuOpen(false)} className="hover:text-[#F2F2F7] transition-colors duration-150">Partners</a>
+                <a href="#" onClick={() => setMenuOpen(false)} className="hover:text-[#F2F2F7] transition-colors duration-150">Support</a>
                 <button
-                  className="mt-2 rounded-full bg-[color:var(--accent)] px-4 py-1.5 text-black font-semibold hover:brightness-95 active:translate-y-[1px] transition"
+                  className="mt-2 rounded-md bg-[#D4A574] px-4 py-1.5 text-[#0A0A0A] font-semibold hover:bg-[#B8785C] active:translate-y-[1px] transition-all duration-150"
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
                   Sign In
                 </button>

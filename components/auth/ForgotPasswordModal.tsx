@@ -40,7 +40,7 @@ export default function ForgotPasswordModal({
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [firebaseVerified, setFirebaseVerified] = useState(false);
 
-  const accent = mode === "attendee" ? "#c1ff72" : "#b472ff";
+  const accent = mode === "attendee" ? "#D4A574" : "#D4A574";
 
   // Cleanup reCAPTCHA on unmount
   useEffect(() => {

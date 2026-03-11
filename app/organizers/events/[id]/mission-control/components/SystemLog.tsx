@@ -62,10 +62,10 @@ export default function SystemLog({ entries }: SystemLogProps) {
   };
 
   return (
-    <div className="fixed right-0 top-12 bottom-0 w-64 bg-[#000000] border-l border-[#1A1A1A] z-40 flex flex-col">
+    <div className="fixed right-0 top-12 bottom-0 w-64 bg-[#0A0A0A] border-l border-[#1C1C1E] z-40 flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 bg-[#000000] border-b border-[#1A1A1A] px-3 py-3 z-10">
-        <h3 className="text-[12px] font-normal uppercase tracking-[0.15em] text-[#6B7280]">
+      <div className="sticky top-0 bg-[#0A0A0A] border-b border-[#1C1C1E] px-3 py-3 z-10">
+        <h3 className="text-[12px] font-normal uppercase tracking-[0.15em] text-[#6B7280]" style={{ fontFamily: "var(--font-mono)" }}>
           SYSTEM LOG
         </h3>
       </div>

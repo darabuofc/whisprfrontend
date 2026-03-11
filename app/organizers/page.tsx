@@ -58,16 +58,17 @@ export default function OrganizersAuth() {
   };
 
   return (
-    <main className="h-screen w-full bg-gradient-to-br from-[#0b0b0f] via-[#1a0b1f] to-[#0b0b0f] flex items-center justify-center">
+    <main className="h-screen w-full bg-gradient-to-br from-[#0A0A0A] via-[#0A0A0A] to-[#0A0A0A] flex items-center justify-center">
       <div className="w-full max-w-md p-8 bg-black/50 rounded-2xl shadow-2xl backdrop-blur-xl">
         {/* Tabs */}
-        <div className="flex justify-center mb-6 border-b border-pink-500/40">
+        <div className="flex justify-center mb-6 border-b border-[#D4A574]/40">
           <button
             className={`px-4 py-2 font-semibold transition ${
               mode === "signin"
-                ? "text-white border-b-2 border-pink-500"
+                ? "text-white border-b-2 border-[#D4A574]"
                 : "text-gray-400"
             }`}
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
             onClick={() => setMode("signin")}
           >
             Sign In
@@ -75,9 +76,10 @@ export default function OrganizersAuth() {
           <button
             className={`px-4 py-2 font-semibold transition ${
               mode === "register"
-                ? "text-white border-b-2 border-pink-500"
+                ? "text-white border-b-2 border-[#D4A574]"
                 : "text-gray-400"
             }`}
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
             onClick={() => setMode("register")}
           >
             Register
@@ -92,10 +94,10 @@ export default function OrganizersAuth() {
         {/* OR Divider */}
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-pink-500/20"></div>
+            <div className="w-full border-t border-[#D4A574]/20"></div>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-black/50 px-3 text-gray-400 tracking-wider">Or continue with email</span>
+            <span className="bg-black/50 px-3 text-gray-400 tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>Or continue with email</span>
           </div>
         </div>
 
@@ -107,7 +109,7 @@ export default function OrganizersAuth() {
               placeholder="Full Name"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A574]"
             />
           )}
 
@@ -116,7 +118,7 @@ export default function OrganizersAuth() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A574]"
           />
 
           <input
@@ -124,13 +126,14 @@ export default function OrganizersAuth() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-3 rounded-lg bg-black/70 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A574]"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 w-full px-6 py-3 rounded-lg font-bold bg-gradient-to-r from-pink-600 to-cyan-600 hover:scale-105 transition shadow-lg disabled:opacity-50"
+            className="mt-4 w-full px-6 py-3 rounded-lg font-bold bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] transition shadow-lg disabled:opacity-50"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
           >
             {loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Register"}
           </button>
@@ -146,7 +149,7 @@ export default function OrganizersAuth() {
               <button
                 type="button"
                 onClick={() => setMode("register")}
-                className="text-pink-400 hover:underline"
+                className="text-[#D4A574] hover:underline"
               >
                 Register
               </button>
@@ -157,7 +160,7 @@ export default function OrganizersAuth() {
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="text-pink-400 hover:underline"
+                className="text-[#D4A574] hover:underline"
               >
                 Sign In
               </button>

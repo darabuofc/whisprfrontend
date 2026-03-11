@@ -37,11 +37,11 @@ export default function OperationsQueue({
   };
 
   return (
-    <div className="w-full border border-[#1A1A1A]">
+    <div className="w-full border border-[#1C1C1E]">
       {/* Header */}
-      <div className="border-b border-[#1A1A1A] bg-[#0A0A0A]">
+      <div className="border-b border-[#1C1C1E] bg-[#0A0A0A]">
         <div className="px-4 py-3">
-          <h2 className="text-[12px] font-normal uppercase tracking-[0.15em] text-[#6B7280]">
+          <h2 className="text-[12px] font-normal uppercase tracking-[0.15em] text-[#6B7280]" style={{ fontFamily: "var(--font-mono)" }}>
             OPERATIONS QUEUE
           </h2>
         </div>
@@ -50,7 +50,7 @@ export default function OperationsQueue({
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#0A0A0A] border-b border-[#1A1A1A]">
+          <thead className="bg-[#0A0A0A] border-b border-[#1C1C1E]">
             <tr>
               <th className="text-left px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.12em] text-[#6B7280]">
                 ID
@@ -83,7 +83,7 @@ export default function OperationsQueue({
               items.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-[#1A1A1A] hover:border-b-[#F59E0B] transition-colors"
+                  className="border-b border-[#1C1C1E] hover:border-b-[#D4A574] transition-colors"
                 >
                   <td className="px-4 py-2.5 text-[14px] text-[#E5E7EB] font-mono" style={{ fontFeatureSettings: '"tnum"' }}>
                     {item.id}
@@ -106,14 +106,14 @@ export default function OperationsQueue({
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => onApprove(item.id)}
-                        className="w-8 h-8 flex items-center justify-center border border-[#1A1A1A] text-[#6B7280] hover:text-[#10B981] hover:border-[#10B981] transition-colors"
+                        className="w-8 h-8 flex items-center justify-center border border-[#1C1C1E] text-[#6B7280] hover:text-[#10B981] hover:border-[#10B981] transition-colors"
                         title="Approve"
                       >
                         <Check size={16} strokeWidth={2} />
                       </button>
                       <button
                         onClick={() => onReject(item.id)}
-                        className="w-8 h-8 flex items-center justify-center border border-[#1A1A1A] text-[#6B7280] hover:text-[#EF4444] hover:border-[#EF4444] transition-colors"
+                        className="w-8 h-8 flex items-center justify-center border border-[#1C1C1E] text-[#6B7280] hover:text-[#EF4444] hover:border-[#EF4444] transition-colors"
                         title="Reject"
                       >
                         <X size={16} strokeWidth={2} />

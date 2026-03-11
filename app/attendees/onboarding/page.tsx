@@ -33,7 +33,7 @@ const CheckIcon = () => (
 
 // Confetti particle component
 const Confetti = ({ active }: { active: boolean }) => {
-  const colors = ['#C1FF72', '#B472FF', '#72D4FF', '#FF72B4', '#FFD472'];
+  const colors = ['#D4A574', '#D4A574', '#8E8E93', '#B8785C', '#D4A574'];
   const particles = Array.from({ length: 50 });
 
   if (!active) return null;
@@ -72,7 +72,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[800px] h-[800px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(193,255,114,0.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(212,165,116,0.15) 0%, transparent 70%)',
         left: '-20%',
         top: '-20%',
       }}
@@ -90,7 +90,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[600px] h-[600px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(180,114,255,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(44,44,46,0.12) 0%, transparent 70%)',
         right: '-15%',
         bottom: '-15%',
       }}
@@ -108,7 +108,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[400px] h-[400px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(114,212,255,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(142,142,147,0.08) 0%, transparent 70%)',
         left: '40%',
         top: '30%',
       }}
@@ -134,9 +134,9 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
         key={i}
         className={`rounded-full transition-colors duration-300 ${
           i + 1 === currentStep
-            ? 'bg-[#C1FF72] w-8 h-2'
+            ? 'bg-[#D4A574] w-8 h-2'
             : i + 1 < currentStep
-            ? 'bg-[#C1FF72]/60 w-2 h-2'
+            ? 'bg-[#D4A574]/60 w-2 h-2'
             : 'bg-white/20 w-2 h-2'
         }`}
         layoutId={`step-${i}`}
@@ -159,7 +159,7 @@ const OnboardingInput = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  placeholder:text-white/30 outline-none transition-all duration-300
-                 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                  hover:bg-white/[0.09]"
     />
   </div>
@@ -179,7 +179,7 @@ const OnboardingSelect = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  outline-none transition-all duration-300 cursor-pointer appearance-none
-                 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                  hover:bg-white/[0.09]"
       style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
@@ -217,7 +217,7 @@ const PrimaryButton = ({
     className={`w-full py-4 px-8 rounded-2xl text-lg font-semibold transition-all duration-300
                ${disabled || loading
                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                 : 'bg-[#C1FF72] text-black shadow-[0_0_40px_rgba(193,255,114,0.3)] hover:shadow-[0_0_60px_rgba(193,255,114,0.4)]'
+                 : 'bg-[#D4A574] text-black shadow-[0_0_40px_rgba(212,165,116,0.3)] hover:shadow-[0_0_60px_rgba(212,165,116,0.4)]'
                }`}
   >
     {loading ? (
@@ -380,7 +380,7 @@ export default function AttendeesOnboarding() {
   };
 
   return (
-    <main className="relative min-h-screen w-full bg-[#050505] text-white overflow-hidden">
+    <main className="relative min-h-screen w-full bg-[#0A0A0A] text-white overflow-hidden">
       <FloatingOrbs />
       <Confetti active={showConfetti} />
 
@@ -396,8 +396,8 @@ export default function AttendeesOnboarding() {
           className="mb-8"
         >
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.08]">
-            <div className="w-2 h-2 rounded-full bg-[#C1FF72] shadow-[0_0_10px_#C1FF72]" />
-            <span className="text-sm font-medium text-white/70">Whispr</span>
+            <div className="w-2 h-2 rounded-full bg-[#D4A574] shadow-[0_0_10px_#D4A574]" />
+            <span className="text-sm font-medium text-white/70" style={{ fontFamily: "var(--font-mono)" }}>Whispr</span>
           </div>
         </motion.div>
 
@@ -422,7 +422,7 @@ export default function AttendeesOnboarding() {
             className="text-center mb-10"
           >
             <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#C1FF72]/5 border border-[#C1FF72]/20 text-[#C1FF72] mb-6"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20 text-[#D4A574] mb-6"
               initial={{ scale: 0.8, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -432,10 +432,10 @@ export default function AttendeesOnboarding() {
               {step === 3 && <UserIcon />}
               {step === 4 && <CheckIcon />}
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
               {steps[step - 1].title}
             </h1>
-            <p className="text-lg text-white/50 max-w-md">
+            <p className="text-lg text-white/50 max-w-md" style={{ fontFamily: "var(--font-body)" }}>
               {steps[step - 1].subtitle}
             </p>
           </motion.div>
@@ -556,18 +556,18 @@ export default function AttendeesOnboarding() {
                     <img
                       src={profile.profilePicPreview}
                       alt="Profile"
-                      className="w-full h-full rounded-full object-cover border-2 border-[#C1FF72]/50"
+                      className="w-full h-full rounded-full object-cover border-2 border-[#D4A574]/50"
                     />
                   ) : (
                     <div className="w-full h-full rounded-full bg-white/[0.07] border-2 border-dashed border-white/20
-                                    flex items-center justify-center transition-colors group-hover:border-[#C1FF72]/50">
+                                    flex items-center justify-center transition-colors group-hover:border-[#D4A574]/50">
                       <svg className="w-8 h-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                               d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
                   )}
-                  <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#C1FF72] flex items-center justify-center">
+                  <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-[#D4A574] flex items-center justify-center">
                     <svg className="w-4 h-4 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -649,7 +649,7 @@ export default function AttendeesOnboarding() {
                     rows={3}
                     className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                                placeholder:text-white/30 outline-none transition-all duration-300 resize-none
-                               focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                               focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                                hover:bg-white/[0.09]"
                   />
                 </div>
@@ -679,7 +679,7 @@ export default function AttendeesOnboarding() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-                  className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#C1FF72] to-[#8BC34A]"
+                  className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#D4A574] to-[#B8785C]"
                 >
                   <svg className="w-12 h-12 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <motion.path
@@ -699,6 +699,7 @@ export default function AttendeesOnboarding() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                     className="text-3xl font-bold mb-3"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
                   >
                     Welcome to Whispr
                   </motion.h2>

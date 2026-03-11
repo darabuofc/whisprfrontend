@@ -19,11 +19,11 @@ function AttendeesContent() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
-      <h1 className="text-3xl font-bold mb-4">Whispr Attendees</h1>
+      <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>Whispr Attendees</h1>
 
       {ref && (
-        <p className="text-lime-400 mb-6">
-          Invitation Code: <span className="font-mono">{ref}</span>
+        <p className="text-[#D4A574] mb-6">
+          Invitation Code: <span style={{ fontFamily: "var(--font-mono)" }}>{ref}</span>
         </p>
       )}
 
@@ -34,7 +34,7 @@ function AttendeesContent() {
           {attendees.map((name) => (
             <li
               key={name}
-              className="bg-neutral-900 px-4 py-2 rounded-lg border border-lime-500/30"
+              className="bg-neutral-900 px-4 py-2 rounded-lg border border-[#D4A574]/30"
             >
               {name}
             </li>

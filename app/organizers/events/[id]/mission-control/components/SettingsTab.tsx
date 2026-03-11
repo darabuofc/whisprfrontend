@@ -66,26 +66,26 @@ export default function SettingsTab({ eventId }: SettingsTabProps) {
                 relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300
                 ${
                   activeSubTab === tab.id
-                    ? "bg-gradient-to-r from-[#C1FF72]/20 to-[#C1FF72]/5 text-white border border-[#C1FF72]/30"
+                    ? "bg-gradient-to-r from-[#D4A574]/20 to-[#D4A574]/5 text-white border border-[#D4A574]/30"
                     : "text-white/50 hover:text-white/80 hover:bg-white/[0.04]"
                 }
               `}
             >
               <span
                 className={`transition-colors duration-300 ${
-                  activeSubTab === tab.id ? "text-[#C1FF72]" : "text-white/40"
+                  activeSubTab === tab.id ? "text-[#D4A574]" : "text-white/40"
                 }`}
               >
                 {tab.icon}
               </span>
               <div className="text-left">
-                <div className="font-medium">{tab.label}</div>
+                <div className="font-medium" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>{tab.label}</div>
                 <div className="text-[10px] text-white/30 hidden sm:block">{tab.description}</div>
               </div>
               {activeSubTab === tab.id && (
                 <motion.div
                   layoutId="activeSubTabIndicator"
-                  className="absolute inset-0 rounded-xl border border-[#C1FF72]/20"
+                  className="absolute inset-0 rounded-xl border border-[#D4A574]/20"
                   style={{ zIndex: -1 }}
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
