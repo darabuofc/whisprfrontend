@@ -217,7 +217,7 @@ const PrimaryButton = ({
     className={`w-full py-4 px-8 rounded-2xl text-lg font-semibold transition-all duration-300
                ${disabled || loading
                  ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                 : 'bg-[#D4A574] text-black shadow-[0_0_40px_rgba(212,165,116,0.3)] hover:shadow-[0_0_60px_rgba(212,165,116,0.4)]'
+                 : 'bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]'
                }`}
   >
     {loading ? (

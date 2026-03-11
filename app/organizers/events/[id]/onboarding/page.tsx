@@ -252,7 +252,7 @@ const PrimaryButton = ({
                  ? "bg-white/10 text-white/70 hover:bg-white/15"
                  : disabled || loading
                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                   : 'bg-[#D4A574] text-black shadow-[0_0_40px_rgba(212,165,116,0.3)] hover:shadow-[0_0_60px_rgba(212,165,116,0.4)]'
+                   : 'bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]'
                } ${className}`}
   >
     {loading ? (
@@ -569,7 +569,7 @@ const CustomDatePicker = ({
                       disabled={isPast(date)}
                       className={`w-full h-full rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-200 ${
                         isSelected(date)
-                          ? "bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)]"
+                          ? "bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]"
                           : isToday(date)
                           ? "bg-white/10 text-[#D4A574] border border-[#D4A574]/30"
                           : isPast(date)
