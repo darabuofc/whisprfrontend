@@ -54,31 +54,31 @@ export default function EventPageClient() {
   // Later: you will fetch real event data using `id` here.
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 text-white p-6">
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-6">
       {/* Header */}
-      <div className="bg-gray-900/80 border border-gray-800 rounded-2xl shadow-lg p-6 flex justify-between items-start">
+      <div className="bg-[#1C1C1E] border border-[#2C2C2E] rounded-2xl shadow-lg p-6 flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold">🎉 Neon Rave Night 2025</h1>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>🎉 Neon Rave Night 2025</h1>
           <div className="mt-2 flex flex-wrap gap-2 text-sm">
-            <span className="px-3 py-1 rounded-full bg-green-700/40 text-green-400 font-medium">
+            <span className="px-3 py-1 rounded-full bg-[#D4A574]/20 text-[#D4A574] font-medium">
               Published
             </span>
-            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-800 text-gray-300">
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#2C2C2E] text-gray-300">
               <Calendar size={16} /> Oct 28, 2025
             </span>
-            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-800 text-gray-300">
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#2C2C2E] text-gray-300">
               <MapPin size={16} /> Karachi
             </span>
           </div>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 flex items-center gap-2">
+          <button className="px-4 py-2 rounded-lg bg-[#D4A574] hover:bg-[#B8785C] text-[#0A0A0A] flex items-center gap-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
             <Edit size={16} /> Edit
           </button>
-          <button className="px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 flex items-center gap-2">
+          <button className="px-4 py-2 rounded-lg border border-[#2C2C2E] text-[#8E8E93] hover:border-[#D4A574] hover:text-[#D4A574] bg-transparent flex items-center gap-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
             <Share2 size={16} /> Share
           </button>
-          <button className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 flex items-center gap-2">
+          <button className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
             <Trash2 size={16} /> Delete
           </button>
         </div>
@@ -94,16 +94,17 @@ export default function EventPageClient() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mt-8 border-b border-gray-800">
+      <div className="flex gap-4 mt-8 border-b border-[#2C2C2E]">
         {["overview", "passes", "attendees", "analytics", "marketing", "settings"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-2 px-2 text-sm font-medium ${
               activeTab === tab
-                ? "text-cyan-400 border-b-2 border-cyan-400"
+                ? "text-[#D4A574] border-b-2 border-[#D4A574]"
                 : "text-gray-400 hover:text-gray-200"
             }`}
+            style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
@@ -127,19 +128,19 @@ export default function EventPageClient() {
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="bg-gray-900/70 p-4 rounded-xl border border-gray-800 flex flex-col items-center">
-      <div className="text-cyan-400 mb-2">{icon}</div>
-      <span className="text-lg font-bold">{value}</span>
-      <p className="text-gray-400 text-sm">{label}</p>
+    <div className="bg-[#1C1C1E] p-4 rounded-xl border border-[#2C2C2E] flex flex-col items-center">
+      <div className="text-[#D4A574] mb-2">{icon}</div>
+      <span className="text-lg font-bold" style={{ fontFamily: "var(--font-mono)" }}>{value}</span>
+      <p className="text-gray-400 text-sm" style={{ fontFamily: "var(--font-mono)" }}>{label}</p>
     </div>
   );
 }
 
 function Card({ title, text }: { title: string; text: string }) {
   return (
-    <div className="bg-gray-900/70 border border-gray-800 rounded-xl p-6">
-      <h2 className="text-lg font-bold mb-2">{title}</h2>
-      <p className="text-gray-300">{text}</p>
+    <div className="bg-[#1C1C1E] border border-[#2C2C2E] rounded-xl p-6">
+      <h2 className="text-lg font-bold mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>{title}</h2>
+      <p className="text-gray-300" style={{ fontFamily: "var(--font-body)" }}>{text}</p>
     </div>
   );
 }

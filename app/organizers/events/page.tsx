@@ -30,8 +30,8 @@ export default function OrganizerEventsPage() {
 
   return (
     <div className="card p-6">
-      <h1 className="text-xl font-semibold text-accent-pink mb-2">Organizer — Events</h1>
-      <p className="text-gray-400 text-sm">Build this page to create and manage events.</p>
+      <h1 className="text-xl font-semibold text-accent-pink mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>Organizer — Events</h1>
+      <p className="text-gray-400 text-sm" style={{ fontFamily: "var(--font-body)" }}>Build this page to create and manage events.</p>
     </div>
   );
 }

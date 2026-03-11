@@ -22,7 +22,7 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
   const getIcon = (type: ActivityItem["type"]) => {
     switch (type) {
       case "submission":
-        return <FileText className="text-violet-400" size={14} />;
+        return <FileText className="text-[#D4A574]" size={14} />;
       case "approval":
         return <CheckCircle className="text-emerald-400" size={14} />;
       case "rejection":
@@ -38,11 +38,11 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
     <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-medium text-white/90">Activity</h3>
+          <h3 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Activity</h3>
           <p className="text-sm text-white/40 mt-1">Recent actions and events</p>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
-          <Activity className="text-violet-400" size={18} />
+        <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center">
+          <Activity className="text-[#D4A574]" size={18} />
         </div>
       </div>
 

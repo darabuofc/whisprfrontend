@@ -23,7 +23,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[800px] h-[800px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(180,114,255,0.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(44,44,46,0.15) 0%, transparent 70%)',
         left: '-20%',
         top: '-20%',
       }}
@@ -41,7 +41,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[600px] h-[600px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(193,255,114,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(212,165,116,0.12) 0%, transparent 70%)',
         right: '-15%',
         bottom: '-15%',
       }}
@@ -59,7 +59,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[400px] h-[400px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(114,212,255,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(142,142,147,0.08) 0%, transparent 70%)',
         left: '40%',
         top: '30%',
       }}
@@ -85,9 +85,9 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
         key={i}
         className={`rounded-full transition-colors duration-300 ${
           i + 1 === currentStep
-            ? 'bg-[#B472FF] w-8 h-2'
+            ? 'bg-[#D4A574] w-8 h-2'
             : i + 1 < currentStep
-            ? 'bg-[#B472FF]/60 w-2 h-2'
+            ? 'bg-[#D4A574]/60 w-2 h-2'
             : 'bg-white/20 w-2 h-2'
         }`}
         layoutId={`org-step-${i}`}
@@ -118,7 +118,7 @@ const OnboardingInput = ({
         {...props}
         className={`w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                    placeholder:text-white/30 outline-none transition-all duration-300
-                   focus:bg-white/[0.1] focus:border-[#B472FF]/50 focus:shadow-[0_0_0_4px_rgba(180,114,255,0.1)]
+                   focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(44,44,46,0.1)]
                    hover:bg-white/[0.09] ${prefix ? 'pl-12' : ''}`}
       />
     </div>
@@ -142,7 +142,7 @@ const OnboardingTextarea = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  placeholder:text-white/30 outline-none transition-all duration-300 resize-none
-                 focus:bg-white/[0.1] focus:border-[#B472FF]/50 focus:shadow-[0_0_0_4px_rgba(180,114,255,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(44,44,46,0.1)]
                  hover:bg-white/[0.09]"
     />
     {hint && (
@@ -175,7 +175,7 @@ const PrimaryButton = ({
                  ? 'bg-white/[0.05] text-white/70 hover:bg-white/[0.1] border border-white/[0.08]'
                  : disabled || loading
                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                   : 'bg-[#B472FF] text-white shadow-[0_0_40px_rgba(180,114,255,0.3)] hover:shadow-[0_0_60px_rgba(180,114,255,0.4)]'
+                   : 'bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]'
                }`}
   >
     {loading ? (
@@ -190,7 +190,7 @@ const PrimaryButton = ({
 
 // Confetti particle component
 const Confetti = ({ active }: { active: boolean }) => {
-  const colors = ['#B472FF', '#C1FF72', '#72D4FF', '#FF72B4', '#FFD472'];
+  const colors = ['#D4A574', '#D4A574', '#8E8E93', '#B8785C', '#D4A574'];
   const particles = Array.from({ length: 50 });
 
   if (!active) return null;
@@ -377,14 +377,14 @@ export default function OrganizationSetupPage() {
 
   if (initialLoading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#050505]">
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0A0A0A]">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#B472FF] to-[#6C2DFF] opacity-20 animate-pulse" />
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#D4A574] to-[#2C2C2E] opacity-20 animate-pulse" />
           <p className="text-neutral-500 text-sm tracking-wider">Loading...</p>
         </motion.div>
       </div>
@@ -394,7 +394,7 @@ export default function OrganizationSetupPage() {
   const CurrentIcon = steps[step - 1].icon;
 
   return (
-    <main className="relative min-h-screen w-full bg-[#050505] text-white overflow-hidden">
+    <main className="relative min-h-screen w-full bg-[#0A0A0A] text-white overflow-hidden">
       <FloatingOrbs />
       <Confetti active={showConfetti} />
 
@@ -420,8 +420,8 @@ export default function OrganizationSetupPage() {
           className="mb-8"
         >
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.08]">
-            <div className="w-2 h-2 rounded-full bg-[#B472FF] shadow-[0_0_10px_#B472FF]" />
-            <span className="text-sm font-medium text-white/70">Organization Setup</span>
+            <div className="w-2 h-2 rounded-full bg-[#D4A574] shadow-[0_0_10px_#D4A574]" />
+            <span className="text-sm font-medium text-white/70" style={{ fontFamily: "var(--font-mono)" }}>Organization Setup</span>
           </div>
         </motion.div>
 
@@ -446,17 +446,17 @@ export default function OrganizationSetupPage() {
             className="text-center mb-10"
           >
             <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B472FF]/20 to-[#B472FF]/5 border border-[#B472FF]/20 text-[#B472FF] mb-6"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20 text-[#D4A574] mb-6"
               initial={{ scale: 0.8, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
             >
               <CurrentIcon size={32} strokeWidth={1.5} />
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
               {steps[step - 1].title}
             </h1>
-            <p className="text-lg text-white/50 max-w-md">
+            <p className="text-lg text-white/50 max-w-md" style={{ fontFamily: "var(--font-body)" }}>
               {steps[step - 1].subtitle}
             </p>
           </motion.div>
@@ -629,7 +629,7 @@ export default function OrganizationSetupPage() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
-                  className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#B472FF] to-[#6C2DFF]"
+                  className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-[#D4A574] to-[#2C2C2E]"
                 >
                   <motion.div
                     initial={{ scale: 0 }}
@@ -646,6 +646,7 @@ export default function OrganizationSetupPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                     className="text-3xl font-bold mb-3"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
                   >
                     Organization Updated
                   </motion.h2>

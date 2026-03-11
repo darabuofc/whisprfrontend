@@ -84,7 +84,7 @@ function OrganizerCallbackContent() {
   }, [router, searchParams]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#040404]">
+    <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A]">
       <div className="text-center">
         {error ? (
           <div className="space-y-4">
@@ -99,7 +99,7 @@ function OrganizerCallbackContent() {
           </div>
         ) : (
           <div className="space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-[#b472ff] mx-auto" />
+            <Loader2 className="h-12 w-12 animate-spin text-[#D4A574] mx-auto" />
             <h1 className="text-xl font-semibold text-white">Completing sign in...</h1>
             <p className="text-white/60">Please wait while we set up your account</p>
           </div>
@@ -112,10 +112,10 @@ function OrganizerCallbackContent() {
 export default function OrganizerOAuthCallback() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-[#040404]">
+      <div className="flex min-h-screen items-center justify-center bg-[#0A0A0A]">
         <div className="text-center">
           <div className="space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-[#b472ff] mx-auto" />
+            <Loader2 className="h-12 w-12 animate-spin text-[#D4A574] mx-auto" />
             <h1 className="text-xl font-semibold text-white">Loading...</h1>
           </div>
         </div>

@@ -181,7 +181,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
       {/* Header with actions */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">General Settings</h3>
+          <h3 className="text-lg font-semibold text-white" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>General Settings</h3>
           <p className="text-sm text-white/40 mt-1">
             Update your event details and configuration
           </p>
@@ -210,7 +210,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-300
               ${
                 hasChanges
-                  ? "bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)] hover:shadow-[0_0_30px_rgba(193,255,114,0.4)]"
+                  ? "bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)] hover:shadow-[0_0_30px_rgba(212,165,116,0.4)]"
                   : "bg-white/[0.05] text-white/30 cursor-not-allowed"
               }`}
           >
@@ -262,7 +262,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
             placeholder="Enter event name"
             className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                      placeholder:text-white/30 outline-none transition-all duration-300
-                     focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]"
+                     focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]"
           />
         </div>
 
@@ -276,7 +276,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
             rows={4}
             className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                      placeholder:text-white/30 outline-none transition-all duration-300 resize-none
-                     focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]"
+                     focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]"
           />
         </div>
 
@@ -293,7 +293,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
                 onChange={(e) => setSettings({ ...settings, date: e.target.value })}
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                          outline-none transition-all duration-300 cursor-pointer
-                         focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]
+                         focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]
                          [color-scheme:dark]"
               />
             </div>
@@ -311,7 +311,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
               onChange={(e) => setSettings({ ...settings, time: e.target.value })}
               className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                        outline-none transition-all duration-300 cursor-pointer
-                       focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]
+                       focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]
                        [color-scheme:dark]"
             />
           </div>
@@ -329,7 +329,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
               placeholder="Enter venue name and city"
               className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white
                        placeholder:text-white/30 outline-none transition-all duration-300
-                       focus:bg-white/[0.08] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_3px_rgba(193,255,114,0.1)]"
+                       focus:bg-white/[0.08] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_3px_rgba(212,165,116,0.1)]"
             />
           </div>
         </div>
@@ -359,7 +359,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
             ) : (
               <div className="w-full h-full rounded-xl bg-white/[0.03] border-2 border-dashed border-white/[0.1]
                             flex flex-col items-center justify-center gap-3 transition-all duration-300
-                            group-hover:border-[#C1FF72]/30 group-hover:bg-white/[0.05]">
+                            group-hover:border-[#D4A574]/30 group-hover:bg-white/[0.05]">
                 <div className="w-12 h-12 rounded-xl bg-white/[0.05] flex items-center justify-center">
                   <Image size={24} className="text-white/40" />
                 </div>

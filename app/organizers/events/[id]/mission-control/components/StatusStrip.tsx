@@ -22,7 +22,7 @@ export default function StatusStrip({
   lastSync = new Date().toLocaleTimeString("en-US", { hour12: false }),
 }: StatusStripProps) {
   return (
-    <div className="fixed top-0 left-0 right-0 h-12 bg-[#0A0A0A] border-b border-[#1A1A1A] z-50 flex items-center px-6">
+    <div className="fixed top-0 left-0 right-0 h-12 bg-[#0A0A0A] border-b border-[#1C1C1E] z-50 flex items-center px-6">
       <div className="flex items-center gap-3 text-[11px] font-mono tracking-[0.1em] uppercase text-[#A0A0A0]">
         <span>
           EVENT: <span className="text-[#E5E7EB]">{eventName}</span>

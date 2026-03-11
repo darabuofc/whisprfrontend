@@ -140,7 +140,7 @@ function ActionMenu({
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 min-w-[160px] py-1 bg-[#141414] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
+        <div className="absolute right-0 top-full mt-1 z-30 min-w-[160px] py-1 bg-[#1C1C1E] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
           {menuItems.map((item) => (
             <button
               key={item.label}
@@ -247,8 +247,8 @@ export default function ApprovalsTable({
               className="w-6 h-6 rounded-full object-cover border border-white/[0.08]"
             />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-              <span className="text-xs text-violet-400">
+            <div className="w-6 h-6 rounded-full bg-[#D4A574]/10 flex items-center justify-center border border-[#D4A574]/20">
+              <span className="text-xs text-[#D4A574]">
                 {attendees[0].name?.charAt(0)?.toUpperCase() || "?"}
               </span>
             </div>
@@ -270,8 +270,8 @@ export default function ApprovalsTable({
                   className="w-6 h-6 rounded-full object-cover border-2 border-[#0a0a0a]"
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-violet-500/10 flex items-center justify-center border-2 border-[#0a0a0a]">
-                  <span className="text-xs text-violet-400">
+                <div className="w-6 h-6 rounded-full bg-[#D4A574]/10 flex items-center justify-center border-2 border-[#0a0a0a]">
+                  <span className="text-xs text-[#D4A574]">
                     {attendee.name?.charAt(0)?.toUpperCase() || "?"}
                   </span>
                 </div>
@@ -297,7 +297,7 @@ export default function ApprovalsTable({
       <div className="p-6 border-b border-white/[0.06]">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-lg font-medium text-white/90">Registration Approvals</h2>
+            <h2 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Registration Approvals</h2>
             <p className="text-sm text-white/40 mt-1">
               Review and manage registration requests
             </p>
@@ -330,7 +330,7 @@ export default function ApprovalsTable({
                 <ChevronDown size={14} className="text-white/40" />
               </button>
               {statusOpen && (
-                <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2">
+                <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#1C1C1E] shadow-xl shadow-black/40 p-2">
                   {statusOptions.map((option) => {
                     const checked = statusFilter.includes(option.value);
                     return (
@@ -345,7 +345,7 @@ export default function ApprovalsTable({
                         <span
                           className={`w-4 h-4 rounded border flex items-center justify-center ${
                             checked
-                              ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                              ? "bg-[#D4A574] border-[#D4A574] text-black"
                               : "border-white/[0.2] text-transparent"
                           }`}
                         >

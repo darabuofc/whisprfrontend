@@ -141,11 +141,11 @@ export default function AttendeeDetailDrawer({
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] bg-white/[0.02]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-                  <Users className="w-5 h-5 text-violet-400" />
+                <div className="w-10 h-10 rounded-xl bg-[#D4A574]/10 flex items-center justify-center border border-[#D4A574]/20">
+                  <Users className="w-5 h-5 text-[#D4A574]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-medium text-white/90">Registration Details</h2>
+                  <h2 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Registration Details</h2>
                   {registrationId && (
                     <p className="text-xs font-mono text-white/40 mt-0.5">{registrationId}</p>
                   )}
@@ -177,7 +177,7 @@ export default function AttendeeDetailDrawer({
                 <div className="p-6 space-y-6">
                   {/* Registration Info */}
                   <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
-                    <h3 className="text-xs font-medium uppercase tracking-wider text-white/30 mb-4">
+                    <h3 className="text-xs font-medium uppercase tracking-wider text-white/30 mb-4" style={{ fontFamily: "var(--font-mono)" }}>
                       Registration Info
                     </h3>
                     <div className="space-y-3">
@@ -228,7 +228,7 @@ export default function AttendeeDetailDrawer({
 
                   {/* Attendees */}
                   <div>
-                    <h3 className="text-xs font-medium uppercase tracking-wider text-white/30 mb-4 px-1">
+                    <h3 className="text-xs font-medium uppercase tracking-wider text-white/30 mb-4 px-1" style={{ fontFamily: "var(--font-mono)" }}>
                       Attendees ({detail.attendees?.length || 0})
                     </h3>
                     <div className="space-y-4">
@@ -250,8 +250,8 @@ export default function AttendeeDetailDrawer({
                                   className="w-14 h-14 rounded-xl object-cover border border-white/[0.08]"
                                 />
                               ) : (
-                                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center border border-white/[0.08]">
-                                  <span className="text-xl font-medium text-violet-400">
+                                <div className="w-14 h-14 rounded-xl bg-[#D4A574]/15 flex items-center justify-center border border-white/[0.08]">
+                                  <span className="text-xl font-medium text-[#D4A574]">
                                     {attendee.full_name?.charAt(0)?.toUpperCase() || "?"}
                                   </span>
                                 </div>
@@ -277,7 +277,7 @@ export default function AttendeeDetailDrawer({
                                 </div>
                               </div>
                               {index === 0 && (
-                                <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20 rounded-md">
+                                <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-medium bg-[#D4A574]/10 text-[#D4A574] border border-[#D4A574]/20 rounded-md">
                                   Primary
                                 </span>
                               )}

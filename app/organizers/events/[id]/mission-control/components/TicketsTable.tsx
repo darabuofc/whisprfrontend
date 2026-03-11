@@ -73,7 +73,7 @@ function TicketActionMenu({
         <MoreHorizontal size={15} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 z-30 min-w-[170px] py-1 bg-[#141414] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
+        <div className="absolute right-0 top-full mt-1 z-30 min-w-[170px] py-1 bg-[#1C1C1E] border border-white/[0.08] rounded-xl shadow-xl shadow-black/40">
           {ticket.ticket_url && (
             <a
               href={ticket.ticket_url}
@@ -195,12 +195,12 @@ export default function TicketsTable({
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
-          <p className="text-xs text-white/40 uppercase tracking-wider">Total Tickets</p>
+          <p className="text-xs text-white/40 uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>Total Tickets</p>
           <p className="text-2xl font-semibold text-white/90 mt-1">{summary.total}</p>
         </div>
         {Object.entries(summary.by_status).slice(0, 3).map(([status, count]) => (
           <div key={status} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-xs text-white/40 uppercase tracking-wider">{status}</p>
+            <p className="text-xs text-white/40 uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>{status}</p>
             <p className="text-2xl font-semibold text-white/90 mt-1">{count}</p>
           </div>
         ))}
@@ -212,7 +212,7 @@ export default function TicketsTable({
         <div className="p-6 border-b border-white/[0.06]">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-lg font-medium text-white/90">Event Tickets</h2>
+              <h2 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Event Tickets</h2>
               <p className="text-sm text-white/40 mt-1">
                 View and manage all issued tickets
               </p>
@@ -239,7 +239,7 @@ export default function TicketsTable({
               {onImportClick && (
                 <motion.button
                   onClick={onImportClick}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)] hover:shadow-[0_0_30px_rgba(193,255,114,0.4)] transition-shadow"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium bg-[#D4A574] text-black shadow-[0_0_20px_rgba(212,165,116,0.3)] hover:shadow-[0_0_30px_rgba(212,165,116,0.4)] transition-shadow"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -286,7 +286,7 @@ export default function TicketsTable({
                   <ChevronDown size={14} className="text-white/40" />
                 </button>
                 {statusOpen && (
-                  <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2">
+                  <div className="absolute right-0 mt-2 min-w-[200px] z-30 rounded-xl border border-white/[0.08] bg-[#1C1C1E] shadow-xl shadow-black/40 p-2">
                     {statusOptions.map((option) => {
                       const checked = statusFilter.includes(option.value);
                       return (
@@ -301,7 +301,7 @@ export default function TicketsTable({
                           <span
                             className={`w-4 h-4 rounded border flex items-center justify-center ${
                               checked
-                                ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                                ? "bg-[#D4A574] border-[#D4A574] text-black"
                                 : "border-white/[0.2] text-transparent"
                             }`}
                           >
@@ -340,7 +340,7 @@ export default function TicketsTable({
                     <ChevronDown size={14} className="text-white/40" />
                   </button>
                   {passTypeOpen && (
-                    <div className="absolute right-0 mt-2 min-w-[220px] z-30 rounded-xl border border-white/[0.08] bg-[#141414] shadow-xl shadow-black/40 p-2 max-h-64 overflow-auto">
+                    <div className="absolute right-0 mt-2 min-w-[220px] z-30 rounded-xl border border-white/[0.08] bg-[#1C1C1E] shadow-xl shadow-black/40 p-2 max-h-64 overflow-auto">
                       {passTypes.map((pt) => {
                         const checked = passTypeFilter.includes(pt.id);
                         return (
@@ -355,7 +355,7 @@ export default function TicketsTable({
                             <span
                               className={`w-4 h-4 rounded border flex items-center justify-center ${
                                 checked
-                                  ? "bg-[#C1FF72] border-[#C1FF72] text-black"
+                                  ? "bg-[#D4A574] border-[#D4A574] text-black"
                                   : "border-white/[0.2] text-transparent"
                               }`}
                             >
@@ -449,8 +449,8 @@ export default function TicketsTable({
                             className="w-8 h-8 rounded-full object-cover border border-white/[0.08]"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
-                            <span className="text-sm font-medium text-violet-400">
+                          <div className="w-8 h-8 rounded-full bg-[#D4A574]/10 flex items-center justify-center border border-[#D4A574]/20">
+                            <span className="text-sm font-medium text-[#D4A574]">
                               {ticket.attendee.name?.charAt(0)?.toUpperCase() || "?"}
                             </span>
                           </div>

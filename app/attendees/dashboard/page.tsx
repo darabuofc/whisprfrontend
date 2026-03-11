@@ -64,8 +64,8 @@ export default function AttendeeDashboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-screen flex items-center justify-center bg-[#060606]">
-          <div className="w-8 h-8 rounded-full border-2 border-[#C1FF72]/30 border-t-[#C1FF72] animate-spin" />
+        <div className="h-screen flex items-center justify-center bg-[#0A0A0A]">
+          <div className="w-8 h-8 rounded-full border-2 border-[#D4A574]/30 border-t-[#D4A574] animate-spin" />
         </div>
       }
     >
@@ -193,12 +193,12 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#060606] relative overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[80px] animate-float will-change-transform" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
+      <div className="h-screen flex items-center justify-center bg-[#0A0A0A] relative overflow-hidden">
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#D4A574]/[0.03] blur-[80px] animate-float will-change-transform" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#2C2C2E]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
         <div className="relative">
-          <div className="w-10 h-10 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
-          <div className="absolute inset-0 w-10 h-10 rounded-full bg-[#C1FF72]/10 blur-md animate-pulse" />
+          <div className="w-10 h-10 rounded-full border-2 border-[#D4A574]/20 border-t-[#D4A574] animate-spin" />
+          <div className="absolute inset-0 w-10 h-10 rounded-full bg-[#D4A574]/10 blur-md animate-pulse" />
         </div>
       </div>
     );
@@ -209,17 +209,17 @@ function DashboardContent() {
   return (
     <div
       {...swipeHandlers}
-      className="min-h-screen bg-[#060606] text-white font-satoshi relative overflow-hidden"
+      className="min-h-screen bg-[#0A0A0A] text-white relative overflow-hidden"
     >
       {/* ─── AMBIENT BACKGROUND ─── */}
       <div className="fixed inset-0 pointer-events-none" style={{ contain: 'strict' }}>
-        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#C1FF72]/[0.03] blur-[80px] animate-float will-change-transform" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#6C2DFF]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
-        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#C1FF72]/[0.02] blur-[60px] animate-glow will-change-transform" />
+        <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[#D4A574]/[0.03] blur-[80px] animate-float will-change-transform" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#2C2C2E]/[0.04] blur-[60px] animate-float will-change-transform" style={AMBIENT_DELAY_STYLE} />
+        <div className="absolute top-[40%] left-[50%] w-[30%] h-[30%] rounded-full bg-[#D4A574]/[0.02] blur-[60px] animate-glow will-change-transform" />
       </div>
 
       {/* ─── DESKTOP HEADER ─── */}
-      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#060606]/70 backdrop-blur-2xl border-b border-white/[0.06]">
+      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#0A0A0A]/70 backdrop-blur-2xl border-b border-white/[0.06]">
         <Image
           src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
           alt="Whispr"
@@ -267,7 +267,7 @@ function DashboardContent() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
                 >
                   <div className="px-3 py-2 mb-1">
                     <p className="text-sm font-medium truncate">
@@ -304,7 +304,7 @@ function DashboardContent() {
       </header>
 
       {/* ─── MOBILE HEADER ─── */}
-      <header className="lg:hidden sticky top-0 z-40 bg-[#060606]/70 backdrop-blur-2xl border-b border-white/[0.06]">
+      <header className="lg:hidden sticky top-0 z-40 bg-[#0A0A0A]/70 backdrop-blur-2xl border-b border-white/[0.06]">
         <div className="flex items-center justify-between px-4 h-14">
           <Image
             src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
@@ -348,7 +348,7 @@ function DashboardContent() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-3 top-[58px] w-56 rounded-xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
+                className="absolute right-3 top-[58px] w-56 rounded-xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
               >
                 <div className="px-3 py-2 mb-1">
                   <p className="text-sm font-medium truncate">
@@ -401,10 +401,10 @@ function DashboardContent() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 lg:pt-24 pb-28 lg:pb-12">
           {/* Welcome + Event */}
           <section className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1 tracking-tight" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
               Welcome back
               {profile?.fullName
-                ? <span className="bg-gradient-to-r from-[#C1FF72] to-[#a8e650] bg-clip-text text-transparent">{`, ${profile.fullName.split(" ")[0]}`}</span>
+                ? <span className="text-[#D4A574]">{`, ${profile.fullName.split(" ")[0]}`}</span>
                 : ""}
             </h1>
             <p className="text-sm text-neutral-500 mb-6">
@@ -415,28 +415,22 @@ function DashboardContent() {
           </section>
 
           {/* Tab Bar */}
-          <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] mb-6 relative">
+          <div className="flex gap-1 border-b border-[#2C2C2E] mb-6 relative">
             {TABS.map(({ key, label, icon: Icon }) => {
               const isActive = activeTab === key;
               return (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 relative ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-all duration-300 relative ${
                     isActive
-                      ? "bg-white/[0.08] text-white shadow-[0_0_20px_rgba(193,255,114,0.08)]"
-                      : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03]"
+                      ? "text-[#D4A574] border-b-2 border-[#D4A574]"
+                      : "text-[#8E8E93] hover:text-[#F2F2F7]"
                   }`}
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
                 >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 rounded-lg bg-white/[0.08] border border-white/[0.08]"
-                      transition={SPRING_TRANSITION}
-                    />
-                  )}
                   <span className="relative z-10 flex items-center gap-2">
-                    <Icon size={15} strokeWidth={isActive ? 2 : 1.5} className={isActive ? "text-[#C1FF72]" : ""} />
+                    <Icon size={15} strokeWidth={isActive ? 2 : 1.5} className={isActive ? "text-[#D4A574]" : ""} />
                     <span className="hidden sm:inline">{label}</span>
                     <span className="sm:hidden">
                       {key === "applications" ? "Apps" : label}
@@ -459,8 +453,8 @@ function DashboardContent() {
               {tabLoading ? (
                 <div className="flex justify-center py-16">
                   <div className="relative">
-                    <div className="w-8 h-8 rounded-full border-2 border-[#C1FF72]/20 border-t-[#C1FF72] animate-spin" />
-                    <div className="absolute inset-0 w-8 h-8 rounded-full bg-[#C1FF72]/10 blur-md animate-pulse" />
+                    <div className="w-8 h-8 rounded-full border-2 border-[#D4A574]/20 border-t-[#D4A574] animate-spin" />
+                    <div className="absolute inset-0 w-8 h-8 rounded-full bg-[#D4A574]/10 blur-md animate-pulse" />
                   </div>
                 </div>
               ) : activeTab === "profile" ? (
@@ -483,7 +477,7 @@ function DashboardContent() {
       </div>
 
       {/* ─── MOBILE BOTTOM NAV ─── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#060606]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
         <div className="grid grid-cols-3 h-16">
           {TABS.map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
@@ -492,13 +486,13 @@ function DashboardContent() {
                 key={key}
                 onClick={() => setActiveTab(key)}
                 className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 relative ${
-                  isActive ? "text-[#C1FF72]" : "text-neutral-600"
+                  isActive ? "text-[#D4A574]" : "text-neutral-600"
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="mobileNavIndicator"
-                    className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#C1FF72] shadow-[0_0_8px_rgba(193,255,114,0.5)]"
+                    className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-[#D4A574] shadow-[0_0_8px_rgba(212,165,116,0.5)]"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
                 )}
@@ -537,8 +531,8 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
 
   if (!event) {
     return (
-      <div className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-8 text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] to-[#6C2DFF]/[0.02]" />
+      <div className="rounded-2xl border border-dashed border-[#2C2C2E] bg-[#1C1C1E] p-8 text-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#D4A574]/[0.02] to-[#2C2C2E]/[0.02]" />
         <Calendar size={28} className="mx-auto mb-3 text-neutral-500 relative" />
         <p className="text-sm text-neutral-400 relative">No upcoming events</p>
         <p className="text-xs text-neutral-600 mt-1 relative">Check back soon for new events</p>
@@ -567,7 +561,7 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
 
   return (
     <div
-      className="group rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/20 transition-all duration-500 cursor-pointer relative hover:shadow-[0_0_40px_rgba(193,255,114,0.06)]"
+      className="group rounded-2xl overflow-hidden border border-[#2C2C2E] bg-[#1C1C1E] hover:border-[#D4A574]/20 transition-all duration-500 cursor-pointer relative hover:shadow-none"
       onClick={() => router.push(`/attendees/events/${eventSlug}`)}
     >
       {/* Cover Image */}
@@ -577,8 +571,8 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
           alt={event.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#D4A574]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Status pills */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
@@ -597,7 +591,7 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
             </div>
           )}
           {r?.is_registered && (
-            <div className="px-2.5 py-1 rounded-full bg-[#C1FF72]/15 border border-[#C1FF72]/20 text-[11px] font-medium text-[#C1FF72] shadow-[0_0_10px_rgba(193,255,114,0.2)]">
+            <div className="px-2.5 py-1 rounded-full bg-[#D4A574]/15 border border-[#D4A574]/20 text-[11px] font-medium text-[#D4A574] shadow-[0_0_10px_rgba(212,165,116,0.2)]">
               Registered
             </div>
           )}
@@ -634,10 +628,10 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
           }}
           className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
             r?.has_ticket
-              ? "bg-[#C1FF72]/10 text-[#C1FF72] border border-[#C1FF72]/20 hover:bg-[#C1FF72]/20 hover:shadow-[0_0_20px_rgba(193,255,114,0.15)]"
+              ? "bg-[#D4A574]/10 text-[#D4A574] border border-[#D4A574]/20 hover:bg-[#D4A574]/20 hover:shadow-[0_0_20px_rgba(212,165,116,0.15)]"
               : r?.is_registered
-              ? "bg-white/[0.06] text-white border border-white/[0.08] hover:bg-white/[0.1]"
-              : "bg-gradient-to-r from-[#C1FF72] to-[#a8e650] text-black hover:shadow-[0_0_30px_rgba(193,255,114,0.3)] hover:scale-[1.01]"
+              ? "bg-white/[0.06] text-white border border-[#2C2C2E] hover:bg-white/[0.1]"
+              : "bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] hover:scale-[1.01]"
           }`}
         >
           {ctaLabel}
@@ -730,7 +724,7 @@ const ProfileTab = memo(function ProfileTab({
   if (!profile) return null;
 
   const inputClass =
-    "w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-white text-sm placeholder:text-neutral-600 outline-none transition-all focus:border-[#C1FF72]/40 focus:bg-white/[0.06] hover:bg-white/[0.05]";
+    "w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-[#2C2C2E] text-white text-sm placeholder:text-neutral-600 outline-none transition-all focus:border-[#D4A574]/40 focus:bg-white/[0.06] hover:bg-white/[0.05]";
 
   // ─── EDIT MODE ───
   if (isEditing) {
@@ -766,7 +760,7 @@ const ProfileTab = memo(function ProfileTab({
                   <User size={24} className="text-neutral-600" />
                 </div>
               )}
-              <div className="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-[#C1FF72] flex items-center justify-center">
+              <div className="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-[#D4A574] flex items-center justify-center">
                 <Camera size={13} className="text-black" />
               </div>
               <input
@@ -905,7 +899,7 @@ const ProfileTab = memo(function ProfileTab({
             className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-300 ${
               saving
                 ? "bg-white/[0.06] text-neutral-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#C1FF72] to-[#a8e650] text-black hover:shadow-[0_0_30px_rgba(193,255,114,0.3)] hover:scale-[1.01]"
+                : "bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] hover:scale-[1.01]"
             }`}
           >
             {saving ? (
@@ -926,7 +920,8 @@ const ProfileTab = memo(function ProfileTab({
         <h2 className="text-lg font-semibold">Profile</h2>
         <button
           onClick={startEditing}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C1FF72] bg-[#C1FF72]/10 hover:bg-[#C1FF72]/15 border border-[#C1FF72]/15 hover:shadow-[0_0_15px_rgba(193,255,114,0.1)] transition-all duration-300"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[#2C2C2E] text-[#8E8E93] hover:border-[#D4A574] hover:text-[#D4A574] bg-transparent transition-all duration-300"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
         >
           <Pencil size={12} />
           Edit
@@ -934,11 +929,11 @@ const ProfileTab = memo(function ProfileTab({
       </div>
 
       {/* Profile card */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#C1FF72]/[0.02] via-transparent to-[#6C2DFF]/[0.02] opacity-0 group-hover/profile:opacity-100 transition-opacity duration-500" />
+      <div className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] p-5 sm:p-6 mb-4 relative overflow-hidden group/profile">
+        <div className="absolute inset-0 opacity-0 group-hover/profile:opacity-100 transition-opacity duration-500" />
         <div className="relative">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/[0.06] ring-offset-2 ring-offset-[#060606]">
+            <div className="w-16 h-16 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden flex-shrink-0 ring-2 ring-white/[0.06] ring-offset-2 ring-offset-[#0A0A0A]">
               {profile.profilePicture ? (
                 <img
                   src={profile.profilePicture}
@@ -952,7 +947,7 @@ const ProfileTab = memo(function ProfileTab({
               )}
             </div>
             <div className="min-w-0">
-              <h3 className="text-xl font-bold">{profile.fullName || "User"}</h3>
+              <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>{profile.fullName || "User"}</h3>
               {profile.bio && (
                 <p className="text-sm text-neutral-400 mt-0.5 line-clamp-2">
                   {profile.bio}
@@ -964,18 +959,17 @@ const ProfileTab = memo(function ProfileTab({
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {profile.profession && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#C1FF72]/[0.06] border border-[#C1FF72]/[0.1] text-xs text-[#C1FF72]/80 capitalize">
-                <Briefcase size={11} className="text-[#C1FF72]/60" />
+              <span className="inline-flex items-center gap-1.5 text-[#8E8E93] border border-[#2C2C2E] bg-transparent text-xs px-2.5 py-1 rounded-md capitalize" style={{ fontFamily: "var(--font-mono)" }}>
                 {profile.profession}
               </span>
             )}
             {profile.age && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-neutral-300">
+              <span className="inline-flex items-center gap-1.5 text-[#8E8E93] border border-[#2C2C2E] bg-transparent text-xs px-2.5 py-1 rounded-md" style={{ fontFamily: "var(--font-mono)" }}>
                 {profile.age} years old
               </span>
             )}
             {profile.gender && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs text-neutral-300 capitalize">
+              <span className="inline-flex items-center gap-1.5 text-[#8E8E93] border border-[#2C2C2E] bg-transparent text-xs px-2.5 py-1 rounded-md capitalize" style={{ fontFamily: "var(--font-mono)" }}>
                 {profile.gender}
               </span>
             )}
@@ -985,8 +979,8 @@ const ProfileTab = memo(function ProfileTab({
 
       {/* Details grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
-          <h4 className="text-[11px] text-[#C1FF72]/60 uppercase tracking-wider mb-3 font-medium">
+        <div className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] p-4 hover:border-white/[0.12] transition-colors duration-300">
+          <h4 className="text-[11px] text-[#8E8E93] uppercase tracking-[0.08em] font-medium mb-3" style={{ fontFamily: "var(--font-mono)" }}>
             Contact
           </h4>
           <div className="space-y-2.5">
@@ -1015,8 +1009,8 @@ const ProfileTab = memo(function ProfileTab({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors duration-300">
-          <h4 className="text-[11px] text-[#6C2DFF]/80 uppercase tracking-wider mb-3 font-medium">
+        <div className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] p-4 hover:border-white/[0.12] transition-colors duration-300">
+          <h4 className="text-[11px] text-[#8E8E93] uppercase tracking-[0.08em] font-medium mb-3" style={{ fontFamily: "var(--font-mono)" }}>
             Details
           </h4>
           <div className="space-y-2.5">
@@ -1056,16 +1050,16 @@ function InfoRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-2.5 ${hoverable ? "group-hover/ig:text-[#C1FF72]" : ""}`}
+      className={`flex items-center gap-2.5 ${hoverable ? "group-hover/ig:text-[#D4A574]" : ""}`}
     >
       <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center flex-shrink-0">
         <Icon
           size={13}
-          className={`text-neutral-500 ${hoverable ? "group-hover/ig:text-[#C1FF72]" : ""} transition-colors`}
+          className={`text-neutral-500 ${hoverable ? "group-hover/ig:text-[#D4A574]" : ""} transition-colors`}
         />
       </div>
       <span
-        className={`text-sm text-neutral-300 truncate ${capitalize ? "capitalize" : ""} ${hoverable ? "group-hover/ig:text-[#C1FF72]" : ""} transition-colors`}
+        className={`text-sm text-neutral-300 truncate ${capitalize ? "capitalize" : ""} ${hoverable ? "group-hover/ig:text-[#D4A574]" : ""} transition-colors`}
       >
         {label}
       </span>
@@ -1166,7 +1160,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
   const statusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "approved":
-        return "text-[#C1FF72] bg-[#C1FF72]/10 border-[#C1FF72]/20";
+        return "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/20";
       case "pending":
         return "text-amber-400 bg-amber-500/10 border-amber-500/20";
       default:
@@ -1207,10 +1201,10 @@ const ApplicationsTab = memo(function ApplicationsTab({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={`rounded-2xl border bg-white/[0.02] overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
+              className={`rounded-2xl border bg-[#1C1C1E] overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${
                 isHighlighted
-                  ? "border-[#C1FF72]/40 ring-1 ring-[#C1FF72]/20 shadow-[0_0_30px_rgba(193,255,114,0.08)]"
-                  : "border-white/[0.08]"
+                  ? "border-[#D4A574]/40 ring-1 ring-[#D4A574]/20 shadow-none"
+                  : "border-[#2C2C2E]"
               }`}
             >
               <div className="flex">
@@ -1274,7 +1268,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                       </div>
                       {r.pass.price !== null &&
                         r.pass.price !== undefined && (
-                          <p className="text-xs font-semibold text-[#C1FF72]">
+                          <p className="text-xs font-semibold text-[#D4A574]">
                             {r.pass.price === 0
                               ? "Free"
                               : `PKR ${r.pass.price.toLocaleString()}`}
@@ -1284,12 +1278,12 @@ const ApplicationsTab = memo(function ApplicationsTab({
                   )}
 
                   {/* Registration code */}
-                  <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-black/30 border border-[#C1FF72]/[0.08]">
+                  <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-black/30 border border-[#D4A574]/[0.08]">
                     <div className="min-w-0">
                       <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
                         Code
                       </span>
-                      <p className="font-mono text-xs text-[#C1FF72] font-medium truncate">
+                      <p className="font-mono text-xs text-[#D4A574] font-medium truncate">
                         {r.registration_id}
                       </p>
                     </div>
@@ -1304,7 +1298,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                       title="Copy code"
                     >
                       {copiedId === r.registration_airtable_id ? (
-                        <Check size={13} className="text-[#C1FF72]" />
+                        <Check size={13} className="text-[#D4A574]" />
                       ) : (
                         <Copy size={13} className="text-neutral-500" />
                       )}
@@ -1315,7 +1309,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleShare(r)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#C1FF72]/[0.08] border border-white/[0.06] hover:border-[#C1FF72]/20 text-xs font-medium transition-all duration-300"
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 text-xs font-medium transition-all duration-300"
                     >
                       <Share2 size={12} />
                       Share
@@ -1357,7 +1351,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
               transition={{ duration: 0.15 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
-              <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#0c0c0c]/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/50">
+              <div className="w-full max-w-sm rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/50">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center">
                     <XCircle size={18} className="text-red-400" />
@@ -1372,7 +1366,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                   <button
                     onClick={() => setCancelConfirmId(null)}
                     disabled={cancelling}
-                    className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] text-sm font-medium transition-all disabled:opacity-50"
+                    className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-[#2C2C2E] text-sm font-medium transition-all disabled:opacity-50"
                   >
                     Keep It
                   </button>
@@ -1416,8 +1410,8 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
   if (!tickets.length)
     return (
       <div className="text-center py-16">
-        <div className="w-16 h-16 rounded-2xl bg-[#C1FF72]/[0.05] border border-[#C1FF72]/[0.1] flex items-center justify-center mx-auto mb-4">
-          <Ticket size={24} className="text-[#C1FF72]/50" />
+        <div className="w-16 h-16 rounded-2xl bg-[#D4A574]/[0.05] border border-[#D4A574]/[0.1] flex items-center justify-center mx-auto mb-4">
+          <Ticket size={24} className="text-[#D4A574]/50" />
         </div>
         <p className="text-sm text-neutral-400">No tickets yet</p>
         <p className="text-xs text-neutral-600 mt-1">
@@ -1437,15 +1431,15 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
-            className="rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-[#C1FF72]/25 hover:shadow-[0_0_25px_rgba(193,255,114,0.06)] transition-all duration-300 cursor-pointer group"
+            className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] hover:border-[#D4A574]/25 hover:shadow-none transition-all duration-300 cursor-pointer group"
             onClick={() => router.push(`/attendees/tickets/${t.id}`)}
           >
             <div className="p-4 flex items-center gap-4">
               {/* Ticket icon */}
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C1FF72]/15 to-[#C1FF72]/5 border border-[#C1FF72]/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#D4A574]/15 to-[#D4A574]/5 border border-[#D4A574]/10 flex items-center justify-center flex-shrink-0">
                 <Ticket
                   size={20}
-                  className="text-[#C1FF72] group-hover:scale-110 transition-transform duration-300"
+                  className="text-[#D4A574] group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
 
@@ -1467,7 +1461,7 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
 
               <ChevronRight
                 size={18}
-                className="text-neutral-600 group-hover:text-[#C1FF72] transition-colors flex-shrink-0"
+                className="text-neutral-600 group-hover:text-[#D4A574] transition-colors flex-shrink-0"
               />
             </div>
           </motion.div>

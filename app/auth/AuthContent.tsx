@@ -29,8 +29,6 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  const accent = mode === "attendee" ? "#c1ff72" : "#b472ff";
-
   useEffect(() => {
     setMode(initialMode);
     setStage(initialStage);
@@ -114,21 +112,17 @@ export default function AuthPage() {
 
     if (stage === "signin") {
       if (data?.token) persistSession(data.token, "attendee");
-      // Use redirect param if present and user is onboarded, otherwise use default flow
       if (data.attendee?.is_onboarded) {
         router.replace(redirectParam || "/attendees/dashboard");
       } else {
-        // Save redirect URL for after onboarding if present
         if (redirectParam) {
           localStorage.setItem("whispr_post_auth_redirect", redirectParam);
         }
         router.replace("/attendees/onboarding");
       }
     } else {
-      // Registration succeeded - try to use token if provided, otherwise auto-login
       if (data?.token) {
         persistSession(data.token, "attendee");
-        // Save redirect URL for after onboarding if present
         if (redirectParam) {
           localStorage.setItem("whispr_post_auth_redirect", redirectParam);
         }
@@ -136,7 +130,6 @@ export default function AuthPage() {
         return;
       }
 
-      // No token in registration response - auto-login with same credentials
       const loginRes = await fetch(`${base}/attendees/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -152,7 +145,6 @@ export default function AuthPage() {
       if (loginData.attendee?.is_onboarded) {
         router.replace(redirectParam || "/attendees/dashboard");
       } else {
-        // Save redirect URL for after onboarding if present
         if (redirectParam) {
           localStorage.setItem("whispr_post_auth_redirect", redirectParam);
         }
@@ -178,17 +170,16 @@ export default function AuthPage() {
     }
   }, [loading, mode, submitOrganizerFlow, submitAttendeeFlow]);
 
+  const inputClass =
+    "w-full px-4 py-3 bg-[#1C1C1E] border border-[#2C2C2E] rounded-lg text-[#F2F2F7] placeholder:text-[#8E8E93] focus:outline-none focus:border-[#D4A574] transition-all duration-150";
+
   return (
-    <div className="min-h-screen bg-[#040404] text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-4" style={{ fontFamily: "var(--font-body)" }}>
       {/* Ambient glow background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute -top-1/4 -left-1/4 w-[70vw] h-[60vh] rounded-full blur-[100px] opacity-50"
-          style={{ background: "radial-gradient(circle, rgba(180,114,255,0.4), transparent 60%)" }}
-        />
-        <div
-          className="absolute -bottom-1/4 -right-1/4 w-[70vw] h-[60vh] rounded-full blur-[100px] opacity-40"
-          style={{ background: "radial-gradient(circle, rgba(193,255,114,0.35), transparent 60%)" }}
+          className="absolute -top-1/4 -left-1/4 w-[70vw] h-[60vh] rounded-full blur-[100px] opacity-30"
+          style={{ background: "radial-gradient(circle, rgba(212,165,116,0.25), transparent 60%)" }}
         />
         <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:200px_200px] opacity-[0.03] mix-blend-overlay" />
       </div>
@@ -196,39 +187,37 @@ export default function AuthPage() {
       <div className="relative w-full max-w-md">
         {/* Glow ring behind card */}
         <div
-          className="absolute -inset-1 rounded-[32px] blur-2xl opacity-60"
+          className="absolute -inset-1 rounded-[20px] blur-2xl opacity-40"
           style={{
-            background: mode === "attendee"
-              ? "conic-gradient(from 180deg, rgba(193,255,114,0.15), rgba(255,255,255,0.02), rgba(193,255,114,0.15))"
-              : "conic-gradient(from 180deg, rgba(180,114,255,0.15), rgba(255,255,255,0.02), rgba(180,114,255,0.15))"
+            background: "conic-gradient(from 180deg, rgba(212,165,116,0.15), rgba(255,255,255,0.02), rgba(212,165,116,0.15))"
           }}
         />
 
         {/* Glass card */}
-        <div className="relative bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.08] p-8 md:p-10 shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
+        <div className="relative bg-[#1C1C1E]/80 backdrop-blur-2xl rounded-xl border border-[#2C2C2E] p-8 md:p-10 shadow-[0_8px_64px_rgba(0,0,0,0.4)]">
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div
-                className="absolute -inset-6 rounded-full blur-2xl opacity-50"
-                style={{ background: accent }}
+                className="absolute -inset-6 rounded-full blur-2xl opacity-40"
+                style={{ background: "#D4A574" }}
               />
               <Image
                 src="/logo.png"
                 alt="Whispr"
                 width={64}
                 height={64}
-                className="relative h-16 w-16 drop-shadow-[0_0_20px_rgba(193,255,0,0.3)]"
+                className="relative h-16 w-16 drop-shadow-[0_0_20px_rgba(212,165,116,0.3)]"
                 priority
               />
             </div>
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl font-semibold text-center text-white mb-2">
+          <h1 className="text-2xl text-center text-[#F2F2F7] mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
             {stage === "signin" ? "Welcome back" : "Create your account"}
           </h1>
-          <p className="text-sm text-center text-white/50 mb-8">
+          <p className="text-sm text-center text-[#8E8E93] mb-8" style={{ fontFamily: "var(--font-body)" }}>
             {mode === "attendee"
               ? "Access your tickets and experiences"
               : "Manage your events and guests"}
@@ -236,20 +225,20 @@ export default function AuthPage() {
 
           {/* Role Toggle */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex bg-white/[0.04] border border-white/[0.08] rounded-full p-1">
+            <div className="inline-flex bg-[#0A0A0A] border border-[#2C2C2E] rounded-lg p-1">
               {(["attendee", "organizer"] as AuthMode[]).map((r) => {
                 const active = mode === r;
-                const btnAccent = r === "attendee" ? "#c1ff72" : "#b472ff";
                 return (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setMode(r)}
-                    className="relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-300"
+                    className="relative px-5 py-2 text-sm rounded-md transition-all duration-150"
                     style={{
-                      background: active ? btnAccent : "transparent",
-                      color: active ? "#000" : "rgba(255,255,255,0.6)",
-                      boxShadow: active ? `0 8px 24px -8px ${btnAccent}` : "none",
+                      fontFamily: "var(--font-display)",
+                      fontWeight: 500,
+                      background: active ? "#D4A574" : "transparent",
+                      color: active ? "#0A0A0A" : "#8E8E93",
                     }}
                   >
                     {r === "attendee" ? "Attendee" : "Organizer"}
@@ -263,7 +252,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {stage === "register" && (
               <div>
-                <label htmlFor="fullName" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+                <label htmlFor="fullName" className="block text-[11px] uppercase tracking-[0.08em] text-[#8E8E93] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                   Full Name
                 </label>
                 <input
@@ -273,14 +262,14 @@ export default function AuthPage() {
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Jane Doe"
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                  className={inputClass}
                 />
               </div>
             )}
 
             {stage === "register" && mode === "organizer" && (
               <div>
-                <label htmlFor="organizationName" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+                <label htmlFor="organizationName" className="block text-[11px] uppercase tracking-[0.08em] text-[#8E8E93] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                   Organization Name
                 </label>
                 <input
@@ -290,13 +279,13 @@ export default function AuthPage() {
                   onChange={(e) => setOrganizationName(e.target.value)}
                   required
                   placeholder="Your Company"
-                  className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                  className={inputClass}
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+              <label htmlFor="email" className="block text-[11px] uppercase tracking-[0.08em] text-[#8E8E93] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                 Email
               </label>
               <input
@@ -307,12 +296,12 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                className={inputClass}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2">
+              <label htmlFor="password" className="block text-[11px] uppercase tracking-[0.08em] text-[#8E8E93] mb-2" style={{ fontFamily: "var(--font-mono)" }}>
                 Password
               </label>
               <div className="relative">
@@ -324,12 +313,12 @@ export default function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder={stage === "signin" ? "Enter your password" : "Create a password"}
-                  className="w-full px-4 py-3 pr-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                  className={`${inputClass} pr-12`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-white/40 hover:text-white/70 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#8E8E93] hover:text-[#F2F2F7] transition-colors duration-150"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -339,10 +328,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="mt-2 text-xs transition-colors"
-                  style={{ color: `${accent}99` }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = `${accent}99`)}
+                  className="mt-2 text-xs text-[#D4A574]/70 hover:text-[#D4A574] transition-colors duration-150"
                 >
                   Forgot password?
                 </button>
@@ -350,7 +336,7 @@ export default function AuthPage() {
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
                 <p className="text-sm text-red-400 text-center">{error}</p>
               </div>
             )}
@@ -358,11 +344,12 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300 mt-2"
+              className="w-full py-3.5 px-4 rounded-lg text-sm mt-2 transition-all duration-150"
               style={{
-                background: loading ? "rgba(255,255,255,0.05)" : accent,
-                color: loading ? "rgba(255,255,255,0.4)" : "#000",
-                boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
+                fontFamily: "var(--font-display)",
+                fontWeight: 600,
+                background: loading ? "rgba(255,255,255,0.05)" : "#D4A574",
+                color: loading ? "rgba(255,255,255,0.4)" : "#0A0A0A",
                 cursor: loading ? "not-allowed" : "pointer",
               }}
             >
@@ -378,15 +365,14 @@ export default function AuthPage() {
           </form>
 
           {/* Toggle auth stage */}
-          <p className="mt-6 text-center text-sm text-white/40">
+          <p className="mt-6 text-center text-sm text-[#8E8E93]">
             {stage === "signin" ? (
               <>
                 New here?{" "}
                 <button
                   type="button"
                   onClick={() => setStage("register")}
-                  className="font-medium transition-colors"
-                  style={{ color: accent }}
+                  className="font-medium text-[#D4A574] hover:text-[#B8785C] transition-colors duration-150"
                 >
                   Create an account
                 </button>
@@ -397,8 +383,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setStage("signin")}
-                  className="font-medium transition-colors"
-                  style={{ color: accent }}
+                  className="font-medium text-[#D4A574] hover:text-[#B8785C] transition-colors duration-150"
                 >
                   Sign in
                 </button>
@@ -408,7 +393,7 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-xs text-white/30">
+        <p className="mt-8 text-center text-xs text-[#8E8E93]/60">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>

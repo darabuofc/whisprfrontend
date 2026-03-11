@@ -16,7 +16,7 @@ export default function CommandRail({ activeView, onViewChange }: CommandRailPro
   ];
 
   return (
-    <div className="fixed left-0 top-12 bottom-0 w-16 bg-[#0F0F0F] border-r border-[#1A1A1A] z-40 flex flex-col">
+    <div className="fixed left-0 top-12 bottom-0 w-16 bg-[#0A0A0A] border-r border-[#1C1C1E] z-40 flex flex-col">
       <div className="flex-1 py-4">
         {items.map((item) => {
           const Icon = item.icon;
@@ -29,12 +29,12 @@ export default function CommandRail({ activeView, onViewChange }: CommandRailPro
               className={`
                 w-full h-16 flex items-center justify-center relative
                 transition-colors
-                ${isActive ? "text-[#F59E0B]" : "text-[#6B7280] hover:text-[#9CA3AF]"}
+                ${isActive ? "text-[#D4A574]" : "text-[#6B7280] hover:text-[#9CA3AF]"}
               `}
               title={item.label}
             >
               {isActive && (
-                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#F59E0B]" />
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#D4A574]" />
               )}
               <Icon size={24} strokeWidth={1.5} />
             </button>
@@ -43,18 +43,18 @@ export default function CommandRail({ activeView, onViewChange }: CommandRailPro
       </div>
 
       {/* Settings at bottom */}
-      <div className="border-t border-[#1A1A1A]">
+      <div className="border-t border-[#1C1C1E]">
         <button
           onClick={() => onViewChange("settings")}
           className={`
             w-full h-16 flex items-center justify-center relative
             transition-colors
-            ${activeView === "settings" ? "text-[#F59E0B]" : "text-[#6B7280] hover:text-[#9CA3AF]"}
+            ${activeView === "settings" ? "text-[#D4A574]" : "text-[#6B7280] hover:text-[#9CA3AF]"}
           `}
           title="Settings"
         >
           {activeView === "settings" && (
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#F59E0B]" />
+            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#D4A574]" />
           )}
           <Settings size={24} strokeWidth={1.5} />
         </button>

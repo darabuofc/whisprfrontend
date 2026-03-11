@@ -10,18 +10,14 @@ const config: Config = {
   	extend: {
   		colors: {
   			whispr: {
-  				bg: '#0A0226',
-  				text: '#E5E5E5',
-  				muted: '#7D7D7D',
-  				accent: '#C1FF00',
-  				purple: '#6C2DFF',
-  				glow: 'rgba(193,255,0,0.3)'
-  			},
-  			base: {
-  				'700': '#1C0E4F',
-  				'800': '#12063A',
-  				'900': '#0A0226',
-  				DEFAULT: '#0A0226'
+  				void: '#0A0A0A',
+  				smoke: '#1C1C1E',
+  				concrete: '#2C2C2E',
+  				'whisper-gray': '#8E8E93',
+  				chalk: '#F2F2F7',
+  				paper: '#FAFAFA',
+  				copper: '#D4A574',
+  				ember: '#B8785C',
   			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -65,24 +61,14 @@ const config: Config = {
   			}
   		},
   		boxShadow: {
-  			glow: '0 0 20px rgba(193,255,0,0.35)'
+  			glow: '0 0 20px rgba(212,165,116,0.35)'
   		},
   		fontFamily: {
-  			satoshi: [
-  				'Satoshi',
-  				'sans-serif'
-  			],
-  			space: [
-  				'Space Grotesk',
-  				'sans-serif'
-  			],
-  			mono: [
-  				'JetBrains Mono',
-  				'SF Mono',
-  				'Consolas',
-  				'Monaco',
-  				'monospace'
-  			]
+  			display: ['Space Grotesk', 'sans-serif'],
+  			body: ['DM Sans', 'sans-serif'],
+  			mono: ['JetBrains Mono', 'monospace'],
+  			space: ['Space Grotesk', 'sans-serif'],
+  			satoshi: ['DM Sans', 'sans-serif'],
   		},
   		borderRadius: {
   			'2xl': '1.25rem',

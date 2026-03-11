@@ -55,7 +55,7 @@ const RocketIcon = () => (
 
 // Confetti component
 const Confetti = ({ active }: { active: boolean }) => {
-  const colors = ['#C1FF72', '#B472FF', '#72D4FF', '#FF72B4', '#FFD472'];
+  const colors = ['#D4A574', '#D4A574', '#8E8E93', '#B8785C', '#D4A574'];
   const particles = Array.from({ length: 50 });
 
   if (!active) return null;
@@ -94,7 +94,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[800px] h-[800px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(193,255,114,0.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(212,165,116,0.15) 0%, transparent 70%)',
         left: '-20%',
         top: '-20%',
       }}
@@ -108,7 +108,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[600px] h-[600px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(180,114,255,0.12) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(44,44,46,0.12) 0%, transparent 70%)',
         right: '-15%',
         bottom: '-15%',
       }}
@@ -122,7 +122,7 @@ const FloatingOrbs = () => (
     <motion.div
       className="absolute w-[400px] h-[400px] rounded-full"
       style={{
-        background: 'radial-gradient(circle, rgba(114,212,255,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(142,142,147,0.08) 0%, transparent 70%)',
         left: '40%',
         top: '30%',
       }}
@@ -144,9 +144,9 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
         key={i}
         className={`rounded-full transition-colors duration-300 ${
           i + 1 === currentStep
-            ? 'bg-[#C1FF72] w-8 h-2'
+            ? 'bg-[#D4A574] w-8 h-2'
             : i + 1 < currentStep
-            ? 'bg-[#C1FF72]/60 w-2 h-2'
+            ? 'bg-[#D4A574]/60 w-2 h-2'
             : 'bg-white/20 w-2 h-2'
         }`}
         layoutId={`step-${i}`}
@@ -168,7 +168,7 @@ const OnboardingInput = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  placeholder:text-white/30 outline-none transition-all duration-300
-                 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                  hover:bg-white/[0.09]"
     />
     {helper && <p className="text-sm text-white/40 pl-1">{helper}</p>}
@@ -187,7 +187,7 @@ const OnboardingTextarea = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  placeholder:text-white/30 outline-none transition-all duration-300 resize-none
-                 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                  hover:bg-white/[0.09]"
     />
     {helper && <p className="text-sm text-white/40 pl-1">{helper}</p>}
@@ -207,7 +207,7 @@ const OnboardingSelect = ({
       {...props}
       className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-lg
                  outline-none transition-all duration-300 cursor-pointer appearance-none
-                 focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                 focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                  hover:bg-white/[0.09]"
       style={{
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
@@ -252,7 +252,7 @@ const PrimaryButton = ({
                  ? "bg-white/10 text-white/70 hover:bg-white/15"
                  : disabled || loading
                    ? 'bg-white/10 text-white/40 cursor-not-allowed'
-                   : 'bg-[#C1FF72] text-black shadow-[0_0_40px_rgba(193,255,114,0.3)] hover:shadow-[0_0_60px_rgba(193,255,114,0.4)]'
+                   : 'bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]'
                } ${className}`}
   >
     {loading ? (
@@ -346,12 +346,12 @@ const PassCard = ({
               onClick={() => onUpdate("type", type)}
               className={`p-3 rounded-xl border transition-all duration-300 text-left ${
                 pass.type === type
-                  ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                  ? "bg-[#D4A574]/20 border-[#D4A574]/50 text-white"
                   : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:bg-white/[0.07]"
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className={pass.type === type ? "text-[#C1FF72]" : "text-white/50"}>
+                <span className={pass.type === type ? "text-[#D4A574]" : "text-white/50"}>
                   {passTypeIcons[type]}
                 </span>
                 <span className="font-medium text-sm">{type}</span>
@@ -379,7 +379,7 @@ const PassCard = ({
               onChange={(e) => onUpdate("price", parseFloat(e.target.value) || 0)}
               className="w-full pl-14 pr-5 py-4 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white text-lg
                          placeholder:text-white/30 outline-none transition-all duration-300
-                         focus:bg-white/[0.08] focus:border-[#C1FF72]/50"
+                         focus:bg-white/[0.08] focus:border-[#D4A574]/50"
             />
           </div>
           <p className="text-xs text-white/40 pl-1">Set the price attendees will pay for this pass</p>
@@ -569,9 +569,9 @@ const CustomDatePicker = ({
                       disabled={isPast(date)}
                       className={`w-full h-full rounded-xl flex items-center justify-center text-sm font-medium transition-all duration-200 ${
                         isSelected(date)
-                          ? "bg-[#C1FF72] text-black shadow-[0_0_20px_rgba(193,255,114,0.3)]"
+                          ? "bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C]"
                           : isToday(date)
-                          ? "bg-white/10 text-[#C1FF72] border border-[#C1FF72]/30"
+                          ? "bg-white/10 text-[#D4A574] border border-[#D4A574]/30"
                           : isPast(date)
                           ? "text-white/20 cursor-not-allowed"
                           : "text-white/70 hover:bg-white/10"
@@ -653,7 +653,7 @@ const EventPreviewCard = ({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#C1FF72]/30 via-purple-500/20 to-blue-500/20">
+          <div className="w-full h-full bg-gradient-to-br from-[#D4A574]/30 via-[#B8785C]/20 to-[#2C2C2E]/20">
             <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:100px] opacity-10" />
           </div>
         )}
@@ -663,7 +663,7 @@ const EventPreviewCard = ({
       {/* Content */}
       <div className="px-6 pb-6 -mt-8 relative z-10">
         {/* Event Title */}
-        <h3 className="text-2xl font-bold text-white mb-2">{eventData.name || "Untitled Event"}</h3>
+        <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>{eventData.name || "Untitled Event"}</h3>
 
         {/* Event Details */}
         <div className="space-y-3 mb-6">
@@ -696,7 +696,7 @@ const EventPreviewCard = ({
 
         {/* Pass Types */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-white/70 uppercase tracking-wider">Available Passes</h4>
+          <h4 className="text-sm font-medium text-white/70 uppercase tracking-wider" style={{ fontFamily: "var(--font-mono)" }}>Available Passes</h4>
           <div className="grid gap-2">
             {passes.filter(p => p.type && p.price > 0).map((pass, i) => (
               <motion.div
@@ -707,7 +707,7 @@ const EventPreviewCard = ({
                 className="flex items-center justify-between p-4 rounded-xl bg-white/[0.05] border border-white/[0.08]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C1FF72]/20 to-[#C1FF72]/5 flex items-center justify-center text-[#C1FF72]">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 flex items-center justify-center text-[#D4A574]">
                     {passTypeIcons[pass.type]}
                   </div>
                   <div>
@@ -716,7 +716,7 @@ const EventPreviewCard = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-[#C1FF72]">PKR {pass.price.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#D4A574]">PKR {pass.price.toLocaleString()}</p>
                 </div>
               </motion.div>
             ))}
@@ -895,18 +895,18 @@ export default function EventOnboardingPage() {
 
   if (!authorized) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-white/20 border-t-[#C1FF72] rounded-full"
+          className="w-8 h-8 border-2 border-white/20 border-t-[#D4A574] rounded-full"
         />
       </div>
     );
   }
 
   return (
-    <main className="relative min-h-screen w-full bg-[#050505] text-white overflow-hidden">
+    <main className="relative min-h-screen w-full bg-[#0A0A0A] text-white overflow-hidden">
       <FloatingOrbs />
       <Confetti active={showConfetti} />
 
@@ -922,8 +922,8 @@ export default function EventOnboardingPage() {
           className="mb-8"
         >
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] border border-white/[0.08]">
-            <div className="w-2 h-2 rounded-full bg-[#C1FF72] shadow-[0_0_10px_#C1FF72]" />
-            <span className="text-sm font-medium text-white/70">Whispr for Organizers</span>
+            <div className="w-2 h-2 rounded-full bg-[#D4A574] shadow-[0_0_10px_#D4A574]" />
+            <span className="text-sm font-medium text-white/70" style={{ fontFamily: "var(--font-mono)" }}>Whispr for Organizers</span>
           </div>
         </motion.div>
 
@@ -948,7 +948,7 @@ export default function EventOnboardingPage() {
             className="text-center mb-10"
           >
             <motion.div
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#C1FF72]/5 border border-[#C1FF72]/20 text-[#C1FF72] mb-6"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20 text-[#D4A574] mb-6"
               initial={{ scale: 0.8, rotate: -10 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -958,10 +958,10 @@ export default function EventOnboardingPage() {
               {step === 3 && <TicketIcon />}
               {step === 4 && <RocketIcon />}
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-3 tracking-tight" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
               {steps[step - 1].title}
             </h1>
-            <p className="text-lg text-white/50 max-w-md">
+            <p className="text-lg text-white/50 max-w-md" style={{ fontFamily: "var(--font-body)" }}>
               {steps[step - 1].subtitle}
             </p>
           </motion.div>
@@ -1039,7 +1039,7 @@ export default function EventOnboardingPage() {
                     ) : (
                       <div className="w-full h-full rounded-2xl bg-white/[0.05] border-2 border-dashed border-white/[0.15]
                                       flex flex-col items-center justify-center gap-3 transition-all
-                                      group-hover:border-[#C1FF72]/40 group-hover:bg-white/[0.07]">
+                                      group-hover:border-[#D4A574]/40 group-hover:bg-white/[0.07]">
                         <div className="w-12 h-12 rounded-xl bg-white/[0.08] flex items-center justify-center">
                           <svg className="w-6 h-6 text-white/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -1102,15 +1102,15 @@ export default function EventOnboardingPage() {
                 transition={pageTransition}
                 className="space-y-5"
               >
-                <div className="p-4 rounded-2xl bg-[#C1FF72]/10 border border-[#C1FF72]/20 mb-6">
+                <div className="p-4 rounded-2xl bg-[#D4A574]/10 border border-[#D4A574]/20 mb-6">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#C1FF72]/20 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-[#C1FF72]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <div className="w-8 h-8 rounded-lg bg-[#D4A574]/20 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#D4A574]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#C1FF72]">Create pass types</p>
+                      <p className="text-sm font-medium text-[#D4A574]">Create pass types</p>
                       <p className="text-xs text-white/50 mt-1">
                         Add different ticket categories for your event. You can have up to 4 pass types with different pricing.
                       </p>
@@ -1139,7 +1139,7 @@ export default function EventOnboardingPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={addPass}
-                    className="w-full py-4 rounded-2xl border-2 border-dashed border-white/[0.15] text-white/50 hover:border-[#C1FF72]/30 hover:text-[#C1FF72] transition-all duration-300 flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-2xl border-2 border-dashed border-white/[0.15] text-white/50 hover:border-[#D4A574]/30 hover:text-[#D4A574] transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -1150,15 +1150,15 @@ export default function EventOnboardingPage() {
 
                 {/* Payment Settings Section */}
                 <div className="mt-8 pt-6 border-t border-white/[0.08]">
-                  <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-6">
+                  <div className="p-4 rounded-2xl bg-[#D4A574]/10 border border-[#D4A574]/20 mb-6">
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <div className="w-8 h-8 rounded-lg bg-[#D4A574]/20 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-[#D4A574]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-purple-400">Payment Settings</p>
+                        <p className="text-sm font-medium text-[#D4A574]">Payment Settings</p>
                         <p className="text-xs text-white/50 mt-1">
                           Choose how attendees will pay for their tickets after approval.
                         </p>
@@ -1175,15 +1175,15 @@ export default function EventOnboardingPage() {
                         onClick={() => setPaymentMode("online")}
                         className={`p-4 rounded-xl border transition-all duration-300 text-left ${
                           paymentMode === "online"
-                            ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                            ? "bg-[#D4A574]/20 border-[#D4A574]/50 text-white"
                             : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:bg-white/[0.07]"
                         }`}
                       >
                         <div className="flex items-center gap-3 mb-2">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                            paymentMode === "online" ? "bg-[#C1FF72]/30" : "bg-white/[0.08]"
+                            paymentMode === "online" ? "bg-[#D4A574]/30" : "bg-white/[0.08]"
                           }`}>
-                            <svg className={`w-4 h-4 ${paymentMode === "online" ? "text-[#C1FF72]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg className={`w-4 h-4 ${paymentMode === "online" ? "text-[#D4A574]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                             </svg>
                           </div>
@@ -1200,15 +1200,15 @@ export default function EventOnboardingPage() {
                         onClick={() => setPaymentMode("manual")}
                         className={`p-4 rounded-xl border transition-all duration-300 text-left ${
                           paymentMode === "manual"
-                            ? "bg-[#C1FF72]/20 border-[#C1FF72]/50 text-white"
+                            ? "bg-[#D4A574]/20 border-[#D4A574]/50 text-white"
                             : "bg-white/[0.03] border-white/[0.08] text-white/70 hover:bg-white/[0.07]"
                         }`}
                       >
                         <div className="flex items-center gap-3 mb-2">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                            paymentMode === "manual" ? "bg-[#C1FF72]/30" : "bg-white/[0.08]"
+                            paymentMode === "manual" ? "bg-[#D4A574]/30" : "bg-white/[0.08]"
                           }`}>
-                            <svg className={`w-4 h-4 ${paymentMode === "manual" ? "text-[#C1FF72]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg className={`w-4 h-4 ${paymentMode === "manual" ? "text-[#D4A574]" : "text-white/50"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
                             </svg>
                           </div>
@@ -1238,7 +1238,7 @@ export default function EventOnboardingPage() {
                             rows={4}
                             className="w-full px-5 py-4 rounded-2xl bg-white/[0.07] border border-white/[0.08] text-white text-sm
                                        placeholder:text-white/30 outline-none transition-all duration-300 resize-none
-                                       focus:bg-white/[0.1] focus:border-[#C1FF72]/50 focus:shadow-[0_0_0_4px_rgba(193,255,114,0.1)]
+                                       focus:bg-white/[0.1] focus:border-[#D4A574]/50 focus:shadow-[0_0_0_4px_rgba(212,165,116,0.1)]
                                        hover:bg-white/[0.09]"
                           />
                           <p className="text-xs text-white/40 pl-1">
@@ -1267,8 +1267,8 @@ export default function EventOnboardingPage() {
 
                 <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/[0.08]">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <div className="w-8 h-8 rounded-lg bg-[#D4A574]/20 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#D4A574]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                       </svg>
                     </div>

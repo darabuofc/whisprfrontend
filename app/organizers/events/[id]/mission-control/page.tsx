@@ -528,7 +528,7 @@ export default function MissionControlPage() {
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Subtle gradient background - static, no animation */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0a0a0a] to-[#0d0d12]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#0a0a0a] to-[#0A0A0A]" />
         <div className="absolute top-0 right-0 w-[800px] h-[600px] bg-gradient-radial from-white/[0.02] to-transparent opacity-60" />
       </div>
 
@@ -649,7 +649,7 @@ export default function MissionControlPage() {
 
         {activeTab === "ops" && (
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12 text-center">
-            <h2 className="text-xl font-medium text-white/90 mb-2">Ops Mode</h2>
+            <h2 className="text-xl font-medium text-white/90 mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>Ops Mode</h2>
             <p className="text-white/40 text-sm">
               Live operations dashboard for event day
             </p>

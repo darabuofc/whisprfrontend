@@ -53,10 +53,11 @@ export default function Tabs({ activeTab, onTabChange, isToday }: TabsProps) {
                 flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors
                 ${
                   activeTab === tab.id
-                    ? "text-white border-b-2 border-white"
+                    ? "text-white border-b-2 border-[#D4A574]"
                     : "text-white/40 hover:text-white/70 border-b-2 border-transparent"
                 }
               `}
+              style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}
             >
               <span className={activeTab === tab.id ? "opacity-100" : "opacity-60"}>
                 {tab.icon}

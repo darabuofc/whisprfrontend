@@ -24,7 +24,7 @@ function WhisprLogo({ onAnimationComplete }: { onAnimationComplete: () => void }
           ease: "easeInOut",
         }}
         style={{
-          background: "radial-gradient(circle, rgba(193,255,0,0.4) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(212,165,116,0.4) 0%, transparent 70%)",
           filter: "blur(20px)",
         }}
       />
@@ -47,7 +47,7 @@ function WhisprLogo({ onAnimationComplete }: { onAnimationComplete: () => void }
           alt="Whispr"
           width={120}
           height={120}
-          className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_30px_rgba(193,255,0,0.3)]"
+          className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative z-10 drop-shadow-[0_0_30px_rgba(212,165,116,0.3)]"
           priority
         />
       </motion.div>
@@ -72,9 +72,9 @@ export default function WhisprHero() {
   const [showContent, setShowContent] = useState(false);
 
   return (
-    <section className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+    <section className="fixed inset-0 flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
       {/* Subtle radial gradient for depth */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(193,255,0,0.015),transparent_70%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(212,165,116,0.015),transparent_70%)]" />
 
       {/* Grain overlay */}
       <GrainOverlay />
@@ -97,9 +97,10 @@ export default function WhisprHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-4xl sm:text-5xl md:text-6xl font-light tracking-[0.2em] text-white lowercase mb-4"
+          className="text-4xl sm:text-5xl md:text-6xl tracking-[0.1em] text-[#FAFAFA] uppercase mb-4"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
         >
-          whispr
+          WHISPR
         </motion.h1>
 
         {/* Tagline */}
@@ -107,7 +108,8 @@ export default function WhisprHero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: showContent ? 1 : 0, y: showContent ? 0 : 10 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="text-base sm:text-lg text-white/50 tracking-[0.15em] lowercase mb-12"
+          className="text-base sm:text-lg text-[#8E8E93] tracking-[0.15em] lowercase mb-12"
+          style={{ fontFamily: "var(--font-body)" }}
         >
           hear the sound.
         </motion.p>
@@ -121,14 +123,16 @@ export default function WhisprHero() {
         >
           <a
             href="/auth?role=attendee"
-            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-black bg-[#c1ff00] transition-all duration-300 hover:bg-[#d4ff4d] hover:shadow-[0_0_30px_rgba(193,255,0,0.4)]"
+            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-[#0A0A0A] bg-[#D4A574] rounded-md transition-all duration-150 hover:bg-[#B8785C] hover:shadow-[0_0_30px_rgba(212,165,116,0.4)]"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
           >
             Explore Events
           </a>
 
           <a
             href="/auth?role=organizer"
-            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-white/80 border border-white/20 transition-all duration-300 hover:border-[#c1ff00]/50 hover:text-[#c1ff00]"
+            className="group relative px-8 py-3 text-sm tracking-[0.15em] uppercase text-[#8E8E93] border border-[#2C2C2E] rounded-md transition-all duration-150 hover:border-[#D4A574] hover:text-[#D4A574]"
+            style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
           >
             Organize an Event
           </a>

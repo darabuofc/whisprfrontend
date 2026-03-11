@@ -70,10 +70,10 @@ export default function SendMessageModal({
             exit={{ opacity: 0, scale: 0.96, y: 16 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-xl rounded-2xl border border-white/[0.08] bg-[#111113] overflow-hidden">
+            <div className="w-full max-w-xl rounded-2xl border border-white/[0.08] bg-[#0A0A0A] overflow-hidden">
               <div className="flex items-center justify-between p-6 border-b border-white/[0.06]">
                 <div>
-                  <h2 className="text-lg font-semibold text-white/90">Message Ticket Holders</h2>
+                  <h2 className="text-lg font-semibold text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Message Ticket Holders</h2>
                   <p className="text-sm text-white/40 mt-0.5">
                     Sends your message to ticket holders with a saved WhatsApp number.
                   </p>
@@ -143,7 +143,7 @@ export default function SendMessageModal({
                     type="button"
                     onClick={handleSend}
                     disabled={sending}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-black bg-[#C1FF72] hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-black bg-[#D4A574] hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-2"
                   >
                     {sending ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
                     Send Message

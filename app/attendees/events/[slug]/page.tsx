@@ -323,11 +323,11 @@ export default function EventDetailPage() {
 
   if (loading)
     return (
-      <div className="relative min-h-screen overflow-hidden bg-[#040404] text-white font-satoshi">
+      <div className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
         {/* Background glows */}
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(180,114,255,0.25),transparent_55%)]" />
-          <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(200,255,90,0.3),transparent_60%)]" />
+          <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(44,44,46,0.25),transparent_55%)]" />
+          <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(212,165,116,0.3),transparent_60%)]" />
         </div>
 
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-12 pt-6 sm:px-6">
@@ -401,11 +401,11 @@ export default function EventDetailPage() {
 
   if (!event)
     return (
-      <div className="h-screen flex flex-col items-center justify-center text-neutral-500 bg-[#040404]">
+      <div className="h-screen flex flex-col items-center justify-center text-neutral-500 bg-[#0A0A0A]">
         <p>Event not found</p>
         <button
           onClick={() => router.back()}
-          className="mt-4 text-[#C1FF72] underline"
+          className="mt-4 text-[#D4A574] underline"
         >
           go back
         </button>
@@ -413,11 +413,11 @@ export default function EventDetailPage() {
     );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#040404] text-white font-satoshi">
+    <div className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
       {/* Background glows */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(180,114,255,0.25),transparent_55%)]" />
-        <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(200,255,90,0.3),transparent_60%)]" />
+        <div className="absolute -left-1/4 -top-1/5 h-[55vh] w-[70vw] rounded-full blur-[160px] bg-[radial-gradient(circle_at_30%_30%,rgba(44,44,46,0.25),transparent_55%)]" />
+        <div className="absolute -right-1/4 bottom-[-10%] h-[60vh] w-[70vw] rounded-full blur-[180px] bg-[radial-gradient(circle_at_70%_60%,rgba(212,165,116,0.3),transparent_60%)]" />
         <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.08] mix-blend-overlay" />
       </div>
 
@@ -431,13 +431,13 @@ export default function EventDetailPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#D4A574]/60 hover:text-[#D4A574]"
           >
             <ArrowLeft size={18} />
           </button>
           <button
             onClick={handleShare}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#D4A574]/60 hover:text-[#D4A574]"
           >
             <Share2 size={18} />
           </button>
@@ -450,12 +450,12 @@ export default function EventDetailPage() {
           transition={{ delay: 0.1 }}
           className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur"
         >
-          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4">Presented by</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40 mb-4" style={{ fontFamily: "var(--font-mono)" }}>Presented by</p>
 
           {/* Organization Info */}
           <div className="flex items-start gap-4">
             {/* Logo */}
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#C1FF72]/20 to-[#6C2DFF]/20 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#2C2C2E]/20 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
               {event.organization?.logo ? (
                 <img
                   src={event.organization.logo}
@@ -475,7 +475,7 @@ export default function EventDetailPage() {
 
             {/* Details */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-bold">
+              <h3 className="text-lg font-bold" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
                 {event.organization?.name || event.organizer || "Organizer"}
               </h3>
 
@@ -494,7 +494,7 @@ export default function EventDetailPage() {
                     href={`https://instagram.com/${(event.organization?.instagram_handle || event.organizer_instagram || '').replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#C1FF72] hover:border-[#C1FF72]/30 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#D4A574] hover:border-[#D4A574]/30 transition-colors"
                   >
                     <Instagram size={14} />
                     <span>
@@ -511,7 +511,7 @@ export default function EventDetailPage() {
                     href={event.organization.website.startsWith('http') ? event.organization.website : `https://${event.organization.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#C1FF72] hover:border-[#C1FF72]/30 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-sm text-white/70 hover:text-[#D4A574] hover:border-[#D4A574]/30 transition-colors"
                   >
                     <Globe size={14} />
                     <span>Website</span>
@@ -543,18 +543,18 @@ export default function EventDetailPage() {
           <div className="p-4 space-y-3">
             <h1
               className="text-2xl font-bold"
-              style={{ textShadow: "0 0 20px rgba(200,255,90,0.15)" }}
+              style={{ fontFamily: "var(--font-display)", fontWeight: 700, textShadow: "0 0 20px rgba(212,165,116,0.15)" }}
             >
               {event.name}
             </h1>
 
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70">
-                <Calendar size={14} className="text-[#C8FF5A]" />
+                <Calendar size={14} className="text-[#D4A574]" />
                 {formatDate(event.date)}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/70">
-                <MapPin size={14} className="text-[#C8FF5A]" />
+                <MapPin size={14} className="text-[#D4A574]" />
                 {event.venue || "Venue TBA"}
               </span>
             </div>
@@ -577,11 +577,11 @@ export default function EventDetailPage() {
         >
           <div className="flex items-center justify-between px-1">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Apply for a Pass</p>
-              <h2 className="text-xl font-semibold">Request Entry</h2>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-white/40" style={{ fontFamily: "var(--font-mono)" }}>Apply for a Pass</p>
+              <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Request Entry</h2>
             </div>
             {isAuthenticated && !event.user_registered && passes.length > 0 && (
-              <span className="rounded-full bg-[#C1FF72]/20 border border-[#C1FF72]/30 px-3 py-1 text-xs font-medium text-[#C1FF72]">
+              <span className="rounded-full bg-[#D4A574]/20 border border-[#D4A574]/30 px-3 py-1 text-xs font-medium text-[#D4A574]">
                 Open
               </span>
             )}
@@ -591,18 +591,18 @@ export default function EventDetailPage() {
           {!isAuthenticated && !event.user_registered && (
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
               <div className="text-center space-y-4">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
-                  <LogIn size={24} className="text-[#C8FF5A]" />
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20">
+                  <LogIn size={24} className="text-[#D4A574]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-1">Sign in to view passes</h3>
+                  <h3 className="text-lg font-semibold text-white mb-1" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Sign in to view passes</h3>
                   <p className="text-sm text-white/50">
                     Create an account or sign in to see available passes and request entry to this event.
                   </p>
                 </div>
                 <button
                   onClick={handleSignInRedirect}
-                  className="w-full rounded-full bg-[#C8FF5A] px-5 py-3 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01]"
+                  className="w-full rounded-lg bg-[#D4A574] px-5 py-3 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition"
                 >
                   Sign In or Create Account
                 </button>
@@ -627,21 +627,21 @@ export default function EventDetailPage() {
                   key={p.id}
                   onClick={() => handlePassSelect(p)}
                   disabled={registering}
-                  className="group relative flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left transition-all hover:border-[#C8FF5A]/50 hover:bg-white/[0.05] disabled:opacity-50"
+                  className="group relative flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left transition-all hover:border-[#D4A574]/50 hover:bg-white/[0.05] disabled:opacity-50"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20 group-hover:border-[#C8FF5A]/40 transition-colors">
-                      <Ticket size={20} className="text-[#C8FF5A]" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20 group-hover:border-[#D4A574]/40 transition-colors">
+                      <Ticket size={20} className="text-[#D4A574]" />
                     </div>
                     <div>
-                      <h3 className="text-base font-semibold text-white group-hover:text-[#C8FF5A] transition-colors">{p.type}</h3>
+                      <h3 className="text-base font-semibold text-white group-hover:text-[#D4A574] transition-colors">{p.type}</h3>
                       {p.max_members > 1 && (
                         <p className="text-xs text-white/50 mt-0.5">Includes {p.max_members} entries</p>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white group-hover:bg-[#C8FF5A] group-hover:text-black transition-colors">
+                    <div className="rounded-lg bg-white/10 px-4 py-1.5 text-sm font-semibold text-white group-hover:bg-[#D4A574] group-hover:text-[#0A0A0A] transition-colors">
                       {p.price ? `PKR ${p.price.toLocaleString()}` : "Free"}
                     </div>
                   </div>
@@ -663,11 +663,11 @@ export default function EventDetailPage() {
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[#C1FF72]/30 bg-[#C1FF72]/5 p-5 backdrop-blur"
+            className="rounded-2xl border border-[#D4A574]/30 bg-[#D4A574]/5 p-5 backdrop-blur"
           >
             <div className="flex items-center gap-3 mb-3">
-              <CheckCircle2 className="text-[#C1FF72]" size={24} />
-              <h3 className="text-lg font-semibold">You're Registered</h3>
+              <CheckCircle2 className="text-[#D4A574]" size={24} />
+              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>You're Registered</h3>
             </div>
 
             {event.registration ? (
@@ -681,12 +681,12 @@ export default function EventDetailPage() {
                   <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/50">Join Code</p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-white/50" style={{ fontFamily: "var(--font-mono)" }}>Join Code</p>
                         <p
                           onClick={() =>
                             navigator.clipboard.writeText(event.registration?.join_code || "")
                           }
-                          className="font-mono text-[#C8FF5A] cursor-pointer hover:text-white transition"
+                          className="font-mono text-[#D4A574] cursor-pointer hover:text-white transition"
                         >
                           {event.registration.join_code}
                         </p>
@@ -695,7 +695,7 @@ export default function EventDetailPage() {
                         onClick={() =>
                           navigator.clipboard.writeText(event.registration?.join_code || "")
                         }
-                        className="rounded-full border border-white/15 p-2 text-white/70 transition hover:border-[#C8FF5A]/60 hover:text-[#C8FF5A]"
+                        className="rounded-full border border-white/15 p-2 text-white/70 transition hover:border-[#D4A574]/60 hover:text-[#D4A574]"
                       >
                         <Copy size={14} />
                       </button>
@@ -707,7 +707,7 @@ export default function EventDetailPage() {
                           "_blank"
                         )
                       }
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C8FF5A]/40 px-4 py-2 text-sm font-medium text-[#C8FF5A] transition hover:bg-[#C8FF5A]/10"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#D4A574]/40 px-4 py-2 text-sm font-medium text-[#D4A574] transition hover:bg-[#D4A574]/10"
                     >
                       <Share2 size={14} />
                       Invite via WhatsApp
@@ -728,7 +728,7 @@ export default function EventDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-[#C8FF5A]/30 bg-[#C8FF5A]/10 backdrop-blur-lg px-5 py-2 text-sm text-[#C8FF5A]"
+              className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full border border-[#D4A574]/30 bg-[#D4A574]/10 backdrop-blur-lg px-5 py-2 text-sm text-[#D4A574]"
             >
               {successMsg}
             </motion.div>
@@ -782,10 +782,10 @@ export default function EventDetailPage() {
               {modalStep === "couple" && (
                 <>
                   <div className="text-center mb-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
-                      <Users size={28} className="text-[#C8FF5A]" />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20">
+                      <Users size={28} className="text-[#D4A574]" />
                     </div>
-                    <h2 className="text-xl font-semibold">Couple Pass</h2>
+                    <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Couple Pass</h2>
                     <p className="mt-2 text-sm text-white/60">
                       Includes {selectedPass.max_members} entries. One person starts the pass and invites their partner.
                     </p>
@@ -800,13 +800,13 @@ export default function EventDetailPage() {
                         }
                       }}
                       disabled={registering}
-                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                      className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition disabled:opacity-50"
                     >
                       {registering ? "Processing..." : "Start Couple Pass"}
                     </button>
                     <button
                       onClick={() => setModalStep("join")}
-                      className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3.5 text-sm text-white/80 transition hover:border-[#C8FF5A]/60 hover:bg-white/10"
+                      className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3.5 text-sm text-white/80 transition hover:border-[#D4A574]/60 hover:bg-white/10"
                     >
                       Join Partner's Link
                     </button>
@@ -823,7 +823,7 @@ export default function EventDetailPage() {
               {modalStep === "join" && (
                 <>
                   <div className="text-center mb-6">
-                    <h2 className="text-xl font-semibold">Join Partner</h2>
+                    <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Join Partner</h2>
                     <p className="mt-2 text-sm text-white/60">
                       Enter the join code shared by your partner.
                     </p>
@@ -833,13 +833,13 @@ export default function EventDetailPage() {
                     placeholder="REG-COU-XXXXX"
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-center text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-center text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50"
                   />
                   <div className="mt-5 space-y-3">
                     <button
                       onClick={handleJoin}
                       disabled={registering || !joinCode.trim()}
-                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                      className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition disabled:opacity-50"
                     >
                       {registering ? "Joining..." : "Join Partner"}
                     </button>
@@ -856,10 +856,10 @@ export default function EventDetailPage() {
               {modalStep === "discount" && (
                 <>
                   <div className="text-center mb-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
-                      <Ticket size={28} className="text-[#C8FF5A]" />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20">
+                      <Ticket size={28} className="text-[#D4A574]" />
                     </div>
-                    <h2 className="text-xl font-semibold">{selectedPass.type}</h2>
+                    <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>{selectedPass.type}</h2>
                     <p className="mt-2 text-sm text-white/60">
                       {selectedPass.price ? `PKR ${selectedPass.price.toLocaleString()}` : "Free"}
                     </p>
@@ -877,7 +877,7 @@ export default function EventDetailPage() {
                           setDiscountError(null);
                           setDiscountValidation(null);
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/30 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 pr-24"
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-white placeholder:text-white/30 font-mono tracking-wide focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 pr-24"
                       />
                       {discountCode && !discountValidation && (
                         <button
@@ -908,15 +908,15 @@ export default function EventDetailPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="rounded-xl border border-[#C8FF5A]/20 bg-[#C8FF5A]/5 p-4 space-y-2"
+                        className="rounded-xl border border-[#D4A574]/20 bg-[#D4A574]/5 p-4 space-y-2"
                       >
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-white/50">Original price</span>
                           <span className="text-white/70">PKR {discountValidation.original_price.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-[#C8FF5A]">Discount ({discountCode})</span>
-                          <span className="text-[#C8FF5A]">-PKR {discountValidation.discount_amount.toLocaleString()}</span>
+                          <span className="text-[#D4A574]">Discount ({discountCode})</span>
+                          <span className="text-[#D4A574]">-PKR {discountValidation.discount_amount.toLocaleString()}</span>
                         </div>
                         <div className="border-t border-white/10 pt-2 flex items-center justify-between">
                           <span className="text-white font-medium">Final price</span>
@@ -934,7 +934,7 @@ export default function EventDetailPage() {
                     <button
                       onClick={() => handleRegister(selectedPass.id)}
                       disabled={registering}
-                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                      className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition disabled:opacity-50"
                     >
                       {registering ? "Processing..." : "Request Entry"}
                     </button>
@@ -954,10 +954,10 @@ export default function EventDetailPage() {
               {modalStep === "questions" && (
                 <>
                   <div className="text-center mb-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#C8FF5A]/20 to-[#C8FF5A]/5 border border-[#C8FF5A]/20">
-                      <Ticket size={28} className="text-[#C8FF5A]" />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#D4A574]/20 to-[#D4A574]/5 border border-[#D4A574]/20">
+                      <Ticket size={28} className="text-[#D4A574]" />
                     </div>
-                    <h2 className="text-xl font-semibold">Additional Information</h2>
+                    <h2 className="text-xl font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Additional Information</h2>
                     <p className="mt-2 text-sm text-white/60">
                       Please answer a few questions to complete your registration
                     </p>
@@ -985,7 +985,7 @@ export default function EventDetailPage() {
                                 [question.id]: e.target.value,
                               })
                             }
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm"
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 text-sm"
                             placeholder="Your answer"
                           />
                         )}
@@ -1001,7 +1001,7 @@ export default function EventDetailPage() {
                               })
                             }
                             rows={3}
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm resize-none"
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 text-sm resize-none"
                             placeholder="Your answer"
                           />
                         )}
@@ -1017,7 +1017,7 @@ export default function EventDetailPage() {
                                 [question.id]: e.target.value,
                               })
                             }
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm"
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 text-sm"
                             placeholder="0"
                           />
                         )}
@@ -1032,7 +1032,7 @@ export default function EventDetailPage() {
                                 [question.id]: e.target.value,
                               })
                             }
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C8FF5A]/50 text-sm appearance-none cursor-pointer"
+                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 text-sm appearance-none cursor-pointer"
                           >
                             <option value="" className="bg-[#0a0a0a]">
                               Select an option
@@ -1068,7 +1068,7 @@ export default function EventDetailPage() {
                                         [question.id]: newOptions,
                                       });
                                     }}
-                                    className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#C8FF5A] focus:ring-[#C8FF5A]/50"
+                                    className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#D4A574] focus:ring-[#D4A574]/50"
                                   />
                                   <span className="text-sm text-white/80">{option}</span>
                                 </label>
@@ -1089,7 +1089,7 @@ export default function EventDetailPage() {
                                   [question.id]: e.target.checked ? "yes" : "",
                                 })
                               }
-                              className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#C8FF5A] focus:ring-[#C8FF5A]/50"
+                              className="w-4 h-4 rounded border-white/30 bg-white/10 text-[#D4A574] focus:ring-[#D4A574]/50"
                             />
                             <span className="text-sm text-white/80">Yes</span>
                           </label>
@@ -1108,7 +1108,7 @@ export default function EventDetailPage() {
                               }
                               className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${
                                 questionAnswers[question.id] === "yes"
-                                  ? "bg-[#C8FF5A]/20 border-[#C8FF5A]/50 text-[#C8FF5A]"
+                                  ? "bg-[#D4A574]/20 border-[#D4A574]/50 text-[#D4A574]"
                                   : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                               }`}
                             >
@@ -1163,7 +1163,7 @@ export default function EventDetailPage() {
                         }
                       }}
                       disabled={registering}
-                      className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01] disabled:opacity-50"
+                      className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition disabled:opacity-50"
                     >
                       {registering ? "Processing..." : selectedPass.price && selectedPass.price > 0 ? "Continue" : "Request Entry"}
                     </button>
@@ -1183,10 +1183,10 @@ export default function EventDetailPage() {
               {modalStep === "success" && (
                 <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}>
                   <div className="text-center mb-6">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#C8FF5A]/20 border border-[#C8FF5A]/30">
-                      <CheckCircle2 className="text-[#C8FF5A]" size={32} />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4A574]/20 border border-[#D4A574]/30">
+                      <CheckCircle2 className="text-[#D4A574]" size={32} />
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">You've Registered!</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>You've Registered!</h3>
                     <p className="text-sm text-white/60 leading-relaxed">
                       The organizer will review your details. Once accepted, you'll be able to make the payment. Keep an eye on your WhatsApp for a message from us.
                     </p>
@@ -1197,7 +1197,7 @@ export default function EventDetailPage() {
                       <p className="text-sm text-white/60 text-center">Share this code with your partner:</p>
                       <p
                         onClick={() => navigator.clipboard.writeText(createdJoinCode)}
-                        className="text-center font-mono text-lg text-[#C8FF5A] cursor-pointer hover:text-white transition"
+                        className="text-center font-mono text-lg text-[#D4A574] cursor-pointer hover:text-white transition"
                       >
                         {createdJoinCode}
                       </p>
@@ -1208,7 +1208,7 @@ export default function EventDetailPage() {
                             "_blank"
                           )
                         }
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#C8FF5A]/40 px-4 py-2 text-sm font-medium text-[#C8FF5A] transition hover:bg-[#C8FF5A]/10"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#D4A574]/40 px-4 py-2 text-sm font-medium text-[#D4A574] transition hover:bg-[#D4A574]/10"
                       >
                         <Share2 size={14} />
                         Share via WhatsApp
@@ -1218,7 +1218,7 @@ export default function EventDetailPage() {
 
                   <button
                     onClick={() => setShowModal(false)}
-                    className="w-full rounded-full bg-[#C8FF5A] px-5 py-3.5 text-base font-semibold text-black shadow-[0_18px_50px_-18px_rgba(200,255,90,0.5)] transition hover:scale-[1.01]"
+                    className="w-full rounded-lg bg-[#D4A574] px-5 py-3.5 text-base font-semibold text-[#0A0A0A] hover:bg-[#B8785C] transition"
                   >
                     Got it
                   </button>

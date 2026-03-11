@@ -66,7 +66,7 @@ export default function EventHeader({
                 <span className="hidden sm:inline">Dashboard</span>
               </button>
               <span className="text-white/20 hidden sm:inline">|</span>
-              <h1 className="text-2xl sm:text-3xl font-semibold text-white/95 tracking-tight truncate">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-white/95 tracking-tight truncate" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>
                 {name}
               </h1>
               <span
@@ -103,7 +103,8 @@ export default function EventHeader({
             ) : (
               <button
                 onClick={onPublish}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg text-sm font-medium transition-colors hover:bg-white/90"
+                className="flex items-center gap-2 px-4 py-2 bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] rounded-lg text-sm font-medium transition-colors"
+                style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
               >
                 <Play size={15} />
                 <span className="hidden sm:inline">Publish</span>
@@ -136,7 +137,7 @@ export default function EventHeader({
                     onClick={() => setMenuOpen(false)}
                   />
                   {/* Menu */}
-                  <div className="absolute right-0 mt-2 w-44 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-2xl py-1 z-20">
+                  <div className="absolute right-0 mt-2 w-44 bg-[#1C1C1E] border border-[#2C2C2E] rounded-xl shadow-2xl py-1 z-20">
                     <button
                       onClick={() => {
                         onEdit?.();

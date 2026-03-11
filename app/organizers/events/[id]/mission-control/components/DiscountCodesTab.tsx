@@ -186,7 +186,7 @@ export default function DiscountCodesTab({ eventId }: DiscountCodesTabProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-medium text-white/90">Discount Codes</h2>
+          <h2 className="text-lg font-medium text-white/90" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>Discount Codes</h2>
           <p className="text-sm text-white/40 mt-1">
             Create promotional codes for your event
           </p>
@@ -344,7 +344,7 @@ export default function DiscountCodesTab({ eventId }: DiscountCodesTabProps) {
               <button
                 onClick={() => (editingId ? handleUpdate(editingId) : handleCreate())}
                 disabled={formLoading}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white text-black rounded-xl text-sm font-semibold hover:bg-white/90 transition-all disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
               >
                 {formLoading ? (
                   <>
