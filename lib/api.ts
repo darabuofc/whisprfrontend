@@ -979,3 +979,40 @@ export async function importAttendees(
   );
   return res.data;
 }
+
+// ----------------------------------------------------------
+// FEED / ORGANIZER DISCOVERY API
+// ----------------------------------------------------------
+
+export interface FeedOrganization {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  tagline: string | null;
+  website: string | null;
+  instagram: string | null;
+  follower_count: number;
+}
+
+export async function getOrganizations(): Promise<FeedOrganization[]> {
+  const res = await api.get("/organizations");
+  return res.data.organizations ?? res.data ?? [];
+}
+
+export async function followOrganizer(organizerId: string): Promise<void> {
+  await api.post("/follows", { organizer_id: organizerId });
+}
+
+export async function unfollowOrganizer(organizerId: string): Promise<void> {
+  await api.delete(`/follows/${organizerId}`);
+}
+
+export interface FollowingOrganization {
+  id: string;
+  is_following: boolean;
+}
+
+export async function getFollowingOrganizers(): Promise<FeedOrganization[]> {
+  const res = await api.get("/explore/following");
+  return res.data.organizations ?? res.data ?? [];
+}

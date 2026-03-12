@@ -28,6 +28,12 @@ import {
   Menu,
   X,
   Check,
+  Heart,
+  ExternalLink,
+  Users,
+  Star,
+  UserPlus,
+  UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -41,16 +47,22 @@ import {
   getTickets,
   cancelRegistration,
   updateProfile,
+  getOrganizations,
+  getFollowingOrganizers,
+  followOrganizer,
+  unfollowOrganizer,
   Profile,
   ExploreEvent,
   RegistrationItem,
   TicketItem,
+  FeedOrganization,
 } from "@/lib/api";
 
 // ─── STATIC CONSTANTS (outside component to avoid re-creation) ───
 const AMBIENT_DELAY_STYLE = { animationDelay: '-1.5s' } as const;
 const TABS = [
   { key: "profile" as const, label: "Profile", icon: User },
+  { key: "feed" as const, label: "Feed", icon: Heart },
   { key: "applications" as const, label: "Applications", icon: ClipboardList },
   { key: "tickets" as const, label: "Tickets", icon: Ticket },
 ] as const;
@@ -78,7 +90,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
-    "profile" | "applications" | "tickets"
+    "profile" | "feed" | "applications" | "tickets"
   >("profile");
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -99,6 +111,8 @@ function DashboardContent() {
       setActiveTab("applications");
     } else if (tabParam === "tickets") {
       setActiveTab("tickets");
+    } else if (tabParam === "feed") {
+      setActiveTab("feed");
     } else if (tabParam === "profile") {
       setActiveTab("profile");
     }
@@ -108,6 +122,8 @@ function DashboardContent() {
     onSwipedLeft: () =>
       setActiveTab((t) =>
         t === "profile"
+          ? "feed"
+          : t === "feed"
           ? "applications"
           : t === "applications"
           ? "tickets"
@@ -118,6 +134,8 @@ function DashboardContent() {
         t === "tickets"
           ? "applications"
           : t === "applications"
+          ? "feed"
+          : t === "feed"
           ? "profile"
           : "profile"
       ),
@@ -462,6 +480,8 @@ function DashboardContent() {
                   profile={profile}
                   onProfileUpdated={handleProfileUpdated}
                 />
+              ) : activeTab === "feed" ? (
+                <FeedTab />
               ) : activeTab === "applications" ? (
                 <ApplicationsTab
                   registrations={registrations}
@@ -478,7 +498,7 @@ function DashboardContent() {
 
       {/* ─── MOBILE BOTTOM NAV ─── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
-        <div className="grid grid-cols-3 h-16">
+        <div className="grid grid-cols-4 h-16">
           {TABS.map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
             return (
@@ -1468,5 +1488,408 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
         ))}
       </div>
     </div>
+  );
+});
+
+// ═══════════════════════════════════════════════════════════
+// FEED TAB — Organizer Discovery
+// ═══════════════════════════════════════════════════════════
+const FeedTab = memo(function FeedTab() {
+  const router = useRouter();
+  const [organizers, setOrganizers] = useState<FeedOrganization[]>([]);
+  const [followedOrgIds, setFollowedOrgIds] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<"all" | "following">("all");
+  const [loading, setLoading] = useState(true);
+  const [followingInFlight, setFollowingInFlight] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [allOrgs, followedOrgs] = await Promise.all([
+          getOrganizations(),
+          getFollowingOrganizers(),
+        ]);
+        // Sort by follower count descending (social proof)
+        allOrgs.sort((a, b) => (b.follower_count ?? 0) - (a.follower_count ?? 0));
+        setOrganizers(allOrgs);
+        setFollowedOrgIds(new Set(followedOrgs.map((o) => o.id)));
+      } catch {
+        toast.error("Failed to load organizers");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const handleFollow = useCallback(async (orgId: string) => {
+    setFollowingInFlight((prev) => new Set(prev).add(orgId));
+
+    // Optimistic update
+    setFollowedOrgIds((prev) => {
+      const next = new Set(prev);
+      next.add(orgId);
+      return next;
+    });
+    setOrganizers((prev) =>
+      prev.map((o) =>
+        o.id === orgId ? { ...o, follower_count: (o.follower_count ?? 0) + 1 } : o
+      )
+    );
+
+    try {
+      await followOrganizer(orgId);
+    } catch (err: any) {
+      // Revert on error (unless 409 = already following)
+      if (err?.response?.status !== 409) {
+        setFollowedOrgIds((prev) => {
+          const next = new Set(prev);
+          next.delete(orgId);
+          return next;
+        });
+        setOrganizers((prev) =>
+          prev.map((o) =>
+            o.id === orgId
+              ? { ...o, follower_count: Math.max(0, (o.follower_count ?? 0) - 1) }
+              : o
+          )
+        );
+        toast.error("Failed to follow organizer");
+      }
+    } finally {
+      setFollowingInFlight((prev) => {
+        const next = new Set(prev);
+        next.delete(orgId);
+        return next;
+      });
+    }
+  }, []);
+
+  const handleUnfollow = useCallback(async (orgId: string) => {
+    setFollowingInFlight((prev) => new Set(prev).add(orgId));
+
+    // Optimistic update
+    setFollowedOrgIds((prev) => {
+      const next = new Set(prev);
+      next.delete(orgId);
+      return next;
+    });
+    setOrganizers((prev) =>
+      prev.map((o) =>
+        o.id === orgId
+          ? { ...o, follower_count: Math.max(0, (o.follower_count ?? 0) - 1) }
+          : o
+      )
+    );
+
+    try {
+      await unfollowOrganizer(orgId);
+    } catch {
+      // Revert on error
+      setFollowedOrgIds((prev) => {
+        const next = new Set(prev);
+        next.add(orgId);
+        return next;
+      });
+      setOrganizers((prev) =>
+        prev.map((o) =>
+          o.id === orgId ? { ...o, follower_count: (o.follower_count ?? 0) + 1 } : o
+        )
+      );
+      toast.error("Failed to unfollow organizer");
+    } finally {
+      setFollowingInFlight((prev) => {
+        const next = new Set(prev);
+        next.delete(orgId);
+        return next;
+      });
+    }
+  }, []);
+
+  const displayedOrganizers =
+    filter === "following"
+      ? organizers.filter((o) => followedOrgIds.has(o.id))
+      : organizers;
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {/* Header skeleton */}
+        <div className="space-y-2">
+          <div className="h-7 w-48 bg-white/[0.06] rounded-lg animate-pulse" />
+          <div className="h-4 w-64 bg-white/[0.04] rounded-lg animate-pulse" />
+        </div>
+        {/* Filter skeleton */}
+        <div className="flex gap-2">
+          <div className="h-9 w-32 bg-white/[0.06] rounded-full animate-pulse" />
+          <div className="h-9 w-28 bg-white/[0.06] rounded-full animate-pulse" />
+        </div>
+        {/* Card skeletons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] overflow-hidden"
+            >
+              <div className="aspect-[2/1] bg-white/[0.04] animate-pulse" />
+              <div className="p-4 space-y-3">
+                <div className="h-5 w-36 bg-white/[0.06] rounded animate-pulse" />
+                <div className="h-3 w-48 bg-white/[0.04] rounded animate-pulse" />
+                <div className="h-3 w-24 bg-white/[0.04] rounded animate-pulse" />
+                <div className="flex gap-2 mt-3">
+                  <div className="h-9 flex-1 bg-white/[0.06] rounded-lg animate-pulse" />
+                  <div className="h-9 flex-1 bg-white/[0.04] rounded-lg animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h2
+          className="text-xl sm:text-2xl font-bold tracking-tight"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
+        >
+          Event Organizers
+        </h2>
+        <p className="text-sm text-neutral-500 mt-1">
+          Discover event creators you love
+        </p>
+      </div>
+
+      {/* Filter Toggle */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            filter === "all"
+              ? "bg-[#D4A574] text-[#0A0A0A]"
+              : "bg-white/[0.06] text-neutral-400 hover:text-white hover:bg-white/[0.1]"
+          }`}
+          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        >
+          All Organizers
+        </button>
+        <button
+          onClick={() => setFilter("following")}
+          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+            filter === "following"
+              ? "bg-[#D4A574] text-[#0A0A0A]"
+              : "bg-white/[0.06] text-neutral-400 hover:text-white hover:bg-white/[0.1]"
+          }`}
+          style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+        >
+          <UserCheck size={14} />
+          Following
+          {followedOrgIds.size > 0 && (
+            <span className={`text-xs ${filter === "following" ? "text-[#0A0A0A]/70" : "text-neutral-500"}`}>
+              ({followedOrgIds.size})
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Empty State (Following filter, no follows) */}
+      {filter === "following" && displayedOrganizers.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[#2C2C2E] bg-[#1C1C1E] p-10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D4A574]/[0.02] to-[#2C2C2E]/[0.02]" />
+          <Users size={32} className="mx-auto mb-3 text-neutral-500 relative" />
+          <p className="text-sm font-medium text-neutral-300 relative">
+            You&apos;re not following anyone yet
+          </p>
+          <p className="text-xs text-neutral-500 mt-1.5 relative max-w-xs mx-auto">
+            Start following organizers to see their upcoming events here
+          </p>
+          <button
+            onClick={() => setFilter("all")}
+            className="mt-4 px-5 py-2 rounded-lg bg-[#D4A574] text-[#0A0A0A] text-sm font-semibold hover:bg-[#B8785C] transition-colors relative"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Browse All Organizers
+          </button>
+        </div>
+      ) : displayedOrganizers.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[#2C2C2E] bg-[#1C1C1E] p-10 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#D4A574]/[0.02] to-[#2C2C2E]/[0.02]" />
+          <Building2 size={32} className="mx-auto mb-3 text-neutral-500 relative" />
+          <p className="text-sm text-neutral-400 relative">
+            No organizers found
+          </p>
+          <p className="text-xs text-neutral-600 mt-1 relative">
+            Check back soon for new event organizers
+          </p>
+        </div>
+      ) : (
+        /* Organizer Grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {displayedOrganizers.map((org, i) => (
+            <OrganizerCard
+              key={org.id}
+              org={org}
+              isFollowing={followedOrgIds.has(org.id)}
+              isInFlight={followingInFlight.has(org.id)}
+              onFollow={() => handleFollow(org.id)}
+              onUnfollow={() => handleUnfollow(org.id)}
+              index={i}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ═══════════════════════════════════════════════════════════
+// ORGANIZER CARD
+// ═══════════════════════════════════════════════════════════
+const OrganizerCard = memo(function OrganizerCard({
+  org,
+  isFollowing,
+  isInFlight,
+  onFollow,
+  onUnfollow,
+  index,
+}: {
+  org: FeedOrganization;
+  isFollowing: boolean;
+  isInFlight: boolean;
+  onFollow: () => void;
+  onUnfollow: () => void;
+  index: number;
+}) {
+  const router = useRouter();
+
+  const websiteDomain = org.website
+    ? org.website
+        .replace(/^https?:\/\//, "")
+        .replace(/^www\./, "")
+        .replace(/\/$/, "")
+    : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay: index * 0.05 }}
+      className="group rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] overflow-hidden hover:border-[#D4A574]/20 transition-all duration-400 hover:shadow-[0_4px_24px_rgba(212,165,116,0.08)]"
+    >
+      {/* Logo / Hero Area */}
+      <div className="relative aspect-[2/1] bg-gradient-to-br from-[#1C1C1E] to-[#2C2C2E] flex items-center justify-center overflow-hidden">
+        {org.logo_url ? (
+          <img
+            src={org.logo_url}
+            alt={org.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <Building2
+              size={36}
+              className="text-neutral-600 group-hover:text-neutral-500 transition-colors"
+            />
+            <span className="text-xs text-neutral-600">
+              {org.name?.charAt(0)?.toUpperCase()}
+            </span>
+          </div>
+        )}
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-transparent to-transparent opacity-60" />
+
+        {/* Follower count badge */}
+        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-xs text-white/80">
+          <Star size={11} className={org.follower_count >= 50 ? "text-[#D4A574]" : "text-white/50"} />
+          <span className={org.follower_count >= 50 ? "font-semibold text-[#D4A574]" : ""}>
+            {org.follower_count ?? 0}
+          </span>
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-4 space-y-3">
+        {/* Name */}
+        <h3
+          className="text-base font-bold tracking-tight line-clamp-1"
+          style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}
+        >
+          {org.name}
+        </h3>
+
+        {/* Tagline */}
+        {org.tagline && (
+          <p className="text-xs text-neutral-400 italic line-clamp-2 leading-relaxed">
+            &ldquo;{org.tagline}&rdquo;
+          </p>
+        )}
+
+        {/* Website Link */}
+        {websiteDomain && (
+          <a
+            href={org.website!.startsWith("http") ? org.website! : `https://${org.website}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-[#D4A574]/80 hover:text-[#D4A574] transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={11} />
+            <span className="truncate max-w-[180px]">{websiteDomain}</span>
+          </a>
+        )}
+
+        {/* Follower count text */}
+        <p className="text-xs text-neutral-500">
+          <span className={org.follower_count >= 50 ? "font-semibold text-neutral-300" : ""}>
+            {org.follower_count ?? 0}
+          </span>{" "}
+          {org.follower_count === 1 ? "Follower" : "Followers"}
+        </p>
+
+        {/* Buttons */}
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              isFollowing ? onUnfollow() : onFollow();
+            }}
+            disabled={isInFlight}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              isFollowing
+                ? "bg-white/[0.06] text-neutral-300 hover:bg-red-500/10 hover:text-red-400 border border-white/[0.08]"
+                : "bg-[#D4A574] text-[#0A0A0A] hover:bg-[#B8785C] shadow-[0_2px_8px_rgba(212,165,116,0.2)]"
+            } ${isInFlight ? "opacity-60 cursor-not-allowed" : ""}`}
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {isInFlight ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : isFollowing ? (
+              <>
+                <UserCheck size={14} />
+                Following
+              </>
+            ) : (
+              <>
+                <UserPlus size={14} />
+                Follow
+              </>
+            )}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(`/attendees/events?org=${org.id}`);
+            }}
+            className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium bg-white/[0.04] text-neutral-400 hover:bg-white/[0.08] hover:text-white border border-white/[0.06] transition-all duration-200"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            <ChevronRight size={14} />
+            <span className="hidden sm:inline">Events</span>
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 });
