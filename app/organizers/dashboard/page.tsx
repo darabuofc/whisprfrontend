@@ -77,7 +77,7 @@ export default function OrganizerDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p
-          className="text-[var(--text-muted)] text-[12px] uppercase tracking-[0.08em]"
+          className="text-[var(--text-muted)] text-[13px] uppercase tracking-[0.08em]"
           style={{ fontFamily: "var(--font-body-org)" }}
         >
           Loading...
@@ -95,11 +95,11 @@ export default function OrganizerDashboard() {
       {/* Pending Banner */}
       {isPending && (
         <div
-          className="mb-10 px-5 py-4 border border-[var(--border-subtle)] rounded-[2px]"
+          className="mb-10 px-6 py-5 border border-[var(--border-copper)] rounded-md"
           style={{ background: "var(--copper-dim)" }}
         >
           <p
-            className="text-[12px] text-[var(--text-secondary)] uppercase tracking-[0.08em]"
+            className="text-[13px] text-[var(--text-secondary)] uppercase tracking-[0.06em]"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
             Account pending approval — you can create events once approved.
@@ -108,23 +108,23 @@ export default function OrganizerDashboard() {
       )}
 
       {/* Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-12">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5 mb-14">
         <div>
           <p
-            className="text-[13px] text-[var(--text-secondary)]"
+            className="text-[14px] text-[var(--text-secondary)]"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
             Welcome back,
           </p>
           <h1
-            className="text-[32px] sm:text-[36px] text-[var(--text-primary)] uppercase leading-none mt-1"
+            className="text-[36px] sm:text-[42px] text-[var(--text-primary)] uppercase leading-none mt-1 font-medium"
             style={{ fontFamily: "var(--font-display-org)" }}
           >
             {organizer?.name || "Organizer"}
           </h1>
           <p
-            className="text-[11px] text-[var(--text-muted)] mt-2 uppercase tracking-[0.08em]"
-            style={{ fontFamily: "var(--font-body-org)" }}
+            className="text-[13px] text-[var(--text-muted)] mt-3 uppercase tracking-[0.06em]"
+            style={{ fontFamily: "var(--font-mono-org)" }}
           >
             {organization?.name || ""}
             {organization?.follower_count !== undefined && (
@@ -137,7 +137,7 @@ export default function OrganizerDashboard() {
           <button
             onClick={handleCreateEvent}
             disabled={creatingEvent}
-            className="self-start px-6 py-3 bg-[var(--copper)] text-[var(--bg-base)] text-[11px] uppercase tracking-[0.15em] rounded-[2px] hover:opacity-90 transition-opacity duration-200 disabled:opacity-50"
+            className="self-start px-7 py-3.5 bg-[var(--copper)] text-[var(--bg-base)] text-[13px] uppercase tracking-[0.12em] rounded-md hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 font-medium"
             style={{ fontFamily: "var(--font-display-org)" }}
           >
             {creatingEvent ? "Creating..." : "+ New Event"}
@@ -146,7 +146,7 @@ export default function OrganizerDashboard() {
       </div>
 
       {/* Stat Strip */}
-      <div className="mb-12">
+      <div className="mb-14">
         <StatStrip
           totalEvents={events.length}
           published={publishedEvents.length}

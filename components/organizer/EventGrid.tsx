@@ -39,20 +39,20 @@ export default function EventGrid({ events, onCreateEvent }: EventGridProps) {
   return (
     <div>
       {/* Section Header + Filters */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <h2
-          className="text-[14px] uppercase tracking-[0.2em] text-[var(--text-secondary)]"
+          className="text-[16px] uppercase tracking-[0.18em] text-[var(--text-secondary)] font-medium"
           style={{ fontFamily: "var(--font-display-org)" }}
         >
           Events
         </h2>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`text-[11px] uppercase tracking-[0.08em] pb-1 transition-colors duration-200 ${
+              className={`text-[13px] uppercase tracking-[0.06em] pb-1 transition-colors duration-200 ${
                 filter === f.key
                   ? "text-[var(--text-primary)] border-b border-[var(--copper)]"
                   : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
@@ -67,23 +67,23 @@ export default function EventGrid({ events, onCreateEvent }: EventGridProps) {
 
       {/* Grid */}
       {filtered.length === 0 && events.length === 0 ? (
-        <div className="py-16 text-center">
+        <div className="py-20 text-center">
           <p
-            className="text-[13px] text-[var(--text-muted)] mb-6"
+            className="text-[15px] text-[var(--text-muted)] mb-6"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
             No events yet. Create your first event to get started.
           </p>
           <button
             onClick={onCreateEvent}
-            className="px-6 py-3 bg-[var(--copper)] text-[var(--bg-base)] text-[11px] uppercase tracking-[0.15em] rounded-[2px] hover:opacity-90 transition-opacity duration-200"
+            className="px-7 py-3.5 bg-[var(--copper)] text-[var(--bg-base)] text-[13px] uppercase tracking-[0.12em] rounded-md hover:opacity-90 transition-opacity duration-200 font-medium"
             style={{ fontFamily: "var(--font-display-org)" }}
           >
             + New Event
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map((ev) => (
             <EventCard key={ev.id} event={ev} />
           ))}

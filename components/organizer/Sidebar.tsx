@@ -42,14 +42,14 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
       {/* Wordmark */}
       <div className="px-5 pt-8 pb-1">
         <h1
-          className="text-[16px] uppercase tracking-[0.3em] text-[var(--text-primary)] font-normal"
+          className="text-[18px] uppercase tracking-[0.3em] text-[var(--text-primary)] font-medium"
           style={{ fontFamily: "var(--font-display-org)" }}
         >
           WHISPR
         </h1>
         <p
-          className="text-[9px] uppercase tracking-[0.15em] text-[var(--text-muted)] mt-1"
-          style={{ fontFamily: "var(--font-body-org)" }}
+          className="text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)] mt-1.5"
+          style={{ fontFamily: "var(--font-mono-org)" }}
         >
           Organizer
         </p>
@@ -72,18 +72,18 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
                 }
               }}
               disabled={item.disabled}
-              className={`w-full text-left px-5 py-[10px] text-[12px] uppercase tracking-[0.08em] transition-colors duration-200 block border-l-2 ${
+              className={`w-full text-left px-5 py-[11px] text-[13px] uppercase tracking-[0.06em] transition-colors duration-200 block border-l-2 ${
                 active
-                  ? "text-[var(--text-primary)] border-[var(--copper)]"
+                  ? "text-[var(--text-primary)] border-[var(--copper)] bg-[var(--copper-dim)]"
                   : item.disabled
                   ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed border-transparent"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-transparent"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border-transparent"
               }`}
               style={{ fontFamily: "var(--font-body-org)" }}
             >
               {item.label}
               {item.disabled && (
-                <span className="ml-2 text-[9px] opacity-60">Soon</span>
+                <span className="ml-2 text-[10px] opacity-60">Soon</span>
               )}
             </button>
           );
@@ -91,7 +91,7 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
       </nav>
 
       {/* Organizer identity block */}
-      <div className="mt-auto border-t border-[var(--border-subtle)] px-5 py-4">
+      <div className="mt-auto border-t border-[var(--border-subtle)] px-5 py-5">
         <button
           onClick={() => {
             router.push("/organizers/profile");
@@ -100,24 +100,24 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
           className="w-full text-left group"
         >
           <p
-            className="text-[12px] text-[var(--text-primary)] truncate"
+            className="text-[13px] text-[var(--text-primary)] truncate font-medium"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
             {organizer?.name || "Organizer"}
           </p>
           <p
-            className="text-[11px] text-[var(--text-muted)] truncate mt-0.5"
+            className="text-[12px] text-[var(--text-muted)] truncate mt-1"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
             {organization?.name || ""}
           </p>
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex items-center gap-2 mt-2.5">
             {organizer?.approval_status === "Approved" && (
               <>
                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--status-live)]" />
                 <span
-                  className="text-[10px] text-[var(--text-muted)] uppercase tracking-[0.08em]"
-                  style={{ fontFamily: "var(--font-body-org)" }}
+                  className="text-[11px] text-[var(--text-muted)] uppercase tracking-[0.06em]"
+                  style={{ fontFamily: "var(--font-mono-org)" }}
                 >
                   Approved
                 </span>
@@ -127,8 +127,8 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
               <>
                 <div className="w-1.5 h-1.5 rounded-full bg-[var(--status-warning)]" />
                 <span
-                  className="text-[10px] text-[var(--text-muted)] uppercase tracking-[0.08em]"
-                  style={{ fontFamily: "var(--font-body-org)" }}
+                  className="text-[11px] text-[var(--text-muted)] uppercase tracking-[0.06em]"
+                  style={{ fontFamily: "var(--font-mono-org)" }}
                 >
                   Pending
                 </span>
@@ -136,8 +136,8 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
             )}
           </div>
           <span
-            className="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--copper)] transition-colors duration-200 mt-1.5 inline-block uppercase tracking-[0.08em]"
-            style={{ fontFamily: "var(--font-body-org)" }}
+            className="text-[11px] text-[var(--text-muted)] group-hover:text-[var(--copper)] transition-colors duration-200 mt-2 inline-block uppercase tracking-[0.06em]"
+            style={{ fontFamily: "var(--font-mono-org)" }}
           >
             Edit →
           </span>
@@ -146,7 +146,7 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
         {/* Sign out */}
         <button
           onClick={onSignOut}
-          className="w-full text-left mt-3 text-[11px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-200 uppercase tracking-[0.08em]"
+          className="w-full text-left mt-4 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-200 uppercase tracking-[0.06em]"
           style={{ fontFamily: "var(--font-body-org)" }}
         >
           Sign Out
@@ -166,7 +166,7 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-[var(--bg-base)] border-b border-[var(--border-subtle)]">
         <div className="flex items-center justify-between px-4 py-3">
           <h1
-            className="text-[14px] uppercase tracking-[0.3em] text-[var(--text-primary)]"
+            className="text-[16px] uppercase tracking-[0.3em] text-[var(--text-primary)] font-medium"
             style={{ fontFamily: "var(--font-display-org)" }}
           >
             WHISPR
