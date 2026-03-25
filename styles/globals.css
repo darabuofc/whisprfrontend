@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -20,6 +20,22 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  /* Organizer dashboard design tokens */
+  --bg-base: #0A0A0A;
+  --bg-raised: #111111;
+  --bg-hover: #161616;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-copper: rgba(212,165,116,0.25);
+  --text-primary: #E8E8E3;
+  --text-secondary: rgba(232,232,227,0.50);
+  --text-muted: rgba(232,232,227,0.25);
+  --copper-dim: rgba(212,165,116,0.10);
+  --status-live: #C8E6C9;
+  --status-draft: rgba(232,232,227,0.35);
+  --status-warning: #E6C9A8;
+  --font-display-org: 'Bebas Neue', 'Space Grotesk', sans-serif;
+  --font-body-org: 'IBM Plex Mono', 'JetBrains Mono', monospace;
 }
 
 /* enable dark mode via class */
@@ -295,3 +311,33 @@ a, button, input, select, textarea {
     @apply bg-background text-foreground;
   }
 }
+
+/* ────────────────
+   ORGANIZER DASHBOARD — NOISE OVERLAY
+──────────────────*/
+.organizer-noise::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' type='fractalNoise' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ────────────────
+   ORGANIZER DASHBOARD — STAT COUNTER ANIMATION
+──────────────────*/
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-animate {
+  animation: countUp 0.6s ease-out both;
+}
+.stat-animate-1 { animation-delay: 0ms; }
+.stat-animate-2 { animation-delay: 80ms; }
+.stat-animate-3 { animation-delay: 160ms; }
+.stat-animate-4 { animation-delay: 240ms; }
+.stat-animate-5 { animation-delay: 320ms; }

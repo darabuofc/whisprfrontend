@@ -435,6 +435,10 @@ export interface Organization {
   tagline?: string;
   website?: string;
   instagram_handle?: string;
+  follower_count?: number;
+  description?: string;
+  category?: string;
+  city?: string;
 }
 
 export async function getOrganization(): Promise<Organization | null> {
@@ -448,10 +452,14 @@ export async function getOrganization(): Promise<Organization | null> {
 }
 
 export async function updateOrganization(data: {
+  name?: string;
   logo?: string;
   tagline?: string;
+  description?: string;
   website?: string;
   instagram_handle?: string;
+  category?: string;
+  city?: string;
 }): Promise<Organization> {
   const res = await api.put("/organizers/organization", data);
   return res.data.organization;
@@ -1015,4 +1023,113 @@ export interface FollowingOrganization {
 export async function getFollowingOrganizers(): Promise<FeedOrganization[]> {
   const res = await api.get("/explore/following");
   return res.data.organizations ?? res.data ?? [];
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORGANIZER PROFILE
+// ═══════════════════════════════════════════════════════════
+
+export async function updateOrganizerProfile(data: {
+  full_name?: string;
+  bio?: string;
+  profile_image?: string;
+  contact_email?: string;
+  phone?: string;
+  instagram?: string;
+}): Promise<any> {
+  const res = await api.put("/organizers/me/profile", data);
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ORGANIZER FOLLOWERS (Full list)
+// ═══════════════════════════════════════════════════════════
+
+export interface OrganizerFollower {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  followed_at: string;
+  source?: string;
+}
+
+export async function getOrganizerFollowers(params?: {
+  search?: string;
+  page?: number;
+}): Promise<{ followers: OrganizerFollower[]; total: number }> {
+  const res = await api.get("/organizers/followers", { params });
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUTO-APPROVE RULES
+// ═══════════════════════════════════════════════════════════
+
+export interface AutoApproveRule {
+  id: string;
+  rule_type: string;
+  criteria: any;
+  is_active: boolean;
+}
+
+export async function getAutoApproveRules(): Promise<AutoApproveRule[]> {
+  const res = await api.get("/organizers/auto-approve-rules");
+  return res.data.rules ?? [];
+}
+
+export async function createAutoApproveRule(data: {
+  rule_type: string;
+  criteria: any;
+}): Promise<AutoApproveRule> {
+  const res = await api.post("/organizers/auto-approve-rules", data);
+  return res.data.rule;
+}
+
+export async function updateAutoApproveRule(
+  id: string,
+  data: { is_active?: boolean; criteria?: any }
+): Promise<AutoApproveRule> {
+  const res = await api.put(`/organizers/auto-approve-rules/${id}`, data);
+  return res.data.rule;
+}
+
+export async function deleteAutoApproveRule(id: string): Promise<void> {
+  await api.delete(`/organizers/auto-approve-rules/${id}`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONTACT DIRECTORY
+// ═══════════════════════════════════════════════════════════
+
+export interface DirectoryContact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  interaction_types: string[];
+  first_interaction_date?: string;
+  last_event?: string;
+  status?: string;
+}
+
+export async function getDirectory(params?: {
+  search?: string;
+  filter?: string;
+  page?: number;
+}): Promise<{ contacts: DirectoryContact[]; total: number }> {
+  const res = await api.get("/organizers/directory", { params });
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════════
+// COUPLE TICKET GUEST
+// ═══════════════════════════════════════════════════════════
+
+export async function addTicketGuest(
+  ticketId: string,
+  data: { name: string; phone: string; email?: string }
+): Promise<any> {
+  const res = await api.post(`/tickets/${ticketId}/guest`, data);
+  return res.data;
 }
