@@ -69,6 +69,8 @@ const config: Config = {
   			mono: ['JetBrains Mono', 'monospace'],
   			space: ['Space Grotesk', 'sans-serif'],
   			satoshi: ['DM Sans', 'sans-serif'],
+  			bebas: ['Bebas Neue', 'Space Grotesk', 'sans-serif'],
+  			plex: ['IBM Plex Mono', 'JetBrains Mono', 'monospace'],
   		},
   		borderRadius: {
   			'2xl': '1.25rem',
