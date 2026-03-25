@@ -11,20 +11,20 @@ const ACTIONS = [
 
 export default function QuickActions() {
   return (
-    <div className="mt-12">
-      <div className="h-px bg-[var(--border-subtle)] mb-6" />
-      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2">
+    <div className="mt-14">
+      <div className="h-px bg-[var(--border-subtle)] mb-8" />
+      <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-3">
         {ACTIONS.map((action, i) => (
           <span key={action.href} className="flex items-center">
             <Link
               href={action.href}
-              className="text-[11px] uppercase tracking-[0.08em] text-[var(--text-muted)] hover:text-[var(--copper)] transition-colors duration-200"
+              className="text-[13px] uppercase tracking-[0.06em] text-[var(--text-muted)] hover:text-[var(--copper)] transition-colors duration-200"
               style={{ fontFamily: "var(--font-body-org)" }}
             >
               {action.label}
             </Link>
             {i < ACTIONS.length - 1 && (
-              <span className="text-[var(--text-muted)] mx-2 text-[10px]">·</span>
+              <span className="text-[var(--border-subtle)] mx-3 text-[11px]">·</span>
             )}
           </span>
         ))}

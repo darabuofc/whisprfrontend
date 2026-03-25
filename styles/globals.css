@@ -23,19 +23,20 @@
 
   /* Organizer dashboard design tokens */
   --bg-base: #0A0A0A;
-  --bg-raised: #111111;
-  --bg-hover: #161616;
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-copper: rgba(212,165,116,0.25);
-  --text-primary: #E8E8E3;
-  --text-secondary: rgba(232,232,227,0.50);
-  --text-muted: rgba(232,232,227,0.25);
+  --bg-raised: #151515;
+  --bg-hover: #1A1A1A;
+  --border-subtle: rgba(255,255,255,0.09);
+  --border-copper: rgba(212,165,116,0.30);
+  --text-primary: #EDEDEB;
+  --text-secondary: rgba(237,237,235,0.62);
+  --text-muted: rgba(237,237,235,0.40);
   --copper-dim: rgba(212,165,116,0.10);
   --status-live: #C8E6C9;
-  --status-draft: rgba(232,232,227,0.35);
+  --status-draft: rgba(237,237,235,0.45);
   --status-warning: #E6C9A8;
-  --font-display-org: 'Bebas Neue', 'Space Grotesk', sans-serif;
-  --font-body-org: 'IBM Plex Mono', 'JetBrains Mono', monospace;
+  --font-display-org: 'Space Grotesk', sans-serif;
+  --font-body-org: 'DM Sans', sans-serif;
+  --font-mono-org: 'IBM Plex Mono', 'JetBrains Mono', monospace;
 }
 
 /* enable dark mode via class */

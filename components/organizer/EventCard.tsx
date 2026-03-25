@@ -35,8 +35,7 @@ export default function EventCard({ event }: { event: Event }) {
   return (
     <div
       onClick={() => router.push(`/organizers/events/${event.id}/mission-control`)}
-      className="group cursor-pointer bg-[var(--bg-raised)] rounded-[3px] overflow-hidden transition-all duration-250 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-b hover:border-b-[var(--border-copper)]"
-      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }}
+      className="group cursor-pointer bg-[var(--bg-raised)] border border-[var(--border-subtle)] rounded-lg overflow-hidden transition-all duration-250 hover:-translate-y-[2px] hover:border-[var(--border-copper)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
     >
       {/* Cover Image */}
       <div className="relative h-[200px] overflow-hidden">
@@ -48,9 +47,9 @@ export default function EventCard({ event }: { event: Event }) {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full bg-[#111] flex items-center justify-center px-4">
+          <div className="w-full h-full bg-[var(--bg-hover)] flex items-center justify-center px-6">
             <span
-              className="text-[18px] text-[var(--text-muted)] uppercase text-center leading-tight"
+              className="text-[20px] text-[var(--text-muted)] uppercase text-center leading-tight tracking-wide"
               style={{ fontFamily: "var(--font-display-org)" }}
             >
               {event.fields.Name || "Untitled Event"}
@@ -61,11 +60,12 @@ export default function EventCard({ event }: { event: Event }) {
         {/* Status Badge */}
         <div className="absolute top-3 right-3">
           <span
-            className="px-2.5 py-1 rounded-[2px] text-[10px] uppercase backdrop-blur-[8px]"
+            className="px-3 py-1.5 rounded-md text-[11px] font-medium uppercase tracking-wide backdrop-blur-[8px]"
             style={{
               fontFamily: "var(--font-body-org)",
-              background: "rgba(10,10,10,0.7)",
+              background: "rgba(10,10,10,0.75)",
               color: isPublished ? "var(--status-live)" : "var(--status-draft)",
+              border: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             {isPublished ? "Published" : "Draft"}
@@ -76,31 +76,36 @@ export default function EventCard({ event }: { event: Event }) {
       {/* Content */}
       <div className="p-5">
         <h3
-          className="text-[15px] text-[var(--text-primary)] truncate"
-          style={{ fontFamily: "var(--font-body-org)", fontWeight: 500 }}
+          className="text-[16px] text-[var(--text-primary)] truncate leading-snug"
+          style={{ fontFamily: "var(--font-body-org)", fontWeight: 600 }}
         >
           {event.fields.Name || "Untitled Event"}
         </h3>
 
-        <p
-          className="text-[11px] text-[var(--text-muted)] mt-1"
-          style={{ fontFamily: "var(--font-body-org)" }}
-        >
-          {formatDate(event.fields.Date)}
-        </p>
-
-        {event.fields.Location && (
+        <div className="flex items-center gap-2 mt-2">
           <p
-            className="text-[11px] text-[var(--text-muted)] mt-1"
+            className="text-[13px] text-[var(--text-secondary)]"
             style={{ fontFamily: "var(--font-body-org)" }}
           >
-            {event.fields.Location}
+            {formatDate(event.fields.Date)}
           </p>
-        )}
+
+          {event.fields.Location && (
+            <>
+              <span className="text-[var(--text-muted)]">·</span>
+              <p
+                className="text-[13px] text-[var(--text-secondary)] truncate"
+                style={{ fontFamily: "var(--font-body-org)" }}
+              >
+                {event.fields.Location}
+              </p>
+            </>
+          )}
+        </div>
 
         <p
-          className="text-[11px] text-[var(--text-muted)] group-hover:text-[var(--copper)] transition-colors duration-200 mt-4"
-          style={{ fontFamily: "var(--font-body-org)" }}
+          className="text-[12px] text-[var(--text-muted)] group-hover:text-[var(--copper)] transition-colors duration-200 mt-4 tracking-wide"
+          style={{ fontFamily: "var(--font-mono-org)" }}
         >
           Mission Control →
         </p>
@@ -113,10 +118,10 @@ export function CreateEventCard({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="w-full h-full min-h-[300px] rounded-[3px] border border-dashed border-[var(--border-subtle)] hover:border-[var(--border-copper)] flex items-center justify-center transition-colors duration-200 group bg-transparent"
+      className="w-full h-full min-h-[300px] rounded-lg border border-dashed border-[var(--border-subtle)] hover:border-[var(--border-copper)] flex items-center justify-center transition-all duration-200 group bg-transparent"
     >
       <span
-        className="text-[12px] text-[var(--text-muted)] group-hover:text-[var(--copper)] uppercase tracking-[0.08em] transition-colors duration-200"
+        className="text-[13px] text-[var(--text-muted)] group-hover:text-[var(--copper)] uppercase tracking-[0.08em] transition-colors duration-200"
         style={{ fontFamily: "var(--font-body-org)" }}
       >
         + Create Event
