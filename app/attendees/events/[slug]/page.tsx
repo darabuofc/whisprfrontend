@@ -55,10 +55,14 @@ interface EventDetail {
   organization?: EventOrganization | null;
   user_registered?: boolean;
   registration?: {
+    registration_id?: string;
     join_code?: string;
     pass?: { name: string; max_members: number };
     members?: { name: string }[];
     gender_mismatch?: boolean;
+    status?: string;
+    is_complete?: boolean;
+    remaining_slots?: number;
   };
 }
 
@@ -665,28 +669,82 @@ export default function EventDetailPage() {
             animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl border border-[#D4A574]/30 bg-[#D4A574]/5 p-5 backdrop-blur"
           >
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle2 className="text-[#D4A574]" size={24} />
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>You're Registered</h3>
+            {/* Header row: title + status badge */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="text-[#D4A574]" size={24} />
+                <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>You're Registered</h3>
+              </div>
+
+              {event.registration?.status && (() => {
+                const s = event.registration.status.toLowerCase();
+                const badge = s === "approved"
+                  ? { label: "Approved", cls: "text-green-400 bg-green-400/10 border-green-400/30" }
+                  : s === "rejected"
+                  ? { label: "Rejected", cls: "text-red-400 bg-red-400/10 border-red-400/30" }
+                  : s === "cancelled"
+                  ? { label: "Cancelled", cls: "text-neutral-400 bg-neutral-400/10 border-neutral-400/30" }
+                  : (s === "pending" || s === "pending approval")
+                  ? { label: "Pending Approval", cls: "text-amber-400 bg-amber-400/10 border-amber-400/30" }
+                  : s === "incomplete"
+                  ? { label: "Incomplete", cls: "text-orange-400 bg-orange-400/10 border-orange-400/30" }
+                  : { label: event.registration!.status, cls: "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/30" };
+                return (
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${badge.cls}`}>
+                    {badge.label}
+                  </span>
+                );
+              })()}
             </div>
 
             {event.registration ? (
               <div className="space-y-3">
+                {/* Pass name */}
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-white/60">Pass</span>
                   <span className="font-medium">{event.registration.pass?.name}</span>
                 </div>
 
-                {event.registration.join_code && event.registration.pass?.name?.toLowerCase().includes('couple') && (
+                {/* Member progress for couple/group passes */}
+                {event.registration.pass && event.registration.pass.max_members > 1 && (
+                  <div className="space-y-2.5 rounded-xl border border-white/10 bg-black/20 p-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-white/60">Members Joined</span>
+                      <span className="font-medium">
+                        {event.registration.members?.length ?? 1} out of {event.registration.pass.max_members}
+                      </span>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-[#D4A574] transition-all duration-500"
+                        style={{
+                          width: `${((event.registration.members?.length ?? 1) / event.registration.pass.max_members) * 100}%`
+                        }}
+                      />
+                    </div>
+
+                    {/* Incomplete hint */}
+                    {event.registration.members && event.registration.members.length < event.registration.pass.max_members && (
+                      <p className="text-xs text-amber-400/80">
+                        Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Share Code section for couple/group passes */}
+                {event.registration.join_code && event.registration.pass && event.registration.pass.max_members > 1 && (
                   <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/50" style={{ fontFamily: "var(--font-mono)" }}>Join Code</p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-white/50" style={{ fontFamily: "var(--font-mono)" }}>Share Code</p>
                         <p
                           onClick={() =>
                             navigator.clipboard.writeText(event.registration?.join_code || "")
                           }
-                          className="font-mono text-[#D4A574] cursor-pointer hover:text-white transition"
+                          className="font-mono text-lg text-[#D4A574] cursor-pointer hover:text-white transition"
                         >
                           {event.registration.join_code}
                         </p>
