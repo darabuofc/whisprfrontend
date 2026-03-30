@@ -20,6 +20,8 @@ import {
   LogIn,
   X,
   AlertTriangle,
+  XCircle,
+  Check,
 } from "lucide-react";
 import {
   getEventById,
@@ -28,6 +30,7 @@ import {
   joinExistingRegistration,
   validateDiscountCode,
   getEventRegistrationQuestions,
+  cancelRegistration,
   type DiscountValidationResult,
   type RegistrationQuestion,
 } from "@/lib/api";
@@ -95,6 +98,11 @@ export default function EventDetailPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [genderMismatchWarning, setGenderMismatchWarning] = useState(false);
 
+  // Cancel & copy state for registration card
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+
   // Discount code state
   const [discountCode, setDiscountCode] = useState("");
   const [discountValidation, setDiscountValidation] = useState<DiscountValidationResult | null>(null);
@@ -115,6 +123,82 @@ export default function EventDetailPage() {
   const handleSignInRedirect = () => {
     const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
     router.push(`/auth?role=attendee&redirect=${encodeURIComponent(currentPath)}`);
+  };
+
+  const handleCopyRegistrationCode = async () => {
+    if (!event?.registration?.registration_id) return;
+    try {
+      await navigator.clipboard.writeText(event.registration.registration_id);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleShareRegistration = async () => {
+    if (!event) return;
+    const shareText = `Check out ${event.name}!${event.registration?.registration_id ? ` My registration code: ${event.registration.registration_id}` : ""}`;
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: event.name || "Event Registration",
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch {
+        // cancelled
+      }
+    } else {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText + "\n" + shareUrl)}`,
+        "_blank"
+      );
+    }
+  };
+
+  const handleCancelRegistration = async () => {
+    if (!event?.registration?.registration_id) return;
+    setCancelling(true);
+    try {
+      await cancelRegistration(event.registration.registration_id);
+      const data = await getEventById(eventId);
+      setEvent(data);
+      setSuccessMsg("Registration cancelled");
+      setTimeout(() => setSuccessMsg(null), 3000);
+    } catch {
+      setSuccessMsg("Failed to cancel registration");
+      setTimeout(() => setSuccessMsg(null), 3000);
+    } finally {
+      setCancelling(false);
+      setCancelConfirmOpen(false);
+    }
+  };
+
+  const canCancelRegistration = (status?: string) => {
+    if (!status) return false;
+    const blocked = ["paid", "rejected", "cancelled"];
+    return !blocked.includes(status.toLowerCase());
+  };
+
+  const registrationStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved":
+        return "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/20";
+      case "pending":
+      case "pending approval":
+        return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+      case "rejected":
+        return "text-red-400 bg-red-500/10 border-red-500/20";
+      case "cancelled":
+        return "text-neutral-400 bg-neutral-400/10 border-neutral-400/30";
+      case "incomplete":
+        return "text-orange-400 bg-orange-500/10 border-orange-500/20";
+      default:
+        return "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/20";
+    }
   };
 
   useEffect(() => {
@@ -662,120 +746,165 @@ export default function EventDetailPage() {
           )}
         </motion.section>
 
-        {/* Already Registered */}
+        {/* Already Registered — Application Card */}
         {event.user_registered && (
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[#D4A574]/30 bg-[#D4A574]/5 p-5 backdrop-blur"
+            className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] overflow-hidden"
           >
-            {/* Header row: title + status badge */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="text-[#D4A574]" size={24} />
-                <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>You're Registered</h3>
-              </div>
-
-              {event.registration?.status && (() => {
-                const s = event.registration.status.toLowerCase();
-                const badge = s === "approved"
-                  ? { label: "Approved", cls: "text-green-400 bg-green-400/10 border-green-400/30" }
-                  : s === "rejected"
-                  ? { label: "Rejected", cls: "text-red-400 bg-red-400/10 border-red-400/30" }
-                  : s === "cancelled"
-                  ? { label: "Cancelled", cls: "text-neutral-400 bg-neutral-400/10 border-neutral-400/30" }
-                  : (s === "pending" || s === "pending approval")
-                  ? { label: "Pending Approval", cls: "text-amber-400 bg-amber-400/10 border-amber-400/30" }
-                  : s === "incomplete"
-                  ? { label: "Incomplete", cls: "text-orange-400 bg-orange-400/10 border-orange-400/30" }
-                  : { label: event.registration!.status, cls: "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/30" };
-                return (
-                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${badge.cls}`}>
-                    {badge.label}
-                  </span>
-                );
-              })()}
-            </div>
-
-            {event.registration ? (
-              <div className="space-y-3">
-                {/* Pass name */}
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-white/60">Pass</span>
-                  <span className="font-medium">{event.registration.pass?.name}</span>
+            <div className="p-4">
+              {/* Header row */}
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <CheckCircle2 className="text-[#D4A574] flex-shrink-0" size={20} />
+                  <h3 className="font-semibold text-sm">You&apos;re Registered</h3>
                 </div>
 
-                {/* Member progress for couple/group passes */}
-                {event.registration.pass && event.registration.pass.max_members > 1 && (
-                  <div className="space-y-2.5 rounded-xl border border-white/10 bg-black/20 p-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-white/60">Members Joined</span>
-                      <span className="font-medium">
-                        {event.registration.members?.length ?? 1} out of {event.registration.pass.max_members}
-                      </span>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-[#D4A574] transition-all duration-500"
-                        style={{
-                          width: `${((event.registration.members?.length ?? 1) / event.registration.pass.max_members) * 100}%`
-                        }}
-                      />
-                    </div>
-
-                    {/* Incomplete hint */}
-                    {event.registration.members && event.registration.members.length < event.registration.pass.max_members && (
-                      <p className="text-xs text-amber-400/80">
-                        Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
-                      </p>
-                    )}
-                  </div>
+                {event.registration?.status && (
+                  <span
+                    className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium capitalize border ${registrationStatusColor(event.registration.status)}`}
+                  >
+                    {event.registration.status}
+                  </span>
                 )}
+              </div>
 
-                {/* Share Code section for couple/group passes */}
-                {event.registration.join_code && event.registration.pass && event.registration.pass.max_members > 1 && (
-                  <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+              {event.registration ? (
+                <>
+                  {/* Gender mismatch warning */}
+                  {event.registration.gender_mismatch && (
+                    <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+                      <AlertTriangle size={11} />
+                      Gender mismatch
+                    </div>
+                  )}
+
+                  {/* Pass info row */}
+                  {event.registration.pass?.name && (
+                    <div className="flex items-center justify-between py-2.5 border-t border-white/[0.06] mb-3">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/50" style={{ fontFamily: "var(--font-mono)" }}>Share Code</p>
-                        <p
-                          onClick={() =>
-                            navigator.clipboard.writeText(event.registration?.join_code || "")
-                          }
-                          className="font-mono text-lg text-[#D4A574] cursor-pointer hover:text-white transition"
-                        >
-                          {event.registration.join_code}
+                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                          Pass
+                        </span>
+                        <p className="text-xs font-medium">{event.registration.pass.name}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Member progress for couple/group passes */}
+                  {event.registration.pass && event.registration.pass.max_members > 1 && (
+                    <div className="space-y-2.5 rounded-xl border border-white/[0.06] bg-black/20 p-3 mb-3">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-neutral-500">Members Joined</span>
+                        <span className="font-medium">
+                          {event.registration.members?.length ?? 1} / {event.registration.pass.max_members}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#D4A574] transition-all duration-500"
+                          style={{
+                            width: `${((event.registration.members?.length ?? 1) / event.registration.pass.max_members) * 100}%`
+                          }}
+                        />
+                      </div>
+                      {event.registration.members && event.registration.members.length < event.registration.pass.max_members && (
+                        <p className="text-[11px] text-amber-400/80">
+                          Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Registration code */}
+                  {event.registration.registration_id && (
+                    <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-black/30 border border-[#D4A574]/[0.08] mb-3">
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                          Code
+                        </span>
+                        <p className="font-mono text-xs text-[#D4A574] font-medium truncate">
+                          {event.registration.registration_id}
                         </p>
                       </div>
                       <button
-                        onClick={() =>
-                          navigator.clipboard.writeText(event.registration?.join_code || "")
-                        }
-                        className="rounded-full border border-white/15 p-2 text-white/70 transition hover:border-[#D4A574]/60 hover:text-[#D4A574]"
+                        onClick={handleCopyRegistrationCode}
+                        className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors flex-shrink-0"
+                        title="Copy code"
                       >
-                        <Copy size={14} />
+                        {codeCopied ? (
+                          <Check size={13} className="text-[#D4A574]" />
+                        ) : (
+                          <Copy size={13} className="text-neutral-500" />
+                        )}
                       </button>
                     </div>
+                  )}
+
+                  {/* Share Code section for couple/group passes */}
+                  {event.registration.join_code && event.registration.pass && event.registration.pass.max_members > 1 && (
+                    <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3 space-y-3 mb-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-neutral-500" style={{ fontFamily: "var(--font-mono)" }}>Share Code</p>
+                          <p
+                            onClick={() =>
+                              navigator.clipboard.writeText(event.registration?.join_code || "")
+                            }
+                            className="font-mono text-lg text-[#D4A574] cursor-pointer hover:text-white transition"
+                          >
+                            {event.registration.join_code}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            navigator.clipboard.writeText(event.registration?.join_code || "")
+                          }
+                          className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors"
+                        >
+                          <Copy size={13} className="text-neutral-500" />
+                        </button>
+                      </div>
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `https://wa.me/?text=Join%20my%20Whispr%20event%20group%20with%20this%20code:%20${event.registration?.join_code ?? ""}`,
+                            "_blank"
+                          )
+                        }
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 px-4 py-2 text-xs font-medium text-[#D4A574] transition-all duration-300"
+                      >
+                        <Share2 size={12} />
+                        Invite via WhatsApp
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Action buttons */}
+                  <div className="flex gap-2">
                     <button
-                      onClick={() =>
-                        window.open(
-                          `https://wa.me/?text=Join%20my%20Whispr%20event%20group%20with%20this%20code:%20${event.registration?.join_code ?? ""}`,
-                          "_blank"
-                        )
-                      }
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[#D4A574]/40 px-4 py-2 text-sm font-medium text-[#D4A574] transition hover:bg-[#D4A574]/10"
+                      onClick={handleShareRegistration}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 text-xs font-medium transition-all duration-300"
                     >
-                      <Share2 size={14} />
-                      Invite via WhatsApp
+                      <Share2 size={12} />
+                      Share
                     </button>
+                    {canCancelRegistration(event.registration.status) && (
+                      <button
+                        onClick={() => setCancelConfirmOpen(true)}
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                      >
+                        <XCircle size={12} />
+                        Cancel
+                      </button>
+                    )}
                   </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-white/60">Your registration is being processed.</p>
-            )}
+                </>
+              ) : (
+                <p className="text-sm text-white/60">Your registration is being processed.</p>
+              )}
+            </div>
           </motion.section>
         )}
 
@@ -818,6 +947,56 @@ export default function EventDetailPage() {
                 </button>
               </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Cancel Registration Confirmation Modal */}
+        <AnimatePresence>
+          {cancelConfirmOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                onClick={() => !cancelling && setCancelConfirmOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              >
+                <div className="w-full max-w-sm rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-5 shadow-2xl shadow-black/50">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-9 h-9 rounded-full bg-red-500/10 flex items-center justify-center">
+                      <XCircle size={18} className="text-red-400" />
+                    </div>
+                    <h3 className="font-semibold">Cancel Registration</h3>
+                  </div>
+                  <p className="text-sm text-neutral-400 mb-5">
+                    Are you sure? You can re-register afterwards if you&apos;d like.
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCancelConfirmOpen(false)}
+                      disabled={cancelling}
+                      className="flex-1 py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] border border-[#2C2C2E] text-sm font-medium transition-all disabled:opacity-50"
+                    >
+                      Keep It
+                    </button>
+                    <button
+                      onClick={handleCancelRegistration}
+                      disabled={cancelling}
+                      className="flex-1 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 text-sm font-medium text-red-400 transition-all disabled:opacity-50"
+                    >
+                      {cancelling ? "Cancelling..." : "Yes, Cancel"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </motion.main>
