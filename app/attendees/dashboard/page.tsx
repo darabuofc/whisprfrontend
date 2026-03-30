@@ -62,7 +62,7 @@ import {
 const AMBIENT_DELAY_STYLE = { animationDelay: '-1.5s' } as const;
 const TABS = [
   { key: "profile" as const, label: "Profile", icon: User },
-  { key: "feed" as const, label: "Feed", icon: Heart },
+  // { key: "feed" as const, label: "Feed", icon: Heart }, // TODO: Re-enable Feed tab
   { key: "applications" as const, label: "Applications", icon: ClipboardList },
   { key: "tickets" as const, label: "Tickets", icon: Ticket },
 ] as const;
@@ -90,7 +90,7 @@ function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
-    "profile" | "feed" | "applications" | "tickets"
+    "profile" | "applications" | "tickets"
   >("profile");
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -111,8 +111,6 @@ function DashboardContent() {
       setActiveTab("applications");
     } else if (tabParam === "tickets") {
       setActiveTab("tickets");
-    } else if (tabParam === "feed") {
-      setActiveTab("feed");
     } else if (tabParam === "profile") {
       setActiveTab("profile");
     }
@@ -122,8 +120,6 @@ function DashboardContent() {
     onSwipedLeft: () =>
       setActiveTab((t) =>
         t === "profile"
-          ? "feed"
-          : t === "feed"
           ? "applications"
           : t === "applications"
           ? "tickets"
@@ -134,8 +130,6 @@ function DashboardContent() {
         t === "tickets"
           ? "applications"
           : t === "applications"
-          ? "feed"
-          : t === "feed"
           ? "profile"
           : "profile"
       ),
@@ -480,8 +474,6 @@ function DashboardContent() {
                   profile={profile}
                   onProfileUpdated={handleProfileUpdated}
                 />
-              ) : activeTab === "feed" ? (
-                <FeedTab />
               ) : activeTab === "applications" ? (
                 <ApplicationsTab
                   registrations={registrations}
@@ -498,7 +490,7 @@ function DashboardContent() {
 
       {/* ─── MOBILE BOTTOM NAV ─── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0A0A0A]/80 backdrop-blur-2xl border-t border-white/[0.06] pb-safe">
-        <div className="grid grid-cols-4 h-16">
+        <div className="grid grid-cols-3 h-16">
           {TABS.map(({ key, label, icon: Icon }) => {
             const isActive = activeTab === key;
             return (
