@@ -365,7 +365,7 @@ export default function GeneralSettingsTab({ eventId }: GeneralSettingsTabProps)
                 </div>
                 <div className="text-center">
                   <p className="text-white/60 text-sm font-medium">Click to upload banner</p>
-                  <p className="text-white/30 text-xs mt-1">Recommended: 1920x820px (21:9)</p>
+                  <p className="text-white/30 text-xs mt-1">Recommended: 1920×1080px (16:9)</p>
                 </div>
               </div>
             )}
