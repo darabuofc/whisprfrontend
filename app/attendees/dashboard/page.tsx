@@ -57,6 +57,7 @@ import {
   TicketItem,
   FeedOrganization,
 } from "@/lib/api";
+import NotificationBell from "@/components/organizer/NotificationBell";
 
 // ─── STATIC CONSTANTS (outside component to avoid re-creation) ───
 const AMBIENT_DELAY_STYLE = { animationDelay: '-1.5s' } as const;
@@ -241,7 +242,9 @@ function DashboardContent() {
           priority
         />
 
-        <div className="relative">
+        <div className="flex items-center gap-3">
+          <NotificationBell />
+          <div className="relative">
           <button
             onClick={() => setDesktopMenuOpen(!desktopMenuOpen)}
             className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
@@ -313,6 +316,7 @@ function DashboardContent() {
             )}
           </AnimatePresence>
         </div>
+        </div>
       </header>
 
       {/* ─── MOBILE HEADER ─── */}
@@ -326,22 +330,25 @@ function DashboardContent() {
             className="h-5 w-auto opacity-80"
             priority
           />
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden"
-          >
-            {profile?.profilePicture ? (
-              <img
-                src={profile.profilePicture}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-xs font-semibold text-neutral-400">
-                {profile?.fullName?.charAt(0)?.toUpperCase() || "U"}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden"
+            >
+              {profile?.profilePicture ? (
+                <img
+                  src={profile.profilePicture}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xs font-semibold text-neutral-400">
+                  {profile?.fullName?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile menu dropdown */}
