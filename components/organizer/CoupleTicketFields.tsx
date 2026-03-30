@@ -15,59 +15,44 @@ export default function CoupleTicketFields({ onChange }: CoupleTicketFieldsProps
     onChange(updated);
   };
 
-  const inputClass =
-    "w-full bg-[var(--bg-raised)] border border-[var(--border-subtle)] text-[var(--text-primary)] px-4 py-3 rounded-[2px] text-[13px] focus:border-[var(--border-copper)] focus:outline-none transition-colors duration-200";
-
-  const labelClass =
-    "block text-[10px] uppercase tracking-[0.12em] text-[var(--text-muted)] mb-2";
-
   return (
-    <div className="ml-4 pl-4 border-l border-[var(--border-subtle)] space-y-4">
-      <p
-        className="text-[12px] text-[var(--text-secondary)] uppercase tracking-[0.08em]"
-        style={{ fontFamily: "var(--font-body-org)" }}
-      >
-        Your +1
-      </p>
-
+    <div className="space-y-4">
       <div>
-        <label className={labelClass} style={{ fontFamily: "var(--font-body-org)" }}>
+        <label className="block text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
           Name
         </label>
         <input
           type="text"
           value={guest.name}
           onChange={(e) => handleChange("name", e.target.value)}
-          className={inputClass}
-          style={{ fontFamily: "var(--font-body-org)" }}
-          required
+          placeholder="Their full name"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 focus:border-transparent transition-all"
         />
       </div>
 
       <div>
-        <label className={labelClass} style={{ fontFamily: "var(--font-body-org)" }}>
+        <label className="block text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
           Phone
         </label>
         <input
           type="tel"
           value={guest.phone}
           onChange={(e) => handleChange("phone", e.target.value)}
-          className={inputClass}
-          style={{ fontFamily: "var(--font-body-org)" }}
-          required
+          placeholder="+1 (555) 000-0000"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 focus:border-transparent transition-all"
         />
       </div>
 
       <div>
-        <label className={labelClass} style={{ fontFamily: "var(--font-body-org)" }}>
-          Email (optional)
+        <label className="block text-[10px] uppercase tracking-wider text-neutral-500 mb-2">
+          Email <span className="normal-case tracking-normal text-neutral-600">(optional)</span>
         </label>
         <input
           type="email"
           value={guest.email}
           onChange={(e) => handleChange("email", e.target.value)}
-          className={inputClass}
-          style={{ fontFamily: "var(--font-body-org)" }}
+          placeholder="their@email.com"
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4A574]/50 focus:border-transparent transition-all"
         />
       </div>
     </div>
