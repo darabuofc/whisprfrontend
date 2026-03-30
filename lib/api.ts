@@ -1133,3 +1133,39 @@ export async function addTicketGuest(
   const res = await api.post(`/tickets/${ticketId}/guest`, data);
   return res.data;
 }
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+
+export interface AppNotification {
+  id: string;
+  type: "couple_invite" | "new_event";
+  title: string;
+  body: string;
+  action_url: string;
+  is_read: boolean;
+  created_at: string;
+  actor_name?: string;
+  actor_avatar_url?: string | null;
+  organizer_name?: string;
+  organizer_logo_url?: string | null;
+}
+
+export async function getUnreadNotificationCount(): Promise<number> {
+  const res = await api.get("/notifications/unread-count");
+  return res.data.count;
+}
+
+export async function getNotifications(): Promise<AppNotification[]> {
+  const res = await api.get("/notifications");
+  return res.data.notifications;
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await api.post(`/notifications/${id}/read`);
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  await api.post("/notifications/read-all");
+}

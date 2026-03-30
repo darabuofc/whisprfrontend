@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Organization } from "@/lib/api";
+import NotificationBell from "./NotificationBell";
 
 interface Organizer {
   id: string;
@@ -39,20 +40,25 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
 
   const navContent = (
     <>
-      {/* Wordmark */}
-      <div className="px-5 pt-8 pb-1">
-        <h1
-          className="text-[18px] uppercase tracking-[0.3em] text-[var(--text-primary)] font-medium"
-          style={{ fontFamily: "var(--font-display-org)" }}
-        >
-          WHISPR
-        </h1>
-        <p
-          className="text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)] mt-1.5"
-          style={{ fontFamily: "var(--font-mono-org)" }}
-        >
-          Organizer
-        </p>
+      {/* Wordmark + Notification Bell */}
+      <div className="px-5 pt-8 pb-1 flex items-start justify-between">
+        <div>
+          <h1
+            className="text-[18px] uppercase tracking-[0.3em] text-[var(--text-primary)] font-medium"
+            style={{ fontFamily: "var(--font-display-org)" }}
+          >
+            WHISPR
+          </h1>
+          <p
+            className="text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)] mt-1.5"
+            style={{ fontFamily: "var(--font-mono-org)" }}
+          >
+            Organizer
+          </p>
+        </div>
+        <div className="mt-0.5">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Spacer */}
@@ -171,11 +177,13 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
           >
             WHISPR
           </h1>
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               {mobileOpen ? (
                 <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               ) : (
@@ -185,8 +193,9 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
                   <path d="M3 14H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </>
               )}
-            </svg>
-          </button>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
