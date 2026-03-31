@@ -2,7 +2,7 @@ import axios from "axios";
 
 // ----------------------------------------------------------
 // ADMIN AXIOS INSTANCES
-// Session-based auth (cookies), NOT JWT
+// JWT-based auth (Authorization: Bearer <token>)
 // ----------------------------------------------------------
 
 const BACKEND_BASE =
@@ -11,18 +11,40 @@ const BACKEND_BASE =
     ""
   );
 
-/** For admin data endpoints under /api/admin/* */
+// ----------------------------------------------------------
+// TOKEN MANAGEMENT
+// ----------------------------------------------------------
+
+const TOKEN_KEY = "admin_token";
+
+export function getAdminToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setAdminToken(token: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+function clearAdminToken(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+/** For all admin endpoints under /api/admin/* */
 export const adminApi = axios.create({
   baseURL: BACKEND_BASE + "/api/admin",
-  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
-/** For auth routes at /admin/login, /admin/logout (NOT under /api) */
-export const adminAuthApi = axios.create({
-  baseURL: BACKEND_BASE,
-  withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+// Attach JWT token to every request
+adminApi.interceptors.request.use((config) => {
+  const token = getAdminToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // Normalize error messages
@@ -38,7 +60,6 @@ const errorInterceptor = (error: any) => {
 };
 
 adminApi.interceptors.response.use((r) => r, errorInterceptor);
-adminAuthApi.interceptors.response.use((r) => r, errorInterceptor);
 
 // ----------------------------------------------------------
 // TYPES
@@ -163,12 +184,19 @@ export async function adminLogin(
   username: string,
   password: string
 ): Promise<{ message: string }> {
-  const res = await adminAuthApi.post("/admin/login", { username, password });
+  const res = await adminApi.post("/login", { username, password });
+  if (res.data.token) {
+    setAdminToken(res.data.token);
+  }
   return res.data;
 }
 
 export async function adminLogout(): Promise<void> {
-  await adminAuthApi.post("/admin/logout");
+  try {
+    await adminApi.post("/logout");
+  } finally {
+    clearAdminToken();
+  }
 }
 
 export async function adminAuthCheck(): Promise<{ authenticated: boolean }> {

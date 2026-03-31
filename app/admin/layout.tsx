@@ -28,8 +28,12 @@ export default function AdminLayout({
 
     const checkAuth = async () => {
       try {
-        await adminAuthCheck();
-        setAuthorized(true);
+        const data = await adminAuthCheck();
+        if (data.authenticated) {
+          setAuthorized(true);
+        } else {
+          router.replace("/admin/login");
+        }
       } catch {
         router.replace("/admin/login");
       } finally {
