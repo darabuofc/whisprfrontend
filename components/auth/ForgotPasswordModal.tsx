@@ -1,21 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Loader2, Eye, EyeOff, CheckCircle } from "lucide-react";
 import {
-  resetAttendeePassword,
-  resetOrganizerPassword,
+  attendeeForgotVerifyMobile,
+  attendeeForgotVerifyCnic,
+  attendeeForgotVerifyBirthMonth,
+  attendeeForgotReset,
 } from "@/lib/api";
-import {
-  setupRecaptcha,
-  sendFirebaseOtp,
-  verifyFirebaseOtp,
-  clearRecaptcha,
-} from "@/lib/firebase";
-import type { ConfirmationResult } from "firebase/auth";
 
-type Step = "phone" | "verify" | "reset" | "success";
+type Step = "mobile" | "cnic" | "birth_month" | "new_password" | "success";
+
+const MONTHS = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+];
+
+const STEP_ORDER: Step[] = ["mobile", "cnic", "birth_month", "new_password", "success"];
+const TOTAL_STEPS = 4;
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -28,86 +41,106 @@ export default function ForgotPasswordModal({
   onClose,
   mode,
 }: ForgotPasswordModalProps) {
-  const [step, setStep] = useState<Step>("phone");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<Step>("mobile");
+  const [mobile, setMobile] = useState("");
+  const [cnic, setCnic] = useState("");
+  const [birthMonth, setBirthMonth] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [firebaseVerified, setFirebaseVerified] = useState(false);
+  const [stepToken, setStepToken] = useState("");
+  const [resetToken, setResetToken] = useState("");
 
-  const accent = mode === "attendee" ? "#D4A574" : "#D4A574";
+  const accent = "#D4A574";
 
-  // Cleanup reCAPTCHA on unmount
-  useEffect(() => {
-    return () => {
-      clearRecaptcha();
-    };
-  }, []);
+  const currentStepIndex = STEP_ORDER.indexOf(step);
+  const progressStep = Math.min(currentStepIndex + 1, TOTAL_STEPS);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleClose = () => {
+    setStep("mobile");
+    setMobile("");
+    setCnic("");
+    setBirthMonth("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
+    setStepToken("");
+    setResetToken("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    onClose();
+  };
+
+  // Step 1: verify mobile
+  const handleVerifyMobile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-
     setLoading(true);
     setError("");
-
     try {
-      const verifier = setupRecaptcha("forgot-recaptcha-container");
-      const result = await sendFirebaseOtp(whatsapp.trim());
-      setConfirmationResult(result);
-      setStep("verify");
+      const data = await attendeeForgotVerifyMobile(mobile.trim());
+      setStepToken(data.step_token);
+      setStep("cnic");
     } catch (err: any) {
-      clearRecaptcha();
-      setError(err?.message || "Failed to send OTP");
+      setError(err?.response?.data?.message || err?.message || "Could not verify mobile number");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  // Step 2: verify CNIC
+  const handleVerifyCnic = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading || !confirmationResult) return;
-
+    if (loading) return;
     setLoading(true);
     setError("");
-
     try {
-      await verifyFirebaseOtp(confirmationResult, otp.trim());
-      setFirebaseVerified(true);
-      setStep("reset");
+      const data = await attendeeForgotVerifyCnic(stepToken, cnic.trim());
+      setStepToken(data.step_token);
+      setStep("birth_month");
     } catch (err: any) {
-      setError(err?.message || "Invalid OTP. Please try again.");
+      setError(err?.response?.data?.message || err?.message || "CNIC verification failed");
     } finally {
       setLoading(false);
     }
   };
 
+  // Step 3: verify birth month
+  const handleVerifyBirthMonth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await attendeeForgotVerifyBirthMonth(stepToken, parseInt(birthMonth));
+      setResetToken(data.reset_token);
+      setStep("new_password");
+    } catch (err: any) {
+      setError(err?.response?.data?.message || err?.message || "Birth month verification failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 4: reset password
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
-
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     if (newPassword.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
-
     setLoading(true);
     setError("");
-
     try {
-      const resetPassword =
-        mode === "attendee" ? resetAttendeePassword : resetOrganizerPassword;
-      await resetPassword(whatsapp.trim(), otp.trim(), newPassword);
+      await attendeeForgotReset(resetToken, newPassword);
       setStep("success");
     } catch (err: any) {
       setError(err?.response?.data?.message || err?.message || "Failed to reset password");
@@ -116,18 +149,35 @@ export default function ForgotPasswordModal({
     }
   };
 
-  const handleClose = () => {
-    setStep("phone");
-    setWhatsapp("");
-    setOtp("");
-    setNewPassword("");
-    setConfirmPassword("");
-    setError("");
-    setConfirmationResult(null);
-    setFirebaseVerified(false);
-    clearRecaptcha();
-    onClose();
-  };
+  const inputClass =
+    "w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all";
+
+  const labelClass =
+    "block text-xs font-medium text-white/50 uppercase tracking-wider mb-2";
+
+  const primaryButton = (label: string, loadingLabel: string) => (
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300"
+      style={{
+        background: loading ? "rgba(255,255,255,0.05)" : accent,
+        color: loading ? "rgba(255,255,255,0.4)" : "#000",
+        boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
+        cursor: loading ? "not-allowed" : "pointer",
+        fontFamily: "var(--font-display)",
+      }}
+    >
+      {loading ? (
+        <span className="inline-flex items-center justify-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          {loadingLabel}
+        </span>
+      ) : (
+        label
+      )}
+    </button>
+  );
 
   return (
     <AnimatePresence>
@@ -155,34 +205,51 @@ export default function ForgotPasswordModal({
               <X size={20} />
             </button>
 
-            {/* Invisible reCAPTCHA container */}
-            <div id="forgot-recaptcha-container" />
+            {/* Step progress dots (steps 1–4 only, not success) */}
+            {step !== "success" && (
+              <div className="flex items-center gap-2 mb-6">
+                {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+                  const filled = i < progressStep;
+                  return (
+                    <div
+                      key={i}
+                      className="h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        flex: filled ? "1.5" : "1",
+                        background: filled ? accent : "rgba(255,255,255,0.12)",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
 
-            {step === "phone" && (
+            {/* ── Step 1: Mobile ── */}
+            {step === "mobile" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+                <h2
+                  className="text-xl font-semibold text-white mb-1"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
                   Forgot Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
-                  Enter your phone number to receive an SMS verification code
+                  Enter your registered mobile number to get started
                 </p>
 
-                <form onSubmit={handleSendOtp} className="space-y-4">
+                <form onSubmit={handleVerifyMobile} className="space-y-4">
                   <div>
-                    <label
-                      htmlFor="whatsapp"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      Phone Number
+                    <label htmlFor="mobile" className={labelClass} style={{ fontFamily: "var(--font-mono)" }}>
+                      Mobile Number
                     </label>
                     <input
-                      id="whatsapp"
+                      id="mobile"
                       type="tel"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
+                      value={mobile}
+                      onChange={(e) => setMobile(e.target.value)}
                       required
                       placeholder="+923001234567"
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                      className={inputClass}
                     />
                   </div>
 
@@ -192,56 +259,37 @@ export default function ForgotPasswordModal({
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300"
-                    style={{
-                      background: loading ? "rgba(255,255,255,0.05)" : accent,
-                      color: loading ? "rgba(255,255,255,0.4)" : "#000",
-                      boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
-                      cursor: loading ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {loading ? (
-                      <span className="inline-flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Sending code...
-                      </span>
-                    ) : (
-                      "Send Verification Code"
-                    )}
-                  </button>
+                  {primaryButton("Continue", "Verifying...")}
                 </form>
               </>
             )}
 
-            {step === "verify" && (
+            {/* ── Step 2: CNIC ── */}
+            {step === "cnic" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
-                  Verify Your Number
+                <h2
+                  className="text-xl font-semibold text-white mb-1"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Verify Your Identity
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
-                  Enter the 6-digit code sent to {whatsapp}
+                  Enter your CNIC number linked to your account
                 </p>
 
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <form onSubmit={handleVerifyCnic} className="space-y-4">
                   <div>
-                    <label
-                      htmlFor="otp"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
-                    >
-                      Verification Code
+                    <label htmlFor="cnic" className={labelClass} style={{ fontFamily: "var(--font-mono)" }}>
+                      CNIC Number
                     </label>
                     <input
-                      id="otp"
+                      id="cnic"
                       type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
+                      value={cnic}
+                      onChange={(e) => setCnic(e.target.value)}
                       required
-                      placeholder="Enter 6-digit code"
-                      maxLength={6}
-                      className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all text-center tracking-[0.5em] text-lg"
+                      placeholder="3520212345679"
+                      className={inputClass}
                     />
                   </div>
 
@@ -251,46 +299,82 @@ export default function ForgotPasswordModal({
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300"
-                    style={{
-                      background: loading ? "rgba(255,255,255,0.05)" : accent,
-                      color: loading ? "rgba(255,255,255,0.4)" : "#000",
-                      boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
-                      cursor: loading ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {loading ? (
-                      <span className="inline-flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Verifying...
-                      </span>
-                    ) : (
-                      "Verify Code"
-                    )}
-                  </button>
+                  {primaryButton("Continue", "Verifying...")}
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setStep("phone");
-                      setOtp("");
-                      setError("");
-                      clearRecaptcha();
-                    }}
+                    onClick={() => { setStep("mobile"); setError(""); }}
                     className="w-full py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
                   >
-                    Back to phone number
+                    Back
                   </button>
                 </form>
               </>
             )}
 
-            {step === "reset" && (
+            {/* ── Step 3: Birth Month ── */}
+            {step === "birth_month" && (
               <>
-                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+                <h2
+                  className="text-xl font-semibold text-white mb-1"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
+                  Verify Birth Month
+                </h2>
+                <p className="text-sm text-white/50 mb-6">
+                  Select the month you were born in
+                </p>
+
+                <form onSubmit={handleVerifyBirthMonth} className="space-y-4">
+                  <div>
+                    <label htmlFor="birthMonth" className={labelClass} style={{ fontFamily: "var(--font-mono)" }}>
+                      Birth Month
+                    </label>
+                    <select
+                      id="birthMonth"
+                      value={birthMonth}
+                      onChange={(e) => setBirthMonth(e.target.value)}
+                      required
+                      className={`${inputClass} appearance-none`}
+                      style={{ colorScheme: "dark" }}
+                    >
+                      <option value="" disabled className="bg-[#0a0a0a] text-white/50">
+                        Select month
+                      </option>
+                      {MONTHS.map((m) => (
+                        <option key={m.value} value={m.value} className="bg-[#0a0a0a] text-white">
+                          {m.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {error && (
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                      <p className="text-sm text-red-400 text-center">{error}</p>
+                    </div>
+                  )}
+
+                  {primaryButton("Continue", "Verifying...")}
+
+                  <button
+                    type="button"
+                    onClick={() => { setStep("cnic"); setError(""); }}
+                    className="w-full py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
+                  >
+                    Back
+                  </button>
+                </form>
+              </>
+            )}
+
+            {/* ── Step 4: New Password ── */}
+            {step === "new_password" && (
+              <>
+                <h2
+                  className="text-xl font-semibold text-white mb-1"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
                   Reset Password
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
@@ -299,10 +383,7 @@ export default function ForgotPasswordModal({
 
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div>
-                    <label
-                      htmlFor="newPassword"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
-                    >
+                    <label htmlFor="newPassword" className={labelClass} style={{ fontFamily: "var(--font-mono)" }}>
                       New Password
                     </label>
                     <div className="relative">
@@ -313,7 +394,7 @@ export default function ForgotPasswordModal({
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
                         placeholder="Create a new password"
-                        className="w-full px-4 py-3 pr-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                        className={`${inputClass} pr-12`}
                       />
                       <button
                         type="button"
@@ -327,10 +408,7 @@ export default function ForgotPasswordModal({
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="confirmPassword"
-                      className="block text-xs font-medium text-white/50 uppercase tracking-wider mb-2" style={{ fontFamily: "var(--font-mono)" }}
-                    >
+                    <label htmlFor="confirmPassword" className={labelClass} style={{ fontFamily: "var(--font-mono)" }}>
                       Confirm Password
                     </label>
                     <div className="relative">
@@ -341,7 +419,7 @@ export default function ForgotPasswordModal({
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         placeholder="Confirm your new password"
-                        className="w-full px-4 py-3 pr-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 focus:bg-white/[0.06] transition-all"
+                        className={`${inputClass} pr-12`}
                       />
                       <button
                         type="button"
@@ -360,42 +438,20 @@ export default function ForgotPasswordModal({
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 px-4 rounded-xl text-sm font-semibold transition-all duration-300"
-                    style={{
-                      background: loading ? "rgba(255,255,255,0.05)" : accent,
-                      color: loading ? "rgba(255,255,255,0.4)" : "#000",
-                      boxShadow: loading ? "none" : `0 12px 32px -12px ${accent}`,
-                      cursor: loading ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {loading ? (
-                      <span className="inline-flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Resetting...
-                      </span>
-                    ) : (
-                      "Reset Password"
-                    )}
-                  </button>
+                  {primaryButton("Reset Password", "Resetting...")}
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setStep("phone");
-                      setError("");
-                      clearRecaptcha();
-                    }}
+                    onClick={() => { setStep("birth_month"); setError(""); }}
                     className="w-full py-2 text-sm text-white/50 hover:text-white/70 transition-colors"
                   >
-                    Back to phone number
+                    Back
                   </button>
                 </form>
               </>
             )}
 
+            {/* ── Success ── */}
             {step === "success" && (
               <div className="text-center py-4">
                 <div
@@ -404,11 +460,14 @@ export default function ForgotPasswordModal({
                 >
                   <CheckCircle size={32} style={{ color: accent }} />
                 </div>
-                <h2 className="text-xl font-semibold text-white mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+                <h2
+                  className="text-xl font-semibold text-white mb-2"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                >
                   Password Reset
                 </h2>
                 <p className="text-sm text-white/50 mb-6">
-                  Your password has been successfully reset. You can now sign in with your new password.
+                  Your password has been successfully reset. You are now signed in.
                 </p>
                 <button
                   onClick={handleClose}
@@ -417,9 +476,10 @@ export default function ForgotPasswordModal({
                     background: accent,
                     color: "#000",
                     boxShadow: `0 12px 32px -12px ${accent}`,
+                    fontFamily: "var(--font-display)",
                   }}
                 >
-                  Back to Sign In
+                  Done
                 </button>
               </div>
             )}
