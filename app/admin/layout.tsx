@@ -31,13 +31,14 @@ export default function AdminLayout({
         const data = await adminAuthCheck();
         if (data.authenticated) {
           setAuthorized(true);
+          setLoading(false);
         } else {
           router.replace("/admin/login");
+          // Keep loading=true while navigating — the login page renders via
+          // the skipSidebar check which bypasses the loading gate entirely.
         }
       } catch {
         router.replace("/admin/login");
-      } finally {
-        setLoading(false);
       }
     };
     checkAuth();
