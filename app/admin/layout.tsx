@@ -17,7 +17,8 @@ export default function AdminLayout({
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const skipSidebar = NO_SIDEBAR_PATHS.includes(pathname);
+  const normalizedPathname = pathname.replace(/\/$/, "") || "/";
+  const skipSidebar = NO_SIDEBAR_PATHS.includes(normalizedPathname);
 
   useEffect(() => {
     if (skipSidebar) {
