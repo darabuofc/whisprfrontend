@@ -33,11 +33,11 @@ export default function AdminLayout({
           setAuthorized(true);
           setLoading(false);
         } else {
+          setLoading(false);
           router.replace("/admin/login");
-          // Keep loading=true while navigating — the login page renders via
-          // the skipSidebar check which bypasses the loading gate entirely.
         }
       } catch {
+        setLoading(false);
         router.replace("/admin/login");
       }
     };
