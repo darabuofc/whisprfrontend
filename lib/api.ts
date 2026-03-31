@@ -221,6 +221,29 @@ export async function resetAttendeePassword(whatsapp: string, otp: string, new_p
   return (await api.post("/attendees/forgot-password/reset", { whatsapp, otp, new_password })).data;
 }
 
+// New 4-step identity verification flow
+export async function attendeeForgotVerifyMobile(mobile: string) {
+  return (await api.post("/attendees/forgot-password/verify-mobile", { mobile })).data as { step_token: string };
+}
+
+export async function attendeeForgotVerifyCnic(step_token: string, cnic: string) {
+  return (await api.post("/attendees/forgot-password/verify-cnic", { step_token, cnic })).data as { step_token: string };
+}
+
+export async function attendeeForgotVerifyBirthMonth(step_token: string, birth_month: number) {
+  return (await api.post("/attendees/forgot-password/verify-birth-month", { step_token, birth_month })).data as { reset_token: string };
+}
+
+export async function attendeeForgotReset(reset_token: string, new_password: string) {
+  const res = (await api.post("/attendees/forgot-password/reset", { reset_token, new_password })).data;
+  if (res?.token) {
+    localStorage.setItem("whispr_token", res.token);
+    localStorage.setItem("token", res.token);
+    localStorage.setItem("whispr_role", "attendee");
+  }
+  return res;
+}
+
 export async function sendOrganizerForgotPasswordOtp(whatsapp: string) {
   return (await api.post("/organizers/forgot-password/send-otp", { whatsapp })).data;
 }
