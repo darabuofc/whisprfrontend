@@ -19,13 +19,13 @@ interface SidebarProps {
   onSignOut: () => void;
 }
 
-const NAV_ITEMS: { label: string; href: string; disabled?: boolean }[] = [
+const NAV_ITEMS: { label: string; href: string; disabled?: boolean; onboardingId?: string }[] = [
   { label: "Dashboard", href: "/organizers/dashboard" },
-  { label: "Events", href: "/organizers/events" },
+  { label: "Events", href: "/organizers/events", onboardingId: "sidebar-events" },
   { label: "Applications", href: "/organizers/applications" },
-  { label: "Followers", href: "/organizers/followers" },
-  { label: "Directory", href: "/organizers/directory" },
-  { label: "Settings", href: "/organizers/settings" },
+  { label: "Followers", href: "/organizers/followers", onboardingId: "sidebar-followers" },
+  { label: "Directory", href: "/organizers/directory", onboardingId: "sidebar-directory" },
+  { label: "Settings", href: "/organizers/settings", onboardingId: "sidebar-settings" },
 ];
 
 export default function Sidebar({ organizer, organization, onSignOut }: SidebarProps) {
@@ -71,6 +71,7 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
           return (
             <button
               key={item.href}
+              data-onboarding={item.onboardingId}
               onClick={() => {
                 if (!item.disabled) {
                   router.push(item.href);
@@ -99,6 +100,7 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
       {/* Organizer identity block */}
       <div className="mt-auto border-t border-[var(--border-subtle)] px-5 py-5">
         <button
+          data-onboarding="sidebar-organization"
           onClick={() => {
             router.push("/organizers/profile");
             setMobileOpen(false);

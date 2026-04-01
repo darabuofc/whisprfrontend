@@ -16,6 +16,9 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
+import { TooltipOverlay } from "@/onboarding/components/TooltipOverlay";
+import type { TooltipConfig } from "@/onboarding/context/types";
 
 // Floating orb background component - Purple themed for organizer
 const FloatingOrbs = () => (
@@ -243,6 +246,51 @@ export default function OrganizationSetupPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [existingOrg, setExistingOrg] = useState<Organization | null>(null);
+  const [s1TooltipIdx, setS1TooltipIdx] = useState(0);
+
+  // Onboarding context (may throw if not wrapped - gracefully handle)
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context - that's fine
+  }
+
+  const isOnboarding = onboarding?.isOnboarding && onboarding?.currentStage === "S1";
+
+  // S1 Tooltip sequence
+  const s1Tooltips: TooltipConfig[] = [
+    {
+      id: "s1_org_name",
+      targetSelector: "[data-onboarding='org-logo']",
+      title: "First impressions",
+      body: "Shows in the event feed and on tickets. Square format, dark backgrounds work best.",
+      placement: "right",
+      sequence: { group: "s1_org_setup", index: 1, total: 3 },
+      onDismiss: () => setS1TooltipIdx(1),
+    },
+    {
+      id: "s1_tagline",
+      targetSelector: "[data-onboarding='org-tagline']",
+      title: "One line. Make it count.",
+      body: "Tells attendees what your events are about. Think editorial, not corporate.",
+      placement: "right",
+      sequence: { group: "s1_org_setup", index: 2, total: 3 },
+      onDismiss: () => setS1TooltipIdx(2),
+    },
+    {
+      id: "s1_links",
+      targetSelector: "[data-onboarding='org-links']",
+      title: "Your digital footprint",
+      body: "Connect your website and Instagram so attendees can discover more about you.",
+      placement: "right",
+      sequence: { group: "s1_org_setup", index: 3, total: 3 },
+      onDismiss: () => setS1TooltipIdx(-1),
+    },
+  ];
+
+  const activeS1Tooltip =
+    isOnboarding && s1TooltipIdx >= 0 ? s1Tooltips[s1TooltipIdx] : null;
 
   const [formData, setFormData] = useState({
     logo: "",
@@ -362,7 +410,11 @@ export default function OrganizationSetupPage() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    // Advance onboarding from S1 to S2 if in onboarding mode
+    if (onboarding?.isOnboarding && onboarding?.currentStage === "S1") {
+      await onboarding.advanceStage("S1", "S2");
+    }
     router.push("/organizers/dashboard");
   };
 
@@ -478,6 +530,7 @@ export default function OrganizationSetupPage() {
               >
                 {/* Logo Preview */}
                 <motion.div
+                  data-onboarding="org-logo"
                   className="relative mx-auto w-32 h-32 rounded-2xl bg-white/[0.05] border-2 border-dashed border-white/20 flex items-center justify-center overflow-hidden group"
                   whileHover={{ scale: 1.02 }}
                 >
@@ -538,6 +591,7 @@ export default function OrganizationSetupPage() {
                 transition={pageTransition}
                 className="space-y-6"
               >
+                <div data-onboarding="org-tagline">
                 <OnboardingTextarea
                   label="Tagline"
                   placeholder="Creating unforgettable experiences..."
@@ -546,6 +600,7 @@ export default function OrganizationSetupPage() {
                   rows={3}
                   hint="A short description that captures your organization's essence"
                 />
+                </div>
 
                 <div className="flex gap-3 pt-4">
                   <PrimaryButton onClick={handleBack} variant="secondary">
@@ -574,6 +629,7 @@ export default function OrganizationSetupPage() {
                 exit="exit"
                 transition={pageTransition}
                 className="space-y-6"
+                data-onboarding="org-links"
               >
                 <OnboardingInput
                   label="Website"
@@ -686,6 +742,15 @@ export default function OrganizationSetupPage() {
           </motion.p>
         )}
       </div>
+      {/* S1 Onboarding tooltips */}
+      {isOnboarding && activeS1Tooltip && (
+        <TooltipOverlay
+          tooltip={activeS1Tooltip}
+          onDismiss={() => {
+            if (activeS1Tooltip?.onDismiss) activeS1Tooltip.onDismiss();
+          }}
+        />
+      )}
     </main>
   );
 }
