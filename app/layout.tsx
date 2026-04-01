@@ -12,8 +12,17 @@ import MaintenancePage from "@/components/MaintenancePage";
 const MAINTENANCE_MODE = false;
 
 export const metadata: Metadata = {
-  title: "Whispr",
-  description: "Gated ticketing and event management platform",
+  title: {
+    default: "Whispr — The architecture of a night out.",
+    template: "%s — Whispr",
+  },
+  description: "Discover curated nightlife events. Whispr is the gated ticketing platform for the underground scene.",
+  openGraph: {
+    title: "Whispr — The architecture of a night out.",
+    description: "Discover curated nightlife events. Whispr is the gated ticketing platform for the underground scene.",
+    siteName: "Whispr",
+    type: "website",
+  },
   icons: {
     icon: "https://whispr-app-storage.s3.eu-north-1.amazonaws.com/attendees/whisprlogo.png",
   },
@@ -30,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MaintenancePage />
         ) : (
           <>
-            <main className="relative z-10">{children}</main>
+            <div className="relative z-10">{children}</div>
             <Toaster
               theme="dark"
               position="bottom-right"
