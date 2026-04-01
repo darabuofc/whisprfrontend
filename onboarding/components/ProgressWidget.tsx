@@ -100,8 +100,7 @@ export function ProgressWidget() {
   return (
     <motion.div
       ref={widgetRef}
-      className="fixed z-[1000]"
-      style={{ bottom: 16, left: 16 }}
+      className="fixed z-[1000] left-4 lg:left-[236px] bottom-4"
       layout
     >
       <AnimatePresence mode="wait">
