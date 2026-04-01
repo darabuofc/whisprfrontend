@@ -12,6 +12,10 @@ import {
 import StatStrip from "@/components/organizer/StatStrip";
 import EventGrid from "@/components/organizer/EventGrid";
 import QuickActions from "@/components/organizer/QuickActions";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
+import { S2AttendeeTour } from "@/onboarding/stages/S2AttendeeTour";
+import { S3OrganizerTour } from "@/onboarding/stages/S3OrganizerTour";
+import { S4EventSetup } from "@/onboarding/stages/S4EventSetup";
 
 interface Event {
   id: string;
@@ -39,6 +43,14 @@ export default function OrganizerDashboard() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [creatingEvent, setCreatingEvent] = useState(false);
+
+  // Onboarding context
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,8 +102,25 @@ export default function OrganizerDashboard() {
   const draftEvents = events.filter((e) => e.fields.Status !== "published");
   const isPending = organizer?.approval_status === "Pending";
 
+  // Render simulation stages if onboarding is active
+  if (onboarding?.isSimulationActive) {
+    const stage = onboarding.currentStage;
+
+    if (stage === "S2") {
+      return <S2AttendeeTour />;
+    }
+
+    if (stage === "S3") {
+      return <S3OrganizerTour />;
+    }
+
+    if (stage === "S4") {
+      return <S4EventSetup orgName={organization?.name ?? undefined} />;
+    }
+  }
+
   return (
-    <div className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-20">
+    <div data-onboarding="dashboard-overview" className="max-w-[1100px] mx-auto px-6 sm:px-12 py-20 sm:py-20">
       {/* Pending Banner */}
       {isPending && (
         <div
@@ -135,6 +164,7 @@ export default function OrganizerDashboard() {
 
         {!isPending && (
           <button
+            data-onboarding="create-event-btn"
             onClick={handleCreateEvent}
             disabled={creatingEvent}
             className="self-start px-7 py-3.5 bg-[var(--copper)] text-[var(--bg-base)] text-[13px] uppercase tracking-[0.12em] rounded-md hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 font-medium"
