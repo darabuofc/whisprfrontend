@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import GoogleOAuthButton from "@/components/auth/GoogleOAuthButton";
+import { advanceOnboardingStage } from "@/lib/onboardingApi";
 
 export default function OrganizersAuth() {
   const router = useRouter();
@@ -47,8 +48,21 @@ export default function OrganizersAuth() {
         localStorage.setItem("whispr_role", "organizer");
         router.push("/organizers/dashboard");
       } else {
-        // after register → auto login or just flip back to signin
-        router.push("/organizers/thank-you"); // ✅ redirect to thank-you page
+        // Store token from register response so the advance call is authenticated
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("whispr_token", data.token);
+          localStorage.setItem("whispr_role", "organizer");
+        }
+
+        // Advance onboarding from S0 (Account Setup) → S1 (Organization Setup)
+        try {
+          await advanceOnboardingStage("S0", "S1");
+        } catch {
+          // Non-blocking: state will be picked up by OnboardingProvider on next load
+        }
+
+        router.push("/organizers/thank-you");
       }
     } catch (err: any) {
       setError(err.message);
