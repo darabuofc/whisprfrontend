@@ -467,7 +467,8 @@ export interface Organization {
 export async function getOrganization(): Promise<Organization | null> {
   try {
     const res = await api.get("/organizers/organization");
-    return res.data.organization || null;
+    const org = res.data.organization ?? res.data;
+    return org?.id ? org : null;
   } catch (err: any) {
     if (err.response?.status === 404) return null;
     throw err;
