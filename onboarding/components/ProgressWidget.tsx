@@ -12,11 +12,9 @@ export function ProgressWidget() {
     currentStage,
     completedStages,
     skippedStages,
-    tooltipState,
     navigateBack,
     skipStage,
     advanceStage,
-    batchDismissTooltips,
   } = useOnboarding();
 
   const [expanded, setExpanded] = useState(false);
@@ -84,16 +82,6 @@ export function ProgressWidget() {
         await advanceStage(stage, next);
       }
       stage = next;
-    }
-  }
-
-  // Handle dismiss all tooltips (S5)
-  async function handleDismissAllTooltips() {
-    const remaining = Object.entries(tooltipState)
-      .filter(([, dismissed]) => !dismissed)
-      .map(([id]) => id);
-    if (remaining.length > 0) {
-      await batchDismissTooltips(remaining);
     }
   }
 
@@ -267,16 +255,6 @@ export function ProgressWidget() {
                   );
                 })}
               </div>
-
-              {/* S5: Dismiss all tooltips */}
-              {currentStage === "S5" && (
-                <button
-                  onClick={handleDismissAllTooltips}
-                  className="mt-4 text-[12px] text-[#999] hover:text-[#D4A574] transition-colors w-full text-center"
-                >
-                  Dismiss all tooltips
-                </button>
-              )}
 
               {/* Skip to dashboard */}
               <button

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { advanceOnboardingStage } from "@/lib/onboardingApi";
 import {
   ArrowLeft,
   ArrowRight,
@@ -35,6 +36,17 @@ export default function ThankYou() {
 
     setAuthorized(true);
   }, [router]);
+
+  // S0→S1: Advance onboarding after signup success
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (authorized && !advancedRef.current) {
+      advancedRef.current = true;
+      advanceOnboardingStage("S0", "S1").catch(() => {
+        // Not in onboarding or already advanced — ignore
+      });
+    }
+  }, [authorized]);
 
   if (!authorized) return <div className="p-8 text-white">Checking access...</div>;
 

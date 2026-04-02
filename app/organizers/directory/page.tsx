@@ -1,12 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getDirectory } from "@/lib/api";
 import DirectoryTable from "@/components/organizer/DirectoryTable";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
 
 export default function DirectoryPage() {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context
+  }
+
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (
+      !advancedRef.current &&
+      onboarding?.isOnboarding &&
+      onboarding?.currentStage === "S3"
+    ) {
+      advancedRef.current = true;
+      onboarding.advanceStage("S3", "S4");
+    }
+  }, [onboarding]);
 
   useEffect(() => {
     const fetchCount = async () => {

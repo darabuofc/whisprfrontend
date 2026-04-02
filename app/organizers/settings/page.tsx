@@ -4,7 +4,6 @@ import { useState } from "react";
 import { RotateCcw } from "lucide-react";
 import AutoApproveRules from "@/components/organizer/AutoApproveRules";
 import { useOnboarding } from "@/onboarding/context/useOnboarding";
-import { trackOnboardingEvent } from "@/onboarding/analytics";
 
 export default function SettingsPage() {
   const [reinvoking, setReinvoking] = useState(false);
@@ -19,7 +18,6 @@ export default function SettingsPage() {
   async function handleReinvoke() {
     if (!onboarding || reinvoking) return;
     setReinvoking(true);
-    trackOnboardingEvent("onboarding_reinvoke_clicked", {});
     try {
       await onboarding.reinvoke();
     } finally {

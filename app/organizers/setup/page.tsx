@@ -17,8 +17,6 @@ import {
   X,
 } from "lucide-react";
 import { useOnboarding } from "@/onboarding/context/useOnboarding";
-import { TooltipOverlay } from "@/onboarding/components/TooltipOverlay";
-import type { TooltipConfig } from "@/onboarding/context/types";
 
 // Floating orb background component - Purple themed for organizer
 const FloatingOrbs = () => (
@@ -246,7 +244,6 @@ export default function OrganizationSetupPage() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [existingOrg, setExistingOrg] = useState<Organization | null>(null);
-  const [s1TooltipIdx, setS1TooltipIdx] = useState(0);
 
   // Onboarding context (may throw if not wrapped - gracefully handle)
   let onboarding: ReturnType<typeof useOnboarding> | null = null;
@@ -256,42 +253,6 @@ export default function OrganizationSetupPage() {
     // Not in onboarding context - that's fine
   }
 
-  const isOnboarding = onboarding?.isOnboarding && onboarding?.currentStage === "S1";
-
-  // S1 Tooltip sequence
-  const s1Tooltips: TooltipConfig[] = [
-    {
-      id: "s1_org_name",
-      targetSelector: "[data-onboarding='org-logo']",
-      title: "First impressions",
-      body: "Shows in the event feed and on tickets. Square format, dark backgrounds work best.",
-      placement: "right",
-      sequence: { group: "s1_org_setup", index: 1, total: 3 },
-      onDismiss: () => setS1TooltipIdx(1),
-    },
-    {
-      id: "s1_tagline",
-      targetSelector: "[data-onboarding='org-tagline']",
-      title: "One line. Make it count.",
-      body: "Tells attendees what your events are about. Think editorial, not corporate.",
-      placement: "right",
-      sequence: { group: "s1_org_setup", index: 2, total: 3 },
-      onDismiss: () => setS1TooltipIdx(2),
-    },
-    {
-      id: "s1_links",
-      targetSelector: "[data-onboarding='org-links']",
-      title: "Your digital footprint",
-      body: "Connect your website and Instagram so attendees can discover more about you.",
-      placement: "right",
-      sequence: { group: "s1_org_setup", index: 3, total: 3 },
-      onDismiss: () => setS1TooltipIdx(-1),
-    },
-  ];
-
-  const activeS1Tooltip =
-    isOnboarding && s1TooltipIdx >= 0 ? s1Tooltips[s1TooltipIdx] : null;
-
   const [formData, setFormData] = useState({
     logo: "",
     tagline: "",
@@ -300,8 +261,6 @@ export default function OrganizationSetupPage() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Step metadata - Purple themed icons
   const steps = [
     {
       icon: Image,
@@ -742,15 +701,6 @@ export default function OrganizationSetupPage() {
           </motion.p>
         )}
       </div>
-      {/* S1 Onboarding tooltips */}
-      {isOnboarding && activeS1Tooltip && (
-        <TooltipOverlay
-          tooltip={activeS1Tooltip}
-          onDismiss={() => {
-            if (activeS1Tooltip?.onDismiss) activeS1Tooltip.onDismiss();
-          }}
-        />
-      )}
     </main>
   );
 }

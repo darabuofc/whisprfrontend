@@ -1,12 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getOrganizerFollowers } from "@/lib/api";
 import FollowerList from "@/components/organizer/FollowerList";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
 
 export default function FollowersPage() {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context
+  }
+
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (
+      !advancedRef.current &&
+      onboarding?.isOnboarding &&
+      onboarding?.currentStage === "S2"
+    ) {
+      advancedRef.current = true;
+      onboarding.advanceStage("S2", "S3");
+    }
+  }, [onboarding]);
 
   useEffect(() => {
     const fetchCount = async () => {
