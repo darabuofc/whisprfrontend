@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Organization } from "@/lib/api";
 import NotificationBell from "./NotificationBell";
@@ -19,24 +19,48 @@ interface SidebarProps {
   onSignOut: () => void;
 }
 
-const NAV_ITEMS: { label: string; href: string; disabled?: boolean; onboardingId?: string }[] = [
+const NAV_ITEMS: { label: string; href: string; onboardingId?: string }[] = [
   { label: "Dashboard", href: "/organizers/dashboard" },
-  { label: "Events", href: "/organizers/events", onboardingId: "sidebar-events" },
-  { label: "Applications", href: "/organizers/applications" },
   { label: "Followers", href: "/organizers/followers", onboardingId: "sidebar-followers" },
   { label: "Directory", href: "/organizers/directory", onboardingId: "sidebar-directory" },
-  { label: "Settings", href: "/organizers/settings", onboardingId: "sidebar-settings" },
+  { label: "Configuration", href: "/organizers/settings", onboardingId: "sidebar-settings" },
 ];
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0].toUpperCase())
+    .join("");
+}
 
 export default function Sidebar({ organizer, organization, onSignOut }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const isActive = (href: string) => {
     if (href === "/organizers/dashboard") return pathname === "/organizers/dashboard";
     return pathname.startsWith(href);
   };
+
+  const initials = getInitials(organizer?.name || "O");
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [profileOpen]);
 
   const navContent = (
     <>
@@ -73,92 +97,96 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
               key={item.href}
               data-onboarding={item.onboardingId}
               onClick={() => {
-                if (!item.disabled) {
-                  router.push(item.href);
-                  setMobileOpen(false);
-                }
+                router.push(item.href);
+                setMobileOpen(false);
               }}
-              disabled={item.disabled}
               className={`w-full text-left px-5 py-[11px] text-[13px] uppercase tracking-[0.06em] transition-colors duration-200 block border-l-2 ${
                 active
                   ? "text-[var(--text-primary)] border-[var(--copper)] bg-[var(--copper-dim)]"
-                  : item.disabled
-                  ? "text-[var(--text-muted)] opacity-40 cursor-not-allowed border-transparent"
                   : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border-transparent"
               }`}
               style={{ fontFamily: "var(--font-body-org)" }}
             >
               {item.label}
-              {item.disabled && (
-                <span className="ml-2 text-[10px] opacity-60">Soon</span>
-              )}
             </button>
           );
         })}
       </nav>
 
-      {/* Organizer identity block */}
-      <div className="mt-auto border-t border-[var(--border-subtle)] px-5 py-5">
-        <button
-          data-onboarding="sidebar-organization"
-          onClick={() => {
-            router.push("/organizers/profile");
-            setMobileOpen(false);
-          }}
-          className="w-full text-left group"
-        >
-          <p
-            className="text-[13px] text-[var(--text-primary)] truncate font-medium"
-            style={{ fontFamily: "var(--font-body-org)" }}
+      {/* Profile Badge */}
+      <div className="mt-auto border-t border-[var(--border-subtle)] px-4 py-4" ref={profileRef}>
+        <div className="relative">
+          <button
+            data-onboarding="sidebar-organization"
+            onClick={() => setProfileOpen((prev) => !prev)}
+            className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-[var(--bg-hover)] transition-colors duration-200 group"
           >
-            {organizer?.name || "Organizer"}
-          </p>
-          <p
-            className="text-[12px] text-[var(--text-muted)] truncate mt-1"
-            style={{ fontFamily: "var(--font-body-org)" }}
-          >
-            {organization?.name || ""}
-          </p>
-          <div className="flex items-center gap-2 mt-2.5">
-            {organizer?.approval_status === "Approved" && (
-              <>
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--status-live)]" />
-                <span
-                  className="text-[11px] text-[var(--text-muted)] uppercase tracking-[0.06em]"
-                  style={{ fontFamily: "var(--font-mono-org)" }}
-                >
-                  Approved
-                </span>
-              </>
-            )}
-            {organizer?.approval_status === "Pending" && (
-              <>
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--status-warning)]" />
-                <span
-                  className="text-[11px] text-[var(--text-muted)] uppercase tracking-[0.06em]"
-                  style={{ fontFamily: "var(--font-mono-org)" }}
-                >
-                  Pending
-                </span>
-              </>
-            )}
-          </div>
-          <span
-            className="text-[11px] text-[var(--text-muted)] group-hover:text-[var(--copper)] transition-colors duration-200 mt-2 inline-block uppercase tracking-[0.06em]"
-            style={{ fontFamily: "var(--font-mono-org)" }}
-          >
-            Edit →
-          </span>
-        </button>
+            {/* Avatar */}
+            <div
+              className="w-8 h-8 rounded-full bg-[var(--copper-dim)] border border-[var(--copper)]/30 flex items-center justify-center flex-shrink-0"
+              style={{ fontFamily: "var(--font-mono-org)" }}
+            >
+              <span className="text-[11px] font-semibold text-[var(--copper)] tracking-wider">
+                {initials}
+              </span>
+            </div>
 
-        {/* Sign out */}
-        <button
-          onClick={onSignOut}
-          className="w-full text-left mt-4 text-[12px] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors duration-200 uppercase tracking-[0.06em]"
-          style={{ fontFamily: "var(--font-body-org)" }}
-        >
-          Sign Out
-        </button>
+            {/* Name */}
+            <div className="flex-1 min-w-0 text-left">
+              <p
+                className="text-[13px] text-[var(--text-primary)] truncate font-medium leading-tight"
+                style={{ fontFamily: "var(--font-body-org)" }}
+              >
+                {organizer?.name || "Organizer"}
+              </p>
+            </div>
+
+            {/* Chevron */}
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              className={`flex-shrink-0 text-[var(--text-muted)] transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+            >
+              <path
+                d="M3 5L7 9L11 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          {/* Dropdown */}
+          {profileOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-1 bg-[var(--bg-elevated,var(--bg-base))] border border-[var(--border-subtle)] rounded-lg shadow-lg overflow-hidden z-50">
+              <button
+                onClick={() => {
+                  router.push("/organizers/profile");
+                  setProfileOpen(false);
+                  setMobileOpen(false);
+                }}
+                className="w-full text-left px-4 py-3 text-[12px] uppercase tracking-[0.06em] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors duration-200"
+                style={{ fontFamily: "var(--font-body-org)" }}
+              >
+                Edit Profile
+              </button>
+              <div className="border-t border-[var(--border-subtle)]" />
+              <button
+                onClick={() => {
+                  setProfileOpen(false);
+                  onSignOut();
+                }}
+                className="w-full text-left px-4 py-3 text-[12px] uppercase tracking-[0.06em] text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors duration-200"
+                style={{ fontFamily: "var(--font-body-org)" }}
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
@@ -186,15 +214,15 @@ export default function Sidebar({ organizer, organization, onSignOut }: SidebarP
               className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors p-1"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              {mobileOpen ? (
-                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              ) : (
-                <>
-                  <path d="M3 6H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M3 10H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  <path d="M3 14H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </>
-              )}
+                {mobileOpen ? (
+                  <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                ) : (
+                  <>
+                    <path d="M3 6H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M3 10H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <path d="M3 14H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  </>
+                )}
               </svg>
             </button>
           </div>
