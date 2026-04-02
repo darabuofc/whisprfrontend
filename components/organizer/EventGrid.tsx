@@ -10,7 +10,7 @@ interface Event {
     Date?: string;
     Location?: string;
     Status?: string;
-    Cover?: string[];
+    Banner?: { url: string }[];
   };
 }
 
@@ -25,8 +25,8 @@ export default function EventGrid({ events, onCreateEvent }: EventGridProps) {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const filtered = events.filter((e) => {
-    if (filter === "published") return e.fields.Status === "published";
-    if (filter === "drafts") return e.fields.Status !== "published";
+    if (filter === "published") return e.fields.Status?.toLowerCase() === "published";
+    if (filter === "drafts") return e.fields.Status?.toLowerCase() !== "published";
     return true;
   });
 

@@ -19,7 +19,7 @@ interface Event {
     Date?: string;
     Location?: string;
     Status?: string;
-    Cover?: string[];
+    Banner?: { url: string }[];
   };
 }
 
@@ -75,8 +75,8 @@ export default function OrganizerDashboard() {
     );
   }
 
-  const publishedEvents = events.filter((e) => e.fields.Status === "published");
-  const draftEvents = events.filter((e) => e.fields.Status !== "published");
+  const publishedEvents = events.filter((e) => e.fields.Status?.toLowerCase() === "published");
+  const draftEvents = events.filter((e) => e.fields.Status?.toLowerCase() !== "published");
   const isPending = organizer?.approval_status === "Pending";
 
   return (

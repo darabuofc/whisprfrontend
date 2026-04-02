@@ -9,7 +9,7 @@ interface Event {
     Date?: string;
     Location?: string;
     Status?: string;
-    Cover?: string[];
+    Banner?: { url: string }[];
   };
 }
 
@@ -29,8 +29,8 @@ function formatDate(dateStr?: string): string {
 
 export default function EventCard({ event }: { event: Event }) {
   const router = useRouter();
-  const isPublished = event.fields.Status === "published";
-  const coverImage = event.fields.Cover?.[0];
+  const isPublished = event.fields.Status?.toLowerCase() === "published";
+  const coverImage = event.fields.Banner?.[0]?.url;
 
   return (
     <div
