@@ -118,8 +118,8 @@ export default function OrganizerLayout({
           onSignOut={handleSignOut}
         />
 
-        {/* Main content area */}
-        <main className="lg:ml-[220px] pt-[52px] lg:pt-0">
+        {/* Main content area — offset by collapsed sidebar width (56px) */}
+        <main className="lg:ml-[56px] pt-[52px] lg:pt-0">
           {children}
         </main>
 
