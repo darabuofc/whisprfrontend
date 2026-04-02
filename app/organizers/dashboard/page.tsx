@@ -160,7 +160,10 @@ export default function OrganizerDashboard() {
       <EventGrid events={events} onCreateEvent={handleCreateEvent} />
 
       {/* Quick Actions */}
-      <QuickActions />
+      <QuickActions
+        organization={organization}
+        onOrganizationSaved={() => getOrganization().then(setOrganization)}
+      />
     </div>
   );
 }
