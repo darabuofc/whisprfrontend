@@ -114,7 +114,7 @@ export function ProgressWidget() {
   return (
     <div
       ref={widgetRef}
-      className="fixed bottom-4 left-4 lg:left-[236px]"
+      className="fixed bottom-4 right-4"
       style={{ zIndex: 9990 }}
     >
       <AnimatePresence mode="wait">
