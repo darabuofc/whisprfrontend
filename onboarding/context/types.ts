@@ -30,42 +30,49 @@ export interface OnboardingContextValue {
 // Stage metadata for display
 export const STAGE_META: Record<
   Stage,
-  { label: string; description: string; skippable: boolean }
+  { label: string; description: string; skippable: boolean; route: string | null }
 > = {
   S0: {
     label: "Account Setup",
     description: "Create your organizer account",
     skippable: false,
+    route: null,
   },
   S1: {
     label: "Organization Setup",
     description: "Set up your brand identity",
     skippable: false,
+    route: "/organizers/organization",
   },
   S2: {
     label: "Followers",
     description: "View your followers",
     skippable: true,
+    route: "/organizers/followers",
   },
   S3: {
     label: "Directory",
     description: "Explore the organizer directory",
     skippable: true,
+    route: "/organizers/directory",
   },
   S4: {
     label: "Create Event",
     description: "Create your first event",
     skippable: true,
+    route: "/organizers/dashboard",
   },
   S5: {
     label: "Event Settings",
     description: "Review your event settings",
     skippable: true,
+    route: "/organizers/dashboard",
   },
   S6: {
     label: "Complete",
     description: "Onboarding complete",
     skippable: false,
+    route: null,
   },
 };
 
