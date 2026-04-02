@@ -34,6 +34,7 @@ import {
   Star,
   UserPlus,
   UserCheck,
+  History,
 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -99,6 +100,7 @@ function DashboardContent() {
   const [registrations, setRegistrations] = useState<RegistrationItem[]>([]);
   const [tickets, setTickets] = useState<TicketItem[]>([]);
 
+  const [showAllRegistrations, setShowAllRegistrations] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tabLoading, setTabLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -156,11 +158,8 @@ function DashboardContent() {
       setTabLoading(true);
       try {
         if (activeTab === "applications") {
-          setRegistrations(prev => prev.length === 0 ? [] : prev);
-          if (registrations.length === 0) {
-            const data = await getRegistrations();
-            setRegistrations(data);
-          }
+          const data = await getRegistrations(showAllRegistrations);
+          setRegistrations(data);
         }
         if (activeTab === "tickets") {
           setTickets(prev => prev.length === 0 ? [] : prev);
@@ -175,7 +174,7 @@ function DashboardContent() {
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  }, [activeTab, showAllRegistrations]);
 
   const handleCancelRegistration = useCallback(async (registrationId: string) => {
     // Optimistic update — capture snapshot for rollback
@@ -486,6 +485,8 @@ function DashboardContent() {
                   registrations={registrations}
                   highlightedId={highlightedAppId}
                   onCancel={handleCancelRegistration}
+                  showAll={showAllRegistrations}
+                  onToggleShowAll={() => setShowAllRegistrations(v => !v)}
                 />
               ) : (
                 <TicketsTab tickets={tickets} />
@@ -1093,10 +1094,14 @@ const ApplicationsTab = memo(function ApplicationsTab({
   registrations,
   highlightedId,
   onCancel,
+  showAll,
+  onToggleShowAll,
 }: {
   registrations: RegistrationItem[];
   highlightedId?: string | null;
   onCancel: (registrationId: string) => void;
+  showAll: boolean;
+  onToggleShowAll: () => void;
 }) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
@@ -1205,13 +1210,33 @@ const ApplicationsTab = memo(function ApplicationsTab({
 
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Applications</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold">Applications</h2>
+        <button
+          onClick={onToggleShowAll}
+          className="flex items-center gap-1.5 text-xs text-neutral-400 hover:text-neutral-200 transition-colors px-2.5 py-1 rounded-full border border-white/[0.08] hover:border-white/[0.15] bg-white/[0.03]"
+        >
+          {showAll ? (
+            <>
+              <X size={11} />
+              Active only
+            </>
+          ) : (
+            <>
+              <History size={11} />
+              View full history
+            </>
+          )}
+        </button>
+      </div>
 
       <div className="space-y-3">
         {registrations.map((r, index) => {
           const isHighlighted =
             highlightedId === r.registration_airtable_id ||
             highlightedId === r.registration_id;
+
+          const isInactive = showAll && r.event.is_active === false;
 
           return (
             <motion.div
@@ -1224,7 +1249,7 @@ const ApplicationsTab = memo(function ApplicationsTab({
                 isHighlighted
                   ? "border-[#D4A574]/40 ring-1 ring-[#D4A574]/20 shadow-none"
                   : "border-[#2C2C2E]"
-              }`}
+              } ${isInactive ? "opacity-50" : ""}`}
             >
               <div className="flex">
                 {/* Cover thumbnail */}
@@ -1242,9 +1267,16 @@ const ApplicationsTab = memo(function ApplicationsTab({
                   {/* Header row */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-sm mb-1 line-clamp-1">
-                        {r.event.name || "Untitled Event"}
-                      </h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-sm line-clamp-1">
+                          {r.event.name || "Untitled Event"}
+                        </h3>
+                        {isInactive && (
+                          <span className="flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-neutral-500 uppercase tracking-wide">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
                         <span className="flex items-center gap-1">
                           <Calendar size={11} />

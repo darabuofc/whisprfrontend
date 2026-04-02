@@ -154,6 +154,7 @@ export interface RegistrationItem {
     date: string | null;
     location: string | null;
     cover: string | null;
+    is_active?: boolean;
   };
 
   pass: {
@@ -381,8 +382,10 @@ export async function getAttendeeEvents(): Promise<ExploreEvent[]> {
 // REGISTRATIONS + TICKETS
 // ----------------------------------------------------------
 
-export async function getRegistrations(): Promise<RegistrationItem[]> {
-  const res = await api.get("/attendees/me/registrations");
+export async function getRegistrations(includeInactive = false): Promise<RegistrationItem[]> {
+  const res = await api.get("/attendees/me/registrations", {
+    params: includeInactive ? { include_inactive: true } : undefined,
+  });
   return res.data.registrations ?? [];
 }
 
