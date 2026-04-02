@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Image from "next/image";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
+import { advanceOnboardingStage } from "@/lib/onboardingApi";
 
 type AuthMode = "attendee" | "organizer";
 type AuthStage = "signin" | "register";
@@ -71,6 +72,14 @@ export default function AuthPage() {
       const token = data?.token;
       if (!token) throw new Error("Something went wrong. Please try again.");
       persistSession(token, "organizer");
+
+      // Advance onboarding from S0 (Account Setup) → S1 (Organization Setup)
+      try {
+        await advanceOnboardingStage("S0", "S1");
+      } catch {
+        // Non-blocking: state will be picked up by OnboardingProvider on next load
+      }
+
       router.replace(redirectParam || "/organizers/dashboard");
       return;
     }

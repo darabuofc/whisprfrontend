@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { persistOAuthSession, getPostAuthRedirect } from "@/lib/oauth";
+import { advanceOnboardingStage } from "@/lib/onboardingApi";
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,14 @@ function OrganizerCallbackContent() {
           // Store session
           persistOAuthSession(token, "organizer", userData);
 
+          // Advance onboarding from S0 (Account Setup) → S1 (Organization Setup)
+          // Silent fail for returning users who are already past S0
+          try {
+            await advanceOnboardingStage("S0", "S1");
+          } catch {
+            // Expected for returning users — OnboardingProvider handles current state
+          }
+
           // Redirect to dashboard
           const redirectUrl = getPostAuthRedirect("organizer", true);
           router.replace(redirectUrl);
@@ -65,6 +74,14 @@ function OrganizerCallbackContent() {
             } : null;
 
             persistOAuthSession(hashToken, "organizer", userData);
+
+            // Advance onboarding from S0 → S1 (silent fail for returning users)
+            try {
+              await advanceOnboardingStage("S0", "S1");
+            } catch {
+              // Expected for returning users
+            }
+
             const redirectUrl = getPostAuthRedirect("organizer", true);
             router.replace(redirectUrl);
             return;
