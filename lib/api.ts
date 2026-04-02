@@ -464,11 +464,36 @@ export interface Organization {
   city?: string;
 }
 
+function mapOrgResponse(org: any): Organization {
+  if (!org?.fields) return org;
+  const fields = org.fields;
+  const logoArr = fields["Logo"];
+  const logoUrl =
+    Array.isArray(logoArr) && logoArr.length > 0
+      ? logoArr[0].url ?? logoArr[0]
+      : undefined;
+  return {
+    id: org.id,
+    name: fields["Organization Name"],
+    logo: logoUrl,
+    tagline: fields["Tagline"],
+    website: fields["Website"],
+    instagram_handle: fields["Instagram Handle"],
+    follower_count: fields["follower_count"],
+    description: fields["Description"],
+    category: fields["Category"],
+    city: fields["City"],
+  };
+}
+
 export async function getOrganization(): Promise<Organization | null> {
   try {
     const res = await api.get("/organizers/organization");
     const org = res.data.organization ?? res.data;
-    return org && typeof org === "object" && Object.keys(org).length > 0 ? org : null;
+    if (!org || typeof org !== "object" || Object.keys(org).length === 0) {
+      return null;
+    }
+    return mapOrgResponse(org);
   } catch (err: any) {
     if (err.response?.status === 404) return null;
     throw err;
@@ -486,7 +511,7 @@ export async function updateOrganization(data: {
   city?: string;
 }): Promise<Organization> {
   const res = await api.put("/organizers/organization", data);
-  return res.data.organization;
+  return mapOrgResponse(res.data.organization);
 }
 
 // ----------------------------------------------------------
