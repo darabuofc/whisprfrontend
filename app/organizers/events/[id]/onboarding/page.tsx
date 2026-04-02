@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { advanceOnboardingStage } from "@/lib/onboardingApi";
+import { createDraftEvent } from "@/lib/api";
 
 interface Pass {
   type: string;
@@ -732,6 +733,7 @@ export default function EventOnboardingPage() {
   const { id } = useParams();
   const router = useRouter();
 
+  const [eventId, setEventId] = useState<string>(Array.isArray(id) ? id[0] : id as string);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [authorized, setAuthorized] = useState(false);
@@ -786,6 +788,15 @@ export default function EventOnboardingPage() {
           return;
         }
 
+        // If this is a new event, create the draft now (after the user has provided details)
+        let currentEventId = eventId;
+        if (eventId === "new") {
+          const draft = await createDraftEvent();
+          currentEventId = draft.id;
+          setEventId(currentEventId);
+          router.replace(`/organizers/events/${currentEventId}/onboarding`);
+        }
+
         // Use FormData to support banner image upload
         const formData = new FormData();
         formData.append("name", eventData.name);
@@ -794,14 +805,14 @@ export default function EventOnboardingPage() {
           formData.append("banner", bannerFile);
         }
 
-        await postWithAuth(`/organizers/events/${id}/update`, formData, true);
+        await postWithAuth(`/organizers/events/${currentEventId}/update`, formData, true);
         setStep(2);
       } else if (step === 2) {
         if (!eventData.date || !eventData.location) {
           setError("Please provide event date and location.");
           return;
         }
-        await postWithAuth(`/organizers/events/${id}/update`, {
+        await postWithAuth(`/organizers/events/${eventId}/update`, {
           date: eventData.date,
           location: eventData.location,
         });
@@ -827,22 +838,22 @@ export default function EventOnboardingPage() {
         }));
 
         // Save pass types
-        await postWithAuth(`/organizers/events/${id}/pass-types`, { passes: passesWithQuantity });
+        await postWithAuth(`/organizers/events/${eventId}/pass-types`, { passes: passesWithQuantity });
 
         // Save payment settings
-        await postWithAuth(`/organizers/events/${id}/update`, {
+        await postWithAuth(`/organizers/events/${eventId}/update`, {
           payment_mode: paymentMode,
           ...(paymentMode === "manual" && { manual_payment_account: manualPaymentAccount.trim() }),
         });
 
         setStep(4);
       } else if (step === 4) {
-        await postWithAuth(`/organizers/events/${id}/publish`);
+        await postWithAuth(`/organizers/events/${eventId}/publish`);
         // S4→S5: Advance onboarding after event creation
         advanceOnboardingStage("S4", "S5").catch(() => {});
         setShowConfetti(true);
         setTimeout(() => {
-          router.push(`/organizers/events/${id}`);
+          router.push(`/organizers/events/${eventId}`);
         }, 2000);
       }
     } catch (err) {
