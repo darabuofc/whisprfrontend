@@ -100,7 +100,8 @@ export function ProgressWidget() {
   return (
     <div
       ref={widgetRef}
-      className="fixed z-[1000] bottom-4 left-4 lg:left-[236px]"
+      className="fixed bottom-4 left-4 lg:left-[236px]"
+      style={{ zIndex: 9990 }}
     >
       <AnimatePresence mode="wait">
         {!expanded ? (
