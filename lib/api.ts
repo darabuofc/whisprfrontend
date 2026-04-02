@@ -468,7 +468,7 @@ export async function getOrganization(): Promise<Organization | null> {
   try {
     const res = await api.get("/organizers/organization");
     const org = res.data.organization ?? res.data;
-    return org?.id ? org : null;
+    return org && typeof org === "object" && Object.keys(org).length > 0 ? org : null;
   } catch (err: any) {
     if (err.response?.status === 404) return null;
     throw err;
