@@ -20,6 +20,7 @@ export function ProgressWidget() {
 
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+  const [justCompletedStage, setJustCompletedStage] = useState<Stage | null>(null);
   const widgetRef = useRef<HTMLDivElement>(null);
 
   // Close on outside click
@@ -36,6 +37,29 @@ export function ProgressWidget() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [expanded]);
+
+  // Auto-expand + track just-completed stage on stage advance
+  const prevStageRef = useRef<Stage | null | undefined>(undefined);
+  useEffect(() => {
+    if (prevStageRef.current === undefined) {
+      // Initial fetch — record but don't expand
+      prevStageRef.current = currentStage;
+      return;
+    }
+    if (currentStage !== prevStageRef.current) {
+      const prev = prevStageRef.current;
+      prevStageRef.current = currentStage;
+      if (prev) setJustCompletedStage(prev);
+      setExpanded(true);
+    }
+  }, [currentStage]);
+
+  // Clear justCompletedStage after animation finishes
+  useEffect(() => {
+    if (!justCompletedStage) return;
+    const timer = setTimeout(() => setJustCompletedStage(null), 1500);
+    return () => clearTimeout(timer);
+  }, [justCompletedStage]);
 
   if (!currentStage || currentStage === "S6") return null;
 
@@ -177,16 +201,17 @@ export function ProgressWidget() {
 
               {/* Stage list */}
               <div className="space-y-1">
-                {displayStages.map((stage) => {
+                {displayStages.map((stage, idx) => {
                   const meta = STAGE_META[stage];
                   const isCompleted = completedStages.includes(stage);
                   const isSkipped = skippedStages.includes(stage);
                   const isCurrent = stage === currentStage;
                   const isPending =
                     !isCompleted && !isSkipped && !isCurrent;
+                  const isJustCompleted = stage === justCompletedStage;
 
                   return (
-                    <div
+                    <motion.div
                       key={stage}
                       className={`flex items-center justify-between rounded-md px-3 py-2.5 transition-colors ${
                         isCurrent
@@ -195,6 +220,25 @@ export function ProgressWidget() {
                           ? "cursor-pointer hover:bg-white/5"
                           : "opacity-40"
                       }`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{
+                        opacity: isPending ? 0.4 : 1,
+                        y: 0,
+                        ...(isJustCompleted
+                          ? {
+                              boxShadow: [
+                                "0 0 0 1px rgba(212,165,116,0.6), 0 0 14px rgba(212,165,116,0.3)",
+                                "0 0 0 1px rgba(212,165,116,0.2), 0 0 6px rgba(212,165,116,0.1)",
+                                "0 0 0 0px rgba(212,165,116,0)",
+                              ],
+                            }
+                          : {}),
+                      }}
+                      transition={{
+                        opacity: { duration: 0.2, ease: "easeOut", delay: idx * 0.05 },
+                        y: { duration: 0.2, ease: "easeOut", delay: idx * 0.05 },
+                        boxShadow: { duration: 1.2, ease: "easeOut", delay: 0.1 },
+                      }}
                       onClick={() => {
                         const route = STAGE_META[stage].route;
                         if (!route) return;
@@ -211,7 +255,7 @@ export function ProgressWidget() {
                     >
                       <div className="flex items-center gap-3">
                         {/* Status icon */}
-                        <div
+                        <motion.div
                           className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
                             isCompleted
                               ? "bg-[#D4A574] text-[#111]"
@@ -221,10 +265,17 @@ export function ProgressWidget() {
                               ? "border-2 border-[#D4A574] text-[#D4A574]"
                               : "border border-[#444] text-[#444]"
                           }`}
+                          initial={isJustCompleted ? { scale: 0 } : false}
+                          animate={{ scale: 1 }}
+                          transition={
+                            isJustCompleted
+                              ? { type: "spring", stiffness: 400, damping: 15, delay: 0.15 }
+                              : {}
+                          }
                         >
                           {isCompleted && <Check className="w-3 h-3" />}
                           {isSkipped && <SkipForward className="w-3 h-3" />}
-                        </div>
+                        </motion.div>
 
                         <div>
                           <p
@@ -260,7 +311,7 @@ export function ProgressWidget() {
                           Skip
                         </button>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
