@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateOrganization, Organization } from "@/lib/api";
 
 interface OrganizationFormProps {
@@ -18,6 +18,21 @@ export default function OrganizationForm({ initialData }: OrganizationFormProps)
     category: initialData?.category || "",
     city: initialData?.city || "",
   });
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        name: initialData.name || "",
+        tagline: initialData.tagline || "",
+        description: initialData.description || "",
+        logo: initialData.logo || "",
+        website: initialData.website || "",
+        instagram_handle: initialData.instagram_handle || "",
+        category: initialData.category || "",
+        city: initialData.city || "",
+      });
+    }
+  }, [initialData]);
+
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
