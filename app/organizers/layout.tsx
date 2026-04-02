@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { getOrganizer, getOrganization, Organization } from "@/lib/api";
 import Sidebar from "@/components/organizer/Sidebar";
 import { OnboardingProvider } from "@/onboarding/context/OnboardingProvider";
-import { S5DashboardOrientation } from "@/onboarding/stages/S5DashboardOrientation";
 
 export interface Organizer {
   id: string;
@@ -124,8 +123,6 @@ export default function OrganizerLayout({
           {children}
         </main>
 
-        {/* S5 Dashboard Orientation tooltips */}
-        <S5DashboardOrientation />
       </div>
     </OnboardingProvider>
   );

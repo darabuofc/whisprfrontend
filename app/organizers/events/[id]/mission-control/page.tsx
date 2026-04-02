@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
 import EventHeader from "./components/EventHeader";
 import HealthStrip from "./components/HealthStrip";
 import Tabs from "./components/Tabs";
@@ -145,6 +146,26 @@ export default function MissionControlPage() {
   });
   const [ticketsLoading, setTicketsLoading] = useState(false);
   const [ticketStatusFilter, setTicketStatusFilter] = useState<string[]>([]);
+
+  // S5→S6: Advance onboarding when event settings screen is viewed
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context
+  }
+
+  const advancedRef = useRef(false);
+  useEffect(() => {
+    if (
+      !advancedRef.current &&
+      onboarding?.isOnboarding &&
+      onboarding?.currentStage === "S5"
+    ) {
+      advancedRef.current = true;
+      onboarding.advanceStage("S5", "S6");
+    }
+  }, [onboarding]);
   const [ticketPassTypeFilter, setTicketPassTypeFilter] = useState<string[]>([]);
   const [ticketSearchQuery, setTicketSearchQuery] = useState<string>("");
   const [passTypes, setPassTypes] = useState<{ id: string; name: string }[]>([]);

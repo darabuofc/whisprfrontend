@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { advanceOnboardingStage } from "@/lib/onboardingApi";
 
 interface Pass {
   type: string;
@@ -837,6 +838,8 @@ export default function EventOnboardingPage() {
         setStep(4);
       } else if (step === 4) {
         await postWithAuth(`/organizers/events/${id}/publish`);
+        // S4→S5: Advance onboarding after event creation
+        advanceOnboardingStage("S4", "S5").catch(() => {});
         setShowConfetti(true);
         setTimeout(() => {
           router.push(`/organizers/events/${id}`);
