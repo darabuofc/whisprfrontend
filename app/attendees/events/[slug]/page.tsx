@@ -9,7 +9,6 @@ import {
   Calendar,
   MapPin,
   CheckCircle2,
-  Copy,
   Share2,
   Ticket,
   Instagram,
@@ -21,8 +20,6 @@ import {
   X,
   AlertTriangle,
   XCircle,
-  Check,
-  UserPlus,
   Loader2,
 } from "lucide-react";
 import {
@@ -33,12 +30,11 @@ import {
   validateDiscountCode,
   getEventRegistrationQuestions,
   cancelRegistration,
-  addTicketGuest,
   type DiscountValidationResult,
   type RegistrationQuestion,
 } from "@/lib/api";
 import { extractEventIdFromSlug } from "@/lib/utils";
-import CoupleTicketFields from "@/components/organizer/CoupleTicketFields";
+import AddPlusOneSection from "@/components/attendees/AddPlusOneSection";
 import { toast } from "sonner";
 
 interface EventOrganization {
@@ -106,7 +102,6 @@ export default function EventDetailPage() {
   // Cancel & copy state for registration card
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [cancelling, setCancelling] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
 
   // Discount code state
   const [discountCode, setDiscountCode] = useState("");
@@ -119,10 +114,6 @@ export default function EventDetailPage() {
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({});
   const [questionErrors, setQuestionErrors] = useState<Record<string, string>>({});
 
-  // Manual guest entry state
-  const [showGuestModal, setShowGuestModal] = useState(false);
-  const [guestData, setGuestData] = useState({ name: "", phone: "", email: "" });
-  const [submittingGuest, setSubmittingGuest] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -133,17 +124,6 @@ export default function EventDetailPage() {
   const handleSignInRedirect = () => {
     const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
     router.push(`/auth?role=attendee&redirect=${encodeURIComponent(currentPath)}`);
-  };
-
-  const handleCopyRegistrationCode = async () => {
-    if (!event?.registration?.registration_id) return;
-    try {
-      await navigator.clipboard.writeText(event.registration.registration_id);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 2000);
-    } catch {
-      // fallback
-    }
   };
 
   const handleShareRegistration = async () => {
@@ -184,31 +164,6 @@ export default function EventDetailPage() {
     } finally {
       setCancelling(false);
       setCancelConfirmOpen(false);
-    }
-  };
-
-  const handleAddGuest = async () => {
-    if (!event?.registration?.registration_id) return;
-    if (!guestData.name.trim() || !guestData.phone.trim()) {
-      toast.error("Name and phone are required");
-      return;
-    }
-    setSubmittingGuest(true);
-    try {
-      await addTicketGuest(event.registration.registration_id, {
-        name: guestData.name.trim(),
-        phone: guestData.phone.trim(),
-        email: guestData.email.trim() || undefined,
-      });
-      setShowGuestModal(false);
-      setGuestData({ name: "", phone: "", email: "" });
-      toast.success("Guest added successfully");
-      const data = await getEventById(eventId);
-      setEvent(data);
-    } catch {
-      toast.error("Failed to add guest. Please try again.");
-    } finally {
-      setSubmittingGuest(false);
     }
   };
 
@@ -849,89 +804,19 @@ export default function EventDetailPage() {
                           Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
                         </p>
                       )}
-                      {event.registration.is_complete === false && (event.registration.remaining_slots ?? 0) > 0 && (
-                        <button
-                          onClick={() => setShowGuestModal(true)}
-                          className="w-full flex items-center justify-center gap-2 mt-1 py-2.5 rounded-xl bg-[#D4A574]/[0.08] hover:bg-[#D4A574]/[0.14] border border-[#D4A574]/20 hover:border-[#D4A574]/30 text-xs font-medium text-[#D4A574] transition-all duration-300"
-                        >
-                          <UserPlus size={13} />
-                          Add your +1 manually
-                        </button>
-                      )}
                     </div>
                   )}
 
-                  {/* Registration code */}
-                  {event.registration.registration_id && (
-                    <div className="flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg bg-black/30 border border-[#D4A574]/[0.08] mb-3">
-                      <div className="min-w-0">
-                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
-                          Code
-                        </span>
-                        <p className="font-mono text-xs text-[#D4A574] font-medium truncate">
-                          {event.registration.registration_id}
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleCopyRegistrationCode}
-                        className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors flex-shrink-0"
-                        title="Copy code"
-                      >
-                        {codeCopied ? (
-                          <Check size={13} className="text-[#D4A574]" />
-                        ) : (
-                          <Copy size={13} className="text-neutral-500" />
-                        )}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* "or" divider when both manual entry and share code are available */}
-                  {event.registration.is_complete === false && event.registration.join_code && event.registration.pass && event.registration.pass.max_members > 1 && (
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex-1 h-px bg-white/[0.06]" />
-                      <span className="text-[10px] uppercase tracking-wider text-neutral-600">or share a code</span>
-                      <div className="flex-1 h-px bg-white/[0.06]" />
-                    </div>
-                  )}
-
-                  {/* Share Code section for couple/group passes */}
-                  {event.registration.join_code && event.registration.pass && event.registration.pass.max_members > 1 && (
-                    <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3 space-y-3 mb-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-neutral-500" style={{ fontFamily: "var(--font-mono)" }}>Share Code</p>
-                          <p
-                            onClick={() =>
-                              navigator.clipboard.writeText(event.registration?.join_code || "")
-                            }
-                            className="font-mono text-lg text-[#D4A574] cursor-pointer hover:text-white transition"
-                          >
-                            {event.registration.join_code}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() =>
-                            navigator.clipboard.writeText(event.registration?.join_code || "")
-                          }
-                          className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors"
-                        >
-                          <Copy size={13} className="text-neutral-500" />
-                        </button>
-                      </div>
-                      <button
-                        onClick={() =>
-                          window.open(
-                            `https://wa.me/?text=Join%20my%20Whispr%20event%20group%20with%20this%20code:%20${event.registration?.join_code ?? ""}`,
-                            "_blank"
-                          )
-                        }
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 px-4 py-2 text-xs font-medium text-[#D4A574] transition-all duration-300"
-                      >
-                        <Share2 size={12} />
-                        Invite via WhatsApp
-                      </button>
-                    </div>
+                  {/* Add your +1 section */}
+                  {event.registration.is_complete === false && (event.registration.remaining_slots ?? 0) > 0 && event.registration.join_code && (
+                    <AddPlusOneSection
+                      registrationId={event.registration.registration_id!}
+                      joinCode={event.registration.join_code}
+                      onGuestAdded={async () => {
+                        const data = await getEventById(eventId);
+                        setEvent(data);
+                      }}
+                    />
                   )}
 
                   {/* Action buttons */}
@@ -1000,80 +885,6 @@ export default function EventDetailPage() {
                 </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Add Guest Modal */}
-        <AnimatePresence>
-          {showGuestModal && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
-                onClick={() => !submittingGuest && setShowGuestModal(false)}
-              />
-              <motion.div
-                initial={{ opacity: 0, y: 60 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 60 }}
-                transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-                className="fixed inset-x-0 bottom-0 z-50 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-4"
-              >
-                <div className="w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl border border-white/[0.08] bg-[#0A0A0A] shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.8)]">
-                  {/* Handle bar (mobile) */}
-                  <div className="flex justify-center pt-3 sm:hidden">
-                    <div className="w-8 h-1 rounded-full bg-white/20" />
-                  </div>
-
-                  {/* Header */}
-                  <div className="flex items-center justify-between px-5 pt-4 pb-1">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#D4A574]/10 flex items-center justify-center">
-                        <UserPlus size={15} className="text-[#D4A574]" />
-                      </div>
-                      <h3 className="text-base font-semibold">Add Your +1</h3>
-                    </div>
-                    <button
-                      onClick={() => !submittingGuest && setShowGuestModal(false)}
-                      className="p-1.5 rounded-full hover:bg-white/[0.06] transition-colors"
-                    >
-                      <X size={16} className="text-neutral-500" />
-                    </button>
-                  </div>
-
-                  <p className="px-5 text-[13px] text-neutral-500 mb-4">
-                    Enter your partner&apos;s details below. They don&apos;t need a Whispr account.
-                  </p>
-
-                  {/* Form */}
-                  <div className="px-5 pb-2">
-                    <CoupleTicketFields
-                      onChange={(data) => setGuestData(data)}
-                    />
-                  </div>
-
-                  {/* Submit */}
-                  <div className="px-5 pt-3 pb-6">
-                    <button
-                      onClick={handleAddGuest}
-                      disabled={submittingGuest || !guestData.name.trim() || !guestData.phone.trim()}
-                      className="w-full py-3.5 rounded-2xl bg-[#D4A574] hover:bg-[#B8785C] text-[#0A0A0A] text-sm font-semibold transition-all duration-300 disabled:opacity-40 disabled:hover:bg-[#D4A574] flex items-center justify-center gap-2"
-                    >
-                      {submittingGuest ? (
-                        <>
-                          <Loader2 size={15} className="animate-spin" />
-                          Adding...
-                        </>
-                      ) : (
-                        "Confirm Guest"
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </>
           )}
         </AnimatePresence>
 

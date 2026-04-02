@@ -1187,6 +1187,37 @@ export async function addTicketGuest(
 }
 
 // ═══════════════════════════════════════════════════════════
+// ATTENDEE SEARCH & PARTNER INVITE
+// ═══════════════════════════════════════════════════════════
+
+export interface AttendeeSearchResult {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+}
+
+export async function searchAttendee(query: string): Promise<AttendeeSearchResult> {
+  const res = await api.get("/attendees/search", { params: { q: query } });
+  return res.data;
+}
+
+export async function invitePartner(
+  registrationId: string,
+  data: { attendee_id: string }
+): Promise<any> {
+  const res = await api.post(`/registrations/${registrationId}/invite-partner`, data);
+  return res.data;
+}
+
+export async function invitePartnerManual(
+  registrationId: string,
+  data: { manual: true; name: string; phone: string; cnic: string; email?: string }
+): Promise<any> {
+  const res = await api.post(`/registrations/${registrationId}/invite-partner`, data);
+  return res.data;
+}
+
+// ═══════════════════════════════════════════════════════════
 // NOTIFICATIONS
 // ═══════════════════════════════════════════════════════════
 
