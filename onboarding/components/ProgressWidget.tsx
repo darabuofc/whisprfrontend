@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp, ChevronDown, Check, SkipForward, X } from "lucide-react";
 import { useOnboarding } from "../context/useOnboarding";
@@ -17,6 +18,7 @@ export function ProgressWidget() {
     advanceStage,
   } = useOnboarding();
 
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
 
@@ -188,14 +190,21 @@ export function ProgressWidget() {
                       key={stage}
                       className={`flex items-center justify-between rounded-md px-3 py-2.5 transition-colors ${
                         isCurrent
-                          ? "bg-[#D4A574]/10 border border-[#D4A574]/30"
+                          ? "bg-[#D4A574]/10 border border-[#D4A574]/30 cursor-pointer hover:bg-[#D4A574]/15"
                           : isCompleted || isSkipped
                           ? "cursor-pointer hover:bg-white/5"
                           : "opacity-40"
                       }`}
                       onClick={() => {
+                        const route = STAGE_META[stage].route;
+                        if (!route) return;
+
                         if ((isCompleted || isSkipped) && !isCurrent) {
                           navigateBack(stage);
+                        }
+
+                        if (!isPending) {
+                          router.push(route);
                           setExpanded(false);
                         }
                       }}
