@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getEvents,
-  createDraftEvent,
   getOrganizer,
   getOrganization,
   Organization,
@@ -38,8 +37,6 @@ export default function OrganizerDashboard() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creatingEvent, setCreatingEvent] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,17 +57,9 @@ export default function OrganizerDashboard() {
     fetchData();
   }, []);
 
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = () => {
     if (organizer?.approval_status === "Pending") return;
-    try {
-      setCreatingEvent(true);
-      const draft = await createDraftEvent();
-      window.location.href = `/organizers/events/${draft.id}/onboarding`;
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setCreatingEvent(false);
-    }
+    router.push("/organizers/events/new/onboarding");
   };
 
   if (loading) {
@@ -137,11 +126,10 @@ export default function OrganizerDashboard() {
           <button
             data-onboarding="create-event-btn"
             onClick={handleCreateEvent}
-            disabled={creatingEvent}
-            className="self-start px-7 py-3.5 bg-[var(--copper)] text-[var(--bg-base)] text-[13px] uppercase tracking-[0.12em] rounded-md hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 font-medium"
+            className="self-start px-7 py-3.5 bg-[var(--copper)] text-[var(--bg-base)] text-[13px] uppercase tracking-[0.12em] rounded-md hover:opacity-90 transition-opacity duration-200 font-medium"
             style={{ fontFamily: "var(--font-display-org)" }}
           >
-            {creatingEvent ? "Creating..." : "+ New Event"}
+            + New Event
           </button>
         )}
       </div>
