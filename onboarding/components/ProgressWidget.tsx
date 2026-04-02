@@ -98,10 +98,9 @@ export function ProgressWidget() {
   }
 
   return (
-    <motion.div
+    <div
       ref={widgetRef}
-      className="fixed z-[1000] left-4 lg:left-[236px] bottom-4"
-      layout
+      className="fixed z-[1000] bottom-4 left-4 lg:left-[236px]"
     >
       <AnimatePresence mode="wait">
         {!expanded ? (
@@ -289,6 +288,6 @@ export function ProgressWidget() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
