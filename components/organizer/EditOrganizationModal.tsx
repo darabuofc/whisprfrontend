@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { updateOrganization, Organization } from "@/lib/api";
 import { toast } from "sonner";
+import { useOnboarding } from "@/onboarding/context/useOnboarding";
 
 interface EditOrganizationModalProps {
   isOpen: boolean;
@@ -31,6 +32,13 @@ export default function EditOrganizationModal({
   });
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  let onboarding: ReturnType<typeof useOnboarding> | null = null;
+  try {
+    onboarding = useOnboarding();
+  } catch {
+    // Not in onboarding context - that's fine
+  }
 
   // Reset form when modal opens
   useEffect(() => {
@@ -59,6 +67,13 @@ export default function EditOrganizationModal({
     setSaving(true);
     try {
       await updateOrganization(form);
+      if (onboarding?.isOnboarding && onboarding?.currentStage === "S1") {
+        try {
+          await onboarding.advanceStage("S1", "S2");
+        } catch {
+          // Non-blocking
+        }
+      }
       toast.success("Organization saved");
       onSaved?.();
       onClose();
