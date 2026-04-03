@@ -35,6 +35,7 @@ import {
 } from "@/lib/api";
 import { extractEventIdFromSlug } from "@/lib/utils";
 import AddPlusOneSection from "@/components/attendees/AddPlusOneSection";
+import PaymentSection from "@/components/attendees/PaymentSection";
 import { toast } from "sonner";
 
 interface EventOrganization {
@@ -845,6 +846,55 @@ export default function EventDetailPage() {
             </div>
           </motion.section>
         )}
+
+        {/* Payment Section — shown when approved + unpaid */}
+        {event.user_registered &&
+          event.registration?.status?.toLowerCase() === "approved" &&
+          event.registration?.registration_id && (
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <PaymentSection
+                registrationId={event.registration.registration_id}
+                eventId={event.id}
+              />
+            </motion.section>
+          )}
+
+        {/* Payment Expired State */}
+        {event.user_registered &&
+          event.registration?.status?.toLowerCase() === "payment_expired" && (
+            <motion.section
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-white/10 bg-[#1C1C1E] p-5"
+            >
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center">
+                  <XCircle size={24} className="text-white/30" />
+                </div>
+                <div>
+                  <h3
+                    className="text-base font-semibold text-white mb-1"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                  >
+                    Your payment window has expired.
+                  </h3>
+                  <p className="text-sm text-white/40">
+                    Your spot for {event.name} has been released.
+                  </p>
+                </div>
+                <button
+                  onClick={() => router.push("/attendees/dashboard")}
+                  className="px-6 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/70 hover:bg-white/[0.1] transition-all"
+                >
+                  Browse Events
+                </button>
+              </div>
+            </motion.section>
+          )}
 
         {/* Success Message Toast */}
         <AnimatePresence>
