@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import ForgotPasswordModal from "@/components/auth/ForgotPasswordModal";
 import { advanceOnboardingStage } from "@/lib/onboardingApi";
 
@@ -403,7 +404,14 @@ export default function AuthPage() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-[#8E8E93]/60">
-          By continuing, you agree to our Terms of Service and Privacy Policy
+          By continuing, you agree to our{" "}
+          <Link href="/terms" className="underline hover:text-[#D4A574] transition-colors duration-150">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="underline hover:text-[#D4A574] transition-colors duration-150">
+            Privacy Policy
+          </Link>
         </p>
       </div>
 

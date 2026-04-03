@@ -9,6 +9,13 @@ const FOOTER_LINKS = [
   { label: "Organize", href: "/organize" },
 ];
 
+const LEGAL_LINKS = [
+  { label: "Terms & Conditions", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Refund Policy", href: "/refund" },
+  { label: "Cancellation Policy", href: "/cancellation" },
+];
+
 export default function Footer() {
   return (
     <footer
@@ -72,26 +79,59 @@ export default function Footer() {
           </div>
 
           {/* Right — links */}
-          <nav style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {FOOTER_LINKS.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                target={link.href.startsWith("http") ? "_blank" : undefined}
-                rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          <div className="flex flex-col sm:flex-row" style={{ gap: "48px" }}>
+            <nav style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {FOOTER_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  target={link.href.startsWith("http") ? "_blank" : undefined}
+                  rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "14px",
+                    color: "var(--whisper-gray)",
+                    textDecoration: "none",
+                    transition: "color 200ms ease",
+                  }}
+                  className="whispr-footer-link"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <nav style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <p
                 style={{
                   fontFamily: "var(--font-mono)",
-                  fontSize: "14px",
-                  color: "var(--whisper-gray)",
-                  textDecoration: "none",
-                  transition: "color 200ms ease",
+                  fontSize: "11px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--concrete)",
+                  marginBottom: "2px",
                 }}
-                className="whispr-footer-link"
               >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+                Legal
+              </p>
+              {LEGAL_LINKS.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "14px",
+                    color: "var(--whisper-gray)",
+                    textDecoration: "none",
+                    transition: "color 200ms ease",
+                  }}
+                  className="whispr-footer-link"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
         </div>
 
         {/* Bottom strip */}
@@ -99,9 +139,34 @@ export default function Footer() {
           style={{
             borderTop: "1px solid var(--concrete)",
             paddingTop: "24px",
-            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "12px",
           }}
         >
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", justifyContent: "center" }}>
+            {LEGAL_LINKS.map((link, i) => (
+              <span key={link.label} style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <Link
+                  href={link.href}
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "11px",
+                    color: "var(--concrete)",
+                    textDecoration: "none",
+                    transition: "color 200ms ease",
+                  }}
+                  className="whispr-footer-link"
+                >
+                  {link.label}
+                </Link>
+                {i < LEGAL_LINKS.length - 1 && (
+                  <span style={{ color: "var(--concrete)", fontSize: "11px" }}>·</span>
+                )}
+              </span>
+            ))}
+          </div>
           <p
             style={{
               fontFamily: "var(--font-body)",
