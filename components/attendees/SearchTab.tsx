@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 interface SearchTabProps {
   registrationId: string;
-  onGuestAdded: () => void;
+  onGuestAdded: (user: { name: string; avatar_url: string | null }) => void;
 }
 
 function getInitials(name: string) {
@@ -65,7 +65,7 @@ export default function SearchTab({ registrationId, onGuestAdded }: SearchTabPro
     try {
       await invitePartner(registrationId, { attendee_id: result.id });
       toast.success(`Invite sent to ${result.name}`);
-      onGuestAdded();
+      onGuestAdded({ name: result.name, avatar_url: result.avatar_url });
     } catch {
       toast.error("Failed to send invite. Please try again.");
     } finally {
@@ -91,9 +91,17 @@ export default function SearchTab({ registrationId, onGuestAdded }: SearchTabPro
 
       {result && !searching && (
         <div className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
-          <div className="w-10 h-10 rounded-full bg-[#D4A574]/15 flex items-center justify-center text-sm font-semibold text-[#D4A574] flex-shrink-0">
-            {getInitials(result.name)}
-          </div>
+          {result.avatar_url ? (
+            <img
+              src={result.avatar_url}
+              alt={result.name}
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-[#D4A574]/15 flex items-center justify-center text-sm font-semibold text-[#D4A574] flex-shrink-0">
+              {getInitials(result.name)}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{result.name}</p>
           </div>

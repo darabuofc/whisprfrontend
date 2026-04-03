@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 interface ManualTabProps {
   registrationId: string;
-  onGuestAdded: () => void;
+  onGuestAdded: (user: { name: string; avatar_url: string | null }) => void;
 }
 
 const inputClass =
@@ -38,7 +38,7 @@ export default function ManualTab({ registrationId, onGuestAdded }: ManualTabPro
         email: form.email.trim() || undefined,
       });
       toast.success("Guest added successfully");
-      onGuestAdded();
+      onGuestAdded({ name: form.name.trim(), avatar_url: null });
     } catch {
       toast.error("Failed to add guest. Please try again.");
     } finally {
