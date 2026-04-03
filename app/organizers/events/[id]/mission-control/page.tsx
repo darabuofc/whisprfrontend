@@ -15,6 +15,8 @@ import SettingsTab from "./components/SettingsTab";
 import TicketsTable from "./components/TicketsTable";
 import ImportAttendeesModal from "./components/ImportAttendeesModal";
 import SendMessageModal from "./components/SendMessageModal";
+import RevenueTab from "./components/RevenueTab";
+import ConfirmManualPaymentModal from "./components/ConfirmManualPaymentModal";
 import {
   getEventRegistrations,
   approveRegistration,
@@ -34,7 +36,7 @@ import {
 import { toast } from "sonner";
 
 type EventStatus = "Draft" | "Live" | "Today" | "Ended";
-type TabType = "overview" | "approvals" | "tickets" | "ops" | "settings";
+type TabType = "overview" | "approvals" | "tickets" | "revenue" | "ops" | "settings";
 
 export interface LinkedAttendee {
   id: string;
@@ -175,6 +177,10 @@ export default function MissionControlPage() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [sendMessageModalOpen, setSendMessageModalOpen] = useState(false);
   const [organizerId, setOrganizerId] = useState<string>("");
+
+  // Manual payment modal state
+  const [manualPaymentModalOpen, setManualPaymentModalOpen] = useState(false);
+  const [manualPaymentTarget, setManualPaymentTarget] = useState<RegistrationListItem | null>(null);
 
   // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -352,17 +358,21 @@ export default function MissionControlPage() {
   };
 
   const handleMarkPaid = async (registrationId: string) => {
-    const prev = registrations.find((r) => r.registration_id === registrationId);
-    optimisticStatusUpdate(registrationId, "paid");
-    try {
-      await markRegistrationPaid(registrationId);
-      toast.success("Registration marked as paid");
-      fetchEventDetails(true);
-    } catch (error) {
-      console.error("Failed to mark registration as paid:", error);
-      if (prev) optimisticStatusUpdate(registrationId, prev.status);
-      toast.error("Failed to mark as paid");
+    // Open manual payment confirmation modal
+    const reg = registrations.find((r) => r.registration_id === registrationId);
+    if (reg) {
+      setManualPaymentTarget(reg);
+      setManualPaymentModalOpen(true);
     }
+  };
+
+  const handleManualPaymentConfirmed = () => {
+    if (manualPaymentTarget) {
+      optimisticStatusUpdate(manualPaymentTarget.registration_id, "paid");
+    }
+    setManualPaymentTarget(null);
+    fetchEventDetails(true);
+    fetchRegistrations();
   };
 
   const handleCancelRegistration = async (registrationId: string) => {
@@ -668,6 +678,10 @@ export default function MissionControlPage() {
           />
         )}
 
+        {activeTab === "revenue" && (
+          <RevenueTab eventId={eventId} />
+        )}
+
         {activeTab === "ops" && (
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-12 text-center">
             <h2 className="text-xl font-medium text-white/90 mb-2" style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>Ops Mode</h2>
@@ -713,6 +727,22 @@ export default function MissionControlPage() {
         onClose={() => setSendMessageModalOpen(false)}
         eventId={eventId}
       />
+
+      {/* Manual Payment Confirmation Modal */}
+      {manualPaymentTarget && (
+        <ConfirmManualPaymentModal
+          isOpen={manualPaymentModalOpen}
+          onClose={() => {
+            setManualPaymentModalOpen(false);
+            setManualPaymentTarget(null);
+          }}
+          registrationId={manualPaymentTarget.registration_id}
+          attendeeName={manualPaymentTarget.name}
+          passType={manualPaymentTarget.type}
+          price={manualPaymentTarget.price}
+          onConfirmed={handleManualPaymentConfirmed}
+        />
+      )}
     </div>
   );
 }

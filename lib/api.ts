@@ -1257,3 +1257,140 @@ export async function markNotificationRead(id: string): Promise<void> {
 export async function markAllNotificationsRead(): Promise<void> {
   await api.post("/notifications/read-all");
 }
+
+// ----------------------------------------------------------
+// PAYMENTS API
+// ----------------------------------------------------------
+
+export interface PaymentBreakdownItem {
+  label: string;
+  amount: number;
+  amount_display: string;
+}
+
+export interface PaymentBreakdown {
+  registration_id: string;
+  pass_type_name: string;
+  base_price: number;
+  base_price_display: string;
+  discount_amount: number;
+  discount_amount_display: string;
+  discount_code: string | null;
+  subtotal: number;
+  subtotal_display: string;
+  processing_fee: number;
+  processing_fee_display: string;
+  total: number;
+  total_display: string;
+  currency: string;
+  payment_deadline: string;
+  hours_remaining: number;
+  refund_policy: string;
+  accept_online_payments: boolean;
+  accept_manual_payments: boolean;
+  manual_payment_instructions: string | null;
+}
+
+export interface PaymentInitiateResponse {
+  checkout_url: string;
+  tracker_token: string;
+}
+
+export interface PaymentStatusResponse {
+  registration_id: string;
+  payment_status: string;
+  ticket_id?: string;
+  ticket_url?: string;
+}
+
+export interface ManualPaymentConfirmResponse {
+  message: string;
+  registration_id: string;
+  ticket_id?: string;
+}
+
+export interface RevenueTransaction {
+  id: string;
+  attendee_name: string;
+  pass_type: string;
+  amount: number;
+  amount_display: string;
+  net_amount: number | null;
+  net_amount_display: string | null;
+  status: string;
+  method: string;
+  date: string;
+}
+
+export interface RevenueData {
+  total_revenue: number;
+  total_revenue_display: string;
+  tickets_sold: number;
+  gateway_fees: number;
+  gateway_fees_display: string;
+  outstanding_balance: number;
+  outstanding_balance_display: string;
+  transactions: RevenueTransaction[];
+}
+
+export interface PaymentConfig {
+  accept_online_payments: boolean;
+  accept_manual_payments: boolean;
+  manual_payment_instructions: string | null;
+  fee_handling: "absorb" | "pass_to_attendee";
+  payment_window_hours: number;
+  auto_release: boolean;
+  refund_policy: string;
+  refund_policy_text: string | null;
+}
+
+// Attendee: Get payment breakdown
+export async function getPaymentBreakdown(registrationId: string): Promise<PaymentBreakdown> {
+  const res = await api.get(`/payments/breakdown/${registrationId}`);
+  return res.data;
+}
+
+// Attendee: Initiate payment (get Safepay checkout URL)
+export async function initiatePayment(registrationId: string): Promise<PaymentInitiateResponse> {
+  const res = await api.post("/payments/initiate", { registration_id: registrationId });
+  return res.data;
+}
+
+// Attendee: Check payment status (for polling)
+export async function getPaymentStatus(registrationId: string): Promise<PaymentStatusResponse> {
+  const res = await api.get(`/payments/status/${registrationId}`);
+  return res.data;
+}
+
+// Organizer: Confirm manual payment
+export async function confirmManualPayment(
+  registrationId: string,
+  referenceNote?: string
+): Promise<ManualPaymentConfirmResponse> {
+  const res = await api.post("/payments/confirm-manual", {
+    registration_id: registrationId,
+    ...(referenceNote && { reference_note: referenceNote }),
+  });
+  return res.data;
+}
+
+// Organizer: Get event revenue
+export async function getEventRevenue(eventId: string): Promise<RevenueData> {
+  const res = await api.get(`/events/${eventId}/revenue`);
+  return res.data;
+}
+
+// Organizer: Get payment config
+export async function getPaymentConfig(eventId: string): Promise<PaymentConfig> {
+  const res = await api.get(`/events/${eventId}/payment-config`);
+  return res.data;
+}
+
+// Organizer: Update payment config
+export async function updatePaymentConfig(
+  eventId: string,
+  config: Partial<PaymentConfig>
+): Promise<PaymentConfig> {
+  const res = await api.put(`/events/${eventId}/payment-config`, config);
+  return res.data;
+}
