@@ -14,6 +14,9 @@ interface DisplayEvent {
   time: string;
   organizer: string;
   image: string | null;
+  venue: string;
+  orgLogo: string | null;
+  orgName: string;
 }
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
@@ -39,11 +42,23 @@ function formatEventDate(dateStr?: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapToDisplayEvent(raw: any): DisplayEvent {
   const fields = raw.fields ?? raw;
-  const imageAttachments = fields.Banner ?? fields.Cover ?? null;
-  const imageUrl = Array.isArray(imageAttachments)
-    ? (imageAttachments[0]?.url ?? null)
-    : typeof imageAttachments === "string"
-    ? imageAttachments
+
+  // Handle both flat string URLs and Airtable-style attachment arrays
+  const bannerRaw = raw.banner ?? fields.Banner ?? null;
+  const coverRaw = raw.cover ?? fields.Cover ?? null;
+  const imageSource = bannerRaw ?? coverRaw;
+  const imageUrl = Array.isArray(imageSource)
+    ? (imageSource[0]?.url ?? null)
+    : typeof imageSource === "string"
+    ? imageSource
+    : null;
+
+  const org = raw.organization ?? null;
+  const orgLogoRaw = org?.logo ?? null;
+  const orgLogo = Array.isArray(orgLogoRaw)
+    ? (orgLogoRaw[0]?.url ?? null)
+    : typeof orgLogoRaw === "string"
+    ? orgLogoRaw
     : null;
 
   return {
@@ -53,10 +68,13 @@ function mapToDisplayEvent(raw: any): DisplayEvent {
     time: fields.Time ?? fields.time ?? raw.time ?? "",
     organizer:
       raw.organizer?.name ??
-      raw.organizer ??
+      (typeof raw.organizer === "string" ? raw.organizer : "") ??
       fields.Organizer ??
       "",
     image: imageUrl,
+    venue: raw.venue ?? fields.Venue ?? fields.venue ?? "",
+    orgLogo,
+    orgName: org?.name ?? "",
   };
 }
 
@@ -237,89 +255,185 @@ function Hero() {
 // ─── 2. Event Carousel ────────────────────────────────────────────────────────
 
 function EventCard({ event }: { event: DisplayEvent }) {
+  const displayOrganizer = event.orgName || event.organizer;
+
   return (
     <Link
       href={`/events/${event.slug}`}
       style={{
         display: "block",
         flexShrink: 0,
-        width: "320px",
-        height: "420px",
-        background: "var(--smoke)",
-        border: "1px solid var(--concrete)",
-        borderRadius: "8px",
+        width: "340px",
+        borderRadius: "12px",
         overflow: "hidden",
         textDecoration: "none",
-        transition: "transform 200ms ease, border-color 200ms ease",
+        transition: "transform 300ms ease, box-shadow 300ms ease",
         position: "relative",
       }}
       className="whispr-event-card"
     >
-      {/* Image placeholder / dark top 60% */}
+      {/* Banner image — full bleed */}
       <div
         style={{
-          height: "60%",
+          height: "220px",
           background: event.image
-            ? `url(${event.image}) center/cover`
-            : "linear-gradient(180deg, #1a1a1c 0%, #111113 100%)",
+            ? `url(${event.image}) center/cover no-repeat`
+            : "linear-gradient(135deg, #1a1a1c 0%, #2a2a2e 50%, #1a1a1c 100%)",
           position: "relative",
         }}
       >
-        {/* Bottom gradient overlay */}
+        {/* Subtle vignette overlay */}
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "60%",
-            background: "linear-gradient(to top, rgba(28,28,30,1) 0%, transparent 100%)",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(10,10,12,0.95) 0%, rgba(10,10,12,0.3) 40%, transparent 100%)",
           }}
         />
-        {/* Event name over image */}
+
+        {/* Date badge — top right */}
+        {event.date && (
+          <div
+            style={{
+              position: "absolute",
+              top: "14px",
+              right: "14px",
+              background: "rgba(0,0,0,0.65)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                fontWeight: 600,
+                color: "var(--copper)",
+                margin: 0,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              {event.date}
+            </p>
+          </div>
+        )}
+
+        {/* Event name — anchored to bottom of image */}
         <div
           style={{
             position: "absolute",
-            bottom: "12px",
+            bottom: "16px",
             left: "20px",
             right: "20px",
           }}
         >
-          <p
+          <h3
             style={{
               fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              fontSize: "18px",
-              color: "var(--paper)",
+              fontWeight: 700,
+              fontSize: "22px",
+              color: "#fff",
               margin: 0,
+              lineHeight: 1.2,
+              textShadow: "0 2px 8px rgba(0,0,0,0.5)",
             }}
           >
             {event.name}
-          </p>
+          </h3>
         </div>
       </div>
 
       {/* Card body */}
-      <div style={{ padding: "16px 20px 20px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "13px",
-            color: "var(--copper)",
-            marginBottom: "6px",
-          }}
-        >
-          {event.date} · {event.time}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "14px",
-            color: "var(--whisper-gray)",
-          }}
-        >
-          {event.organizer}
-        </p>
+      <div
+        style={{
+          background: "var(--smoke)",
+          padding: "16px 20px 18px",
+          borderTop: "1px solid rgba(255,255,255,0.04)",
+        }}
+      >
+        {/* Venue row */}
+        {event.venue && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "12px" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--copper)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.8 }}>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                color: "var(--whisper-gray)",
+                margin: 0,
+                letterSpacing: "0.02em",
+              }}
+            >
+              {event.venue}
+            </p>
+          </div>
+        )}
+
+        {/* Divider */}
+        <div style={{ height: "1px", background: "var(--concrete)", margin: "0 0 12px" }} />
+
+        {/* Organizer row */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {event.orgLogo ? (
+            <img
+              src={event.orgLogo}
+              alt={displayOrganizer}
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "1px solid var(--concrete)",
+              }}
+            />
+          ) : displayOrganizer ? (
+            <div
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "50%",
+                background: "var(--concrete)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  color: "var(--copper)",
+                }}
+              >
+                {displayOrganizer.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          ) : null}
+          {displayOrganizer && (
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "var(--paper)",
+                margin: 0,
+                opacity: 0.85,
+              }}
+            >
+              {displayOrganizer}
+            </p>
+          )}
+        </div>
       </div>
     </Link>
   );
@@ -417,8 +531,8 @@ function EventCarousel({ events }: { events: DisplayEvent[] }) {
 
       <style>{`
         .whispr-event-card:hover {
-          transform: scale(1.02);
-          border-color: var(--copper) !important;
+          transform: translateY(-4px) scale(1.01);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(184,140,100,0.25);
         }
       `}</style>
     </section>
