@@ -1,10 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { XCircle } from "lucide-react";
 
 export default function PaymentCancelPage() {
+  return (
+    <Suspense>
+      <PaymentCancelContent />
+    </Suspense>
+  );
+}
+
+function PaymentCancelContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registrationId = searchParams.get("reg");
