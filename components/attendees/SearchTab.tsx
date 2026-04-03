@@ -11,6 +11,7 @@ interface SearchTabProps {
 }
 
 function getInitials(name: string) {
+  if (!name) return "?";
   return name
     .split(" ")
     .filter(Boolean)
@@ -45,7 +46,8 @@ export default function SearchTab({ registrationId, onGuestAdded }: SearchTabPro
         setNotFound(false);
       } catch (err: any) {
         setResult(null);
-        if (err?.response?.status === 404) {
+        const status = err?.response?.status;
+        if (status === 404 || status === 422) {
           setNotFound(true);
         }
       } finally {
