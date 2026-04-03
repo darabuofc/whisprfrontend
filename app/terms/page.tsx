@@ -124,9 +124,52 @@ export default function TermsPage() {
           <div
             style={{
               borderTop: "1px solid var(--concrete)",
-              marginBottom: "48px",
+              marginBottom: "32px",
             }}
           />
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid var(--concrete)",
+              borderRadius: "8px",
+              padding: "20px 24px",
+              marginBottom: "48px",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "var(--copper)",
+                marginBottom: "10px",
+              }}
+            >
+              Registered Business
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                color: "var(--paper)",
+                fontWeight: 600,
+                marginBottom: "4px",
+              }}
+            >
+              Whispr Global
+            </p>
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                color: "var(--whisper-gray)",
+                lineHeight: 1.6,
+              }}
+            >
+              B3, Clifton Garden 1, Clifton Block 3, Karachi
+            </p>
+          </div>
         </FadeIn>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
