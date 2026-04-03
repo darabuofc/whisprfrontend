@@ -60,15 +60,6 @@ export default function Footer() {
             >
               The architecture of a night out.
             </p>
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "13px",
-                color: "var(--concrete)",
-              }}
-            >
-              Events by MKhan.
-            </p>
           </div>
 
           {/* Right — links */}

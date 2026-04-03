@@ -5,75 +5,72 @@ import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import SiteLayout from "@/components/layout/SiteLayout";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-// Replace with real API calls to your Laravel backend
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const MOCK_EVENTS = [
-  {
-    slug: "nocturnal-001",
-    name: "Nocturnal",
-    date: "SAT 12 APR",
-    time: "22:00",
-    organizer: "MKhan",
-    image: null,
-  },
-  {
-    slug: "signal-karachi-apr",
-    name: "Signal",
-    date: "FRI 18 APR",
-    time: "21:00",
-    organizer: "Basement Collective",
-    image: null,
-  },
-  {
-    slug: "the-room-vol3",
-    name: "The Room Vol. 3",
-    date: "SAT 26 APR",
-    time: "22:30",
-    organizer: "Sidereal",
-    image: null,
-  },
-  {
-    slug: "frequency-may",
-    name: "Frequency",
-    date: "FRI 02 MAY",
-    time: "20:00",
-    organizer: "FRQNCY",
-    image: null,
-  },
-  {
-    slug: "closed-circuit",
-    name: "Closed Circuit",
-    date: "SAT 10 MAY",
-    time: "23:00",
-    organizer: "MKhan",
-    image: null,
-  },
-];
+interface DisplayEvent {
+  slug: string;
+  name: string;
+  date: string;
+  time: string;
+  organizer: string;
+  image: string | null;
+}
 
-const MOCK_READS = [
-  {
-    slug: "architecture-of-entry",
-    title: "The Architecture of Entry",
-    excerpt: "What a door communicates before anyone walks through it.",
-    readTime: "4 min read",
-    image: null,
-  },
-  {
-    slug: "guestlist-as-design",
-    title: "The Guest List as Design Tool",
-    excerpt: "Curation isn't gatekeeping. It's room design with people.",
-    readTime: "6 min read",
-    image: null,
-  },
-  {
-    slug: "sound-before-crowd",
-    title: "Sound Before Crowd",
-    excerpt: "Why the best nights start with an empty room and a good system.",
-    readTime: "5 min read",
-    image: null,
-  },
-];
+// ─── API helpers ──────────────────────────────────────────────────────────────
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+
+function formatEventDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const months = [
+      "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+      "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+    ];
+    return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+  } catch {
+    return dateStr;
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapToDisplayEvent(raw: any): DisplayEvent {
+  const fields = raw.fields ?? raw;
+  const imageAttachments = fields.Banner ?? fields.Cover ?? null;
+  const imageUrl = Array.isArray(imageAttachments)
+    ? (imageAttachments[0]?.url ?? null)
+    : typeof imageAttachments === "string"
+    ? imageAttachments
+    : null;
+
+  return {
+    slug: raw.slug ?? raw.id ?? "",
+    name: fields.Name ?? fields.name ?? raw.name ?? "",
+    date: formatEventDate(fields.Date ?? fields.date ?? raw.date),
+    time: fields.Time ?? fields.time ?? raw.time ?? "",
+    organizer:
+      raw.organizer?.name ??
+      raw.organizer ??
+      fields.Organizer ??
+      "",
+    image: imageUrl,
+  };
+}
+
+async function fetchExploreEvents(): Promise<DisplayEvent[]> {
+  try {
+    const res = await fetch(`${API_BASE}/events/explore?per_page=10`);
+    if (!res.ok) return [];
+    const json = await res.json();
+    const raw: unknown[] = json.data ?? json.events ?? (Array.isArray(json) ? json : []);
+    return raw.map(mapToDisplayEvent);
+  } catch {
+    return [];
+  }
+}
 
 // ─── Fade-in on scroll helper ─────────────────────────────────────────────────
 
@@ -239,7 +236,7 @@ function Hero() {
 
 // ─── 2. Event Carousel ────────────────────────────────────────────────────────
 
-function EventCard({ event }: { event: typeof MOCK_EVENTS[0] }) {
+function EventCard({ event }: { event: DisplayEvent }) {
   return (
     <Link
       href={`/events/${event.slug}`}
@@ -328,12 +325,15 @@ function EventCard({ event }: { event: typeof MOCK_EVENTS[0] }) {
   );
 }
 
-function EventCarousel() {
+function EventCarousel({ events }: { events: DisplayEvent[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const animRef = useRef<number | null>(null);
+  const shouldScroll = events.length >= 2;
 
   useEffect(() => {
+    if (!shouldScroll) return;
+
     const track = trackRef.current;
     if (!track) return;
 
@@ -353,10 +353,10 @@ function EventCarousel() {
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
     };
-  }, [isPaused]);
+  }, [isPaused, shouldScroll]);
 
-  // Duplicate cards for seamless loop
-  const cards = [...MOCK_EVENTS, ...MOCK_EVENTS];
+  // Duplicate cards for seamless loop only when scrolling is enabled
+  const cards = shouldScroll ? [...events, ...events] : events;
 
   return (
     <section style={{ paddingTop: "80px", paddingBottom: "80px", overflow: "hidden" }}>
@@ -406,7 +406,7 @@ function EventCarousel() {
             gap: "24px",
             paddingLeft: "24px",
             paddingRight: "24px",
-            willChange: "transform",
+            willChange: shouldScroll ? "transform" : "auto",
           }}
         >
           {cards.map((event, i) => (
@@ -456,104 +456,7 @@ function BrandStatement() {
   );
 }
 
-// ─── 4. Organizer Value Prop ──────────────────────────────────────────────────
-
-const VALUE_BLOCKS = [
-  {
-    headline: "Your audience, filtered.",
-    body: "Every name on the list is there because you said so.",
-  },
-  {
-    headline: "Your night, controlled.",
-    body: "One dashboard. Approvals, guest lists, door management. Nothing you didn't ask for.",
-  },
-  {
-    headline: "Your room, full.",
-    body: "Not oversold. Not underattended. Exactly the capacity you designed it for.",
-  },
-];
-
-function OrganizerValueProp() {
-  return (
-    <section
-      style={{
-        paddingTop: "120px",
-        paddingBottom: "80px",
-        background: "var(--void)",
-      }}
-    >
-      <div style={{ maxWidth: "640px", margin: "0 auto", padding: "0 24px" }}>
-        <FadeIn>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "clamp(22px, 3vw, 36px)",
-              color: "var(--copper)",
-              marginBottom: "64px",
-            }}
-          >
-            For the ones building the room.
-          </p>
-        </FadeIn>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "56px", marginBottom: "64px" }}>
-          {VALUE_BLOCKS.map((block, i) => (
-            <FadeIn key={block.headline} delay={i * 0.15}>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontWeight: 600,
-                    fontSize: "clamp(18px, 2.5vw, 26px)",
-                    color: "var(--paper)",
-                    marginBottom: "10px",
-                    letterSpacing: "0.01em",
-                  }}
-                >
-                  {block.headline}
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "clamp(15px, 1.8vw, 17px)",
-                    color: "var(--whisper-gray)",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {block.body}
-                </p>
-              </div>
-            </FadeIn>
-          ))}
-        </div>
-
-        <FadeIn>
-          <Link
-            href="/organize"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              fontSize: "16px",
-              background: "var(--copper)",
-              color: "var(--void)",
-              padding: "14px 32px",
-              borderRadius: "6px",
-              textDecoration: "none",
-              display: "inline-block",
-              transition: "background 200ms ease",
-            }}
-            className="whispr-cta-primary"
-          >
-            Start Building →
-          </Link>
-        </FadeIn>
-      </div>
-    </section>
-  );
-}
-
-// ─── 5. Trust / Logos (Mode B) ────────────────────────────────────────────────
+// ─── 4. Trust / Logos (Mode B) ────────────────────────────────────────────────
 
 function TrustSection() {
   return (
@@ -582,140 +485,21 @@ function TrustSection() {
   );
 }
 
-// ─── 6. Featured Reads ────────────────────────────────────────────────────────
-
-function BlogCard({ read }: { read: typeof MOCK_READS[0] }) {
-  return (
-    <Link
-      href={`/reads/${read.slug}`}
-      style={{
-        display: "block",
-        flex: 1,
-        minWidth: 0,
-        background: "var(--smoke)",
-        border: "1px solid var(--concrete)",
-        borderRadius: "8px",
-        overflow: "hidden",
-        textDecoration: "none",
-        transition: "border-color 200ms ease",
-      }}
-      className="whispr-blog-card"
-    >
-      {/* Image area */}
-      <div
-        style={{
-          height: "200px",
-          background: read.image
-            ? `url(${read.image}) center/cover`
-            : "linear-gradient(180deg, #1e1e20 0%, #141416 100%)",
-        }}
-      />
-
-      {/* Card content */}
-      <div style={{ padding: "20px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 600,
-            fontSize: "20px",
-            color: "var(--paper)",
-            marginBottom: "8px",
-            lineHeight: 1.3,
-          }}
-        >
-          {read.title}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "14px",
-            color: "var(--whisper-gray)",
-            marginBottom: "16px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {read.excerpt}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            color: "var(--copper)",
-          }}
-        >
-          {read.readTime}
-        </p>
-      </div>
-    </Link>
-  );
-}
-
-function FeaturedReads() {
-  return (
-    <section
-      style={{
-        paddingTop: "80px",
-        paddingBottom: "80px",
-        background: "var(--void)",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}>
-        <FadeIn style={{ marginBottom: "12px" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "clamp(22px, 3vw, 32px)",
-              color: "var(--paper)",
-            }}
-          >
-            From the inside.
-          </p>
-        </FadeIn>
-        <FadeIn style={{ marginBottom: "40px" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "16px",
-              color: "var(--whisper-gray)",
-            }}
-          >
-            Dispatches from the dancefloor, the backroom, and everything in between.
-          </p>
-        </FadeIn>
-
-        <div
-          className="flex flex-col md:flex-row"
-          style={{ gap: "24px" }}
-        >
-          {MOCK_READS.map((read, i) => (
-            <FadeIn key={read.slug} delay={i * 0.1} style={{ flex: 1, minWidth: 0 }}>
-              <BlogCard read={read} />
-            </FadeIn>
-          ))}
-        </div>
-      </div>
-
-      <style>{`
-        .whispr-blog-card:hover { border-color: var(--copper) !important; }
-      `}</style>
-    </section>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const [events, setEvents] = useState<DisplayEvent[]>([]);
+
+  useEffect(() => {
+    fetchExploreEvents().then(setEvents);
+  }, []);
+
   return (
     <SiteLayout heroPage>
       <Hero />
-      <EventCarousel />
+      <EventCarousel events={events} />
       <BrandStatement />
-      <OrganizerValueProp />
       <TrustSection />
-      <FeaturedReads />
     </SiteLayout>
   );
 }
