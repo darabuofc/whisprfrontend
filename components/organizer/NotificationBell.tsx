@@ -10,10 +10,25 @@ import {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead,
+  joinExistingRegistration,
   type AppNotification,
 } from "@/lib/api";
 
 const POLL_INTERVAL = 30_000;
+
+function parseInviteUrl(
+  actionUrl: string
+): { joinCode: string; eventSlug: string } | null {
+  try {
+    const url = new URL(actionUrl, "https://x");
+    const joinCode = url.searchParams.get("join_code");
+    const eventSlug = url.pathname.replace(/^\/events\//, "");
+    if (!joinCode || !eventSlug) return null;
+    return { joinCode, eventSlug };
+  } catch {
+    return null;
+  }
+}
 
 function NotificationAvatar({ notification }: { notification: AppNotification }) {
   const isCoupleInvite = notification.type === "couple_invite";
@@ -58,6 +73,8 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<{ id: string; msg: string } | null>(null);
 
   // Poll unread count
   useEffect(() => {
@@ -153,6 +170,48 @@ export default function NotificationBell() {
     setUnreadCount(0);
   }, []);
 
+  const handleAcceptInvite = useCallback(
+    async (notification: AppNotification) => {
+      const parsed = parseInviteUrl(notification.action_url);
+      if (!parsed) return;
+      setInviteLoading(notification.id);
+      setInviteError(null);
+      try {
+        await joinExistingRegistration(parsed.joinCode);
+        try {
+          await markNotificationRead(notification.id);
+        } catch {
+          // non-critical
+        }
+        setIsOpen(false);
+        router.push(`/attendees/events/${parsed.eventSlug}`);
+      } catch (err: any) {
+        setInviteError({
+          id: notification.id,
+          msg:
+            err?.response?.data?.message ??
+            "Failed to join. Please try again.",
+        });
+      } finally {
+        setInviteLoading(null);
+      }
+    },
+    [router]
+  );
+
+  const handleDeclineInvite = useCallback(
+    async (notification: AppNotification) => {
+      try {
+        await markNotificationRead(notification.id);
+      } catch {
+        // non-critical
+      }
+      setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+      setUnreadCount((c) => Math.max(0, c - (notification.is_read ? 0 : 1)));
+    },
+    []
+  );
+
   const hasUnread = notifications.some((n) => !n.is_read);
 
   return (
@@ -217,47 +276,104 @@ export default function NotificationBell() {
                   </span>
                 </div>
               ) : (
-                notifications.map((notification) => (
-                  <button
-                    key={notification.id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left flex items-start gap-3 px-4 py-3 transition-colors duration-150 hover:bg-[var(--bg-hover)] ${
-                      !notification.is_read
-                        ? "bg-[rgba(212,165,116,0.04)]"
-                        : ""
-                    }`}
-                  >
-                    <NotificationAvatar notification={notification} />
+                notifications.map((notification) => {
+                  const isCoupleInvite =
+                    notification.type === "couple_invite";
+                  const isThisLoading = inviteLoading === notification.id;
+                  const thisError =
+                    inviteError?.id === notification.id
+                      ? inviteError.msg
+                      : null;
 
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="text-[13px] font-medium text-[var(--text-primary)] leading-tight"
-                        style={{ fontFamily: "var(--font-body-org)" }}
-                      >
-                        {notification.title}
-                      </p>
-                      <p
-                        className="text-[12px] text-[var(--text-muted)] leading-tight mt-0.5 truncate"
-                        style={{ fontFamily: "var(--font-body-org)" }}
-                      >
-                        {notification.body}
-                      </p>
-                      <p
-                        className="text-[11px] text-[var(--text-muted)] mt-1"
-                        style={{ fontFamily: "var(--font-mono-org)" }}
-                      >
-                        {formatDistanceToNow(new Date(notification.created_at), {
-                          addSuffix: true,
-                        })}
-                      </p>
+                  const innerContent = (
+                    <>
+                      <NotificationAvatar notification={notification} />
+
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-[13px] font-medium text-[var(--text-primary)] leading-tight"
+                          style={{ fontFamily: "var(--font-body-org)" }}
+                        >
+                          {notification.title}
+                        </p>
+                        <p
+                          className="text-[12px] text-[var(--text-muted)] leading-tight mt-0.5 truncate"
+                          style={{ fontFamily: "var(--font-body-org)" }}
+                        >
+                          {notification.body}
+                        </p>
+                        <p
+                          className="text-[11px] text-[var(--text-muted)] mt-1"
+                          style={{ fontFamily: "var(--font-mono-org)" }}
+                        >
+                          {formatDistanceToNow(
+                            new Date(notification.created_at),
+                            { addSuffix: true }
+                          )}
+                        </p>
+
+                        {isCoupleInvite && (
+                          <>
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAcceptInvite(notification);
+                                }}
+                                disabled={isThisLoading}
+                                className="px-3 py-1 text-xs rounded-full bg-[#D4A574] text-black font-medium disabled:opacity-50 transition-opacity"
+                                style={{ fontFamily: "var(--font-body-org)" }}
+                              >
+                                {isThisLoading ? "Joining…" : "Accept"}
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeclineInvite(notification);
+                                }}
+                                disabled={isThisLoading}
+                                className="px-3 py-1 text-xs rounded-full border border-white/20 text-white/70 font-medium disabled:opacity-50 transition-opacity"
+                                style={{ fontFamily: "var(--font-body-org)" }}
+                              >
+                                Decline
+                              </button>
+                            </div>
+                            {thisError && (
+                              <p className="text-[11px] text-red-400 mt-1">
+                                {thisError}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Unread dot */}
+                      {!notification.is_read && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4A574] flex-shrink-0 mt-2" />
+                      )}
+                    </>
+                  );
+
+                  const rowClass = `w-full text-left flex items-start gap-3 px-4 py-3 transition-colors duration-150 hover:bg-[var(--bg-hover)] ${
+                    !notification.is_read
+                      ? "bg-[rgba(212,165,116,0.04)]"
+                      : ""
+                  }`;
+
+                  return isCoupleInvite ? (
+                    <div key={notification.id} className={rowClass}>
+                      {innerContent}
                     </div>
-
-                    {/* Unread dot */}
-                    {!notification.is_read && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#D4A574] flex-shrink-0 mt-2" />
-                    )}
-                  </button>
-                ))
+                  ) : (
+                    <button
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={rowClass}
+                    >
+                      {innerContent}
+                    </button>
+                  );
+                })
               )}
             </div>
           </motion.div>
