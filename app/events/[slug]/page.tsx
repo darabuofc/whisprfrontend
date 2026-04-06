@@ -1,6 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { joinExistingRegistration } from "@/lib/api";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import SiteLayout from "@/components/layout/SiteLayout";
@@ -22,10 +25,32 @@ The lineup is announced 48 hours prior. If you're here, you already know what to
   image: null,
 };
 
+// ─── Join handler ─────────────────────────────────────────────────────────────
+
+function JoinHandler() {
+  const searchParams = useSearchParams();
+  const joinCode = searchParams.get("join_code");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!joinCode || done) return;
+    setDone(true);
+    const id = toast.loading("Joining couple pass…");
+    joinExistingRegistration(joinCode)
+      .then(() => toast.success("You've joined the couple pass!", { id }))
+      .catch((err: any) => {
+        const msg = err?.response?.data?.error ?? err?.message ?? "Something went wrong";
+        toast.error(`Couldn't join: ${msg}`, { id });
+      });
+  }, [joinCode, done]);
+
+  return null;
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function EventDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   // In production: fetch event by slug from /api/events/:slug
   const event = { ...MOCK_EVENT, slug };
 
@@ -45,6 +70,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ slug: st
 
   return (
     <SiteLayout>
+      <Suspense fallback={null}>
+        <JoinHandler />
+      </Suspense>
       <div style={{ minHeight: "100vh", background: "var(--void)" }}>
 
         {/* Cover image */}
