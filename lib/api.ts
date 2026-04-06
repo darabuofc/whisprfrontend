@@ -1198,7 +1198,7 @@ export interface AttendeeSearchResult {
 
 export async function searchAttendee(query: string): Promise<AttendeeSearchResult> {
   const res = await api.get("/attendees/search", { params: { q: query } });
-  const a = res.data.attendee ?? res.data;
+  const a = res.data.attendee ?? res.data.user ?? res.data;
   return {
     id: a.id,
     name: a.name ?? a.full_name,
