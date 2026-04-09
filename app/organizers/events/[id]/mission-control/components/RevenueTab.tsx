@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, AlertCircle, DollarSign, Ticket, CreditCard, Wallet } from "lucide-react";
-import { getEventRevenue, type RevenueData, type RevenueTransaction } from "@/lib/api";
+import { AlertCircle, DollarSign, Ticket, Wallet } from "lucide-react";
+import { getEventRevenue, type RevenueData } from "@/lib/api";
 
 interface RevenueTabProps {
   eventId: string;
@@ -66,14 +66,21 @@ function StatusBadge({ status }: { status: string }) {
 
 function formatDate(dateStr: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const sameYear = date.getFullYear() === now.getFullYear();
+    return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric",
+      ...(sameYear ? {} : { year: "numeric" }),
     });
   } catch {
     return dateStr;
   }
+}
+
+function formatCurrency(amount: number): string {
+  return `PKR ${Math.round(amount).toLocaleString()}`;
 }
 
 export default function RevenueTab({ eventId }: RevenueTabProps) {
@@ -102,9 +109,8 @@ export default function RevenueTab({ eventId }: RevenueTabProps) {
   if (loading) {
     return (
       <div className="space-y-6">
-        {/* Stat cards skeleton */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-9 h-9 rounded-lg bg-white/5 animate-pulse" />
@@ -114,7 +120,6 @@ export default function RevenueTab({ eventId }: RevenueTabProps) {
             </div>
           ))}
         </div>
-        {/* Table skeleton */}
         <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -150,6 +155,8 @@ export default function RevenueTab({ eventId }: RevenueTabProps) {
   if (!data) return null;
 
   const hasTransactions = data.transactions && data.transactions.length > 0;
+  const netRevenue = data.total_revenue - data.gateway_fees;
+  const netRevenueDisplay = formatCurrency(netRevenue);
 
   return (
     <div className="space-y-6">
@@ -159,32 +166,29 @@ export default function RevenueTab({ eventId }: RevenueTabProps) {
         <p className="text-sm text-white/40 mt-1">Payment overview and transaction history</p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Revenue"
-          value={data.total_revenue_display}
-          icon={<DollarSign size={18} className="text-white/40" />}
-        />
-        <StatCard
-          label="Tickets Sold"
-          value={String(data.tickets_sold)}
-          icon={<Ticket size={18} className="text-white/40" />}
-        />
-        <StatCard
-          label="Processing Fees"
-          value={data.gateway_fees_display}
-          icon={<CreditCard size={18} className="text-white/40" />}
-        />
-        <StatCard
-          label="Outstanding"
-          value={data.outstanding_balance_display}
-          icon={<Wallet size={18} className="text-[#D4A574]" />}
-          accent
-        />
-      </div>
+      {/* Summary Cards — hidden when no transactions */}
+      {hasTransactions && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard
+            label="Collected"
+            value={data.total_revenue_display}
+            icon={<DollarSign size={18} className="text-white/40" />}
+          />
+          <StatCard
+            label="Tickets Sold"
+            value={String(data.tickets_sold)}
+            icon={<Ticket size={18} className="text-white/40" />}
+          />
+          <StatCard
+            label="Your Earnings"
+            value={netRevenueDisplay}
+            icon={<Wallet size={18} className="text-[#D4A574]" />}
+            accent
+          />
+        </div>
+      )}
 
-      {/* Transactions Table */}
+      {/* Transactions */}
       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-white/[0.06]">
           <h3 className="text-sm font-medium text-white/70" style={{ fontFamily: "var(--font-display)", fontWeight: 500 }}>Transactions</h3>
@@ -201,50 +205,96 @@ export default function RevenueTab({ eventId }: RevenueTabProps) {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/[0.02] border-b border-white/[0.06]">
-                <tr>
-                  <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Attendee</th>
-                  <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Pass Type</th>
-                  <th className="text-right px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Amount</th>
-                  <th className="text-right px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Net</th>
-                  <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Status</th>
-                  <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Method</th>
-                  <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.transactions.map((tx) => {
-                  const isFailed = tx.status.toLowerCase() === "failed";
-                  return (
-                    <tr
-                      key={tx.id}
-                      className={`border-b border-white/[0.03] ${isFailed ? "opacity-50" : "hover:bg-white/[0.02]"} transition-colors`}
-                    >
-                      <td className="px-6 py-4 text-sm text-white/70">{tx.attendee_name}</td>
-                      <td className="px-6 py-4 text-sm text-white/50">{tx.pass_type}</td>
-                      <td className="px-6 py-4 text-sm text-white/70 text-right tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
-                        {tx.amount_display}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-right tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
-                        {tx.net_amount_display ? (
-                          <span className="text-white/70">{tx.net_amount_display}</span>
-                        ) : (
-                          <span className="text-white/20">&mdash;</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={tx.status} />
-                      </td>
-                      <td className="px-6 py-4 text-sm text-white/50">{tx.method}</td>
-                      <td className="px-6 py-4 text-sm text-white/40">{formatDate(tx.date)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {/* Desktop table — hidden on mobile */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/[0.02] border-b border-white/[0.06]">
+                  <tr>
+                    <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Attendee</th>
+                    <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Pass Type</th>
+                    <th className="text-right px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Amount</th>
+                    <th className="text-right px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Net</th>
+                    <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Status</th>
+                    <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Method</th>
+                    <th className="text-left px-6 py-3.5 text-[11px] font-medium uppercase tracking-wider text-white/30">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.transactions.map((tx) => {
+                    const isFailed = tx.status.toLowerCase() === "failed";
+                    return (
+                      <tr
+                        key={tx.id}
+                        className={`border-b border-white/[0.03] ${isFailed ? "opacity-50" : "hover:bg-white/[0.02]"} transition-colors`}
+                      >
+                        <td className="px-6 py-4 text-sm text-white/70">{tx.attendee_name}</td>
+                        <td className="px-6 py-4 text-sm text-white/50">{tx.pass_type}</td>
+                        <td className="px-6 py-4 text-sm text-white/70 text-right tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
+                          {tx.amount_display}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-right tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
+                          {tx.net_amount_display ? (
+                            <span className="text-white/70">{tx.net_amount_display}</span>
+                          ) : (
+                            <span className="text-white/20">&mdash;</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <StatusBadge status={tx.status} />
+                        </td>
+                        <td className="px-6 py-4 text-sm text-white/50">{tx.method}</td>
+                        <td className="px-6 py-4 text-sm text-white/40">{formatDate(tx.date)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card layout */}
+            <div className="md:hidden divide-y divide-white/[0.06]">
+              {data.transactions.map((tx) => {
+                const isFailed = tx.status.toLowerCase() === "failed";
+                return (
+                  <div
+                    key={tx.id}
+                    className={`p-4 space-y-2 ${isFailed ? "opacity-50" : ""}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white/70 truncate">{tx.attendee_name}</p>
+                        <p className="text-xs text-white/40">{tx.pass_type}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p
+                          className="text-sm font-medium text-white/70 tabular-nums"
+                          style={{ fontFamily: "var(--font-mono)" }}
+                        >
+                          {tx.amount_display}
+                        </p>
+                        <p
+                          className="text-xs tabular-nums"
+                          style={{ fontFamily: "var(--font-mono)" }}
+                        >
+                          {tx.net_amount_display ? (
+                            <span className="text-white/50">Net: {tx.net_amount_display}</span>
+                          ) : (
+                            <span className="text-white/20">Net: &mdash;</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <StatusBadge status={tx.status} />
+                      <span className="text-xs text-white/40">{tx.method}</span>
+                      <span className="text-xs text-white/30 ml-auto">{formatDate(tx.date)}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {/* Footer count */}

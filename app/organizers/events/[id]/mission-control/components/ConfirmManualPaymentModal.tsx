@@ -127,9 +127,19 @@ export default function ConfirmManualPaymentModal({
                 </div>
 
                 {/* Info text */}
-                <p className="text-xs text-white/30 leading-relaxed">
-                  This will mark the payment as received and generate the attendee&apos;s ticket.
-                </p>
+                <div className="space-y-1.5">
+                  <p className="text-xs text-white/40 font-medium">Confirming this will:</p>
+                  <ul className="space-y-1">
+                    <li className="flex items-center gap-2 text-xs text-white/30">
+                      <span className="w-1 h-1 rounded-full bg-white/30 flex-shrink-0" />
+                      Mark the payment as received
+                    </li>
+                    <li className="flex items-center gap-2 text-xs text-white/30">
+                      <span className="w-1 h-1 rounded-full bg-white/30 flex-shrink-0" />
+                      Generate and send the ticket to the attendee
+                    </li>
+                  </ul>
+                </div>
 
                 {/* Error */}
                 {error && (
