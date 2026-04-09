@@ -16,29 +16,66 @@ const REFUND_OPTIONS = [
   { value: "custom", label: "Custom" },
 ];
 
+const REFUND_POLICY_DEFAULTS: Record<string, string> = {
+  no_refunds: "All sales are final. No refunds.",
+  full_refund_before_event: "Full refund available up to 24 hours before the event.",
+  partial_refund: "50% refund available up to 48 hours before the event.",
+};
+
 function FeePreview({ ticketPrice, feeHandling }: { ticketPrice: number; feeHandling: string }) {
-  if (ticketPrice <= 0 || feeHandling !== "pass_to_attendee") return null;
+  if (ticketPrice <= 0) return null;
 
   const gatewayFee = Math.round(ticketPrice * 0.025 + 10);
-  const total = ticketPrice + gatewayFee;
-
   const fmt = (n: number) => `PKR ${n.toLocaleString()}`;
 
+  if (feeHandling === "pass_to_attendee") {
+    const total = ticketPrice + gatewayFee;
+    return (
+      <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+        <p className="text-xs font-medium text-white/50 mb-3 uppercase tracking-wider">
+          Example for a {fmt(ticketPrice)} ticket
+        </p>
+        <div className="space-y-1.5" style={{ fontFamily: "var(--font-mono)" }}>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/50">Ticket price</span>
+            <span className="text-white/70 tabular-nums">{fmt(ticketPrice)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/50">Processing fee</span>
+            <span className="text-white/70 tabular-nums">+{fmt(gatewayFee)}</span>
+          </div>
+          <div className="border-t border-white/[0.06] pt-1.5 flex justify-between text-sm font-medium">
+            <span className="text-white/50">Attendee pays</span>
+            <span className="text-[#D4A574] tabular-nums">{fmt(total)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/50">You receive</span>
+            <span className="text-white/70 tabular-nums">{fmt(ticketPrice)}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Absorb mode
+  const netRevenue = ticketPrice - gatewayFee;
   return (
     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-      <p className="text-xs font-medium text-white/50 mb-3 uppercase tracking-wider">Attendee will see</p>
+      <p className="text-xs font-medium text-white/50 mb-3 uppercase tracking-wider">
+        Example for a {fmt(ticketPrice)} ticket
+      </p>
       <div className="space-y-1.5" style={{ fontFamily: "var(--font-mono)" }}>
         <div className="flex justify-between text-sm">
-          <span className="text-white/50">Ticket price</span>
+          <span className="text-white/50">Attendee pays</span>
           <span className="text-white/70 tabular-nums">{fmt(ticketPrice)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-white/50">Processing fee</span>
-          <span className="text-white/70 tabular-nums">+{fmt(gatewayFee)}</span>
+          <span className="text-white/70 tabular-nums">-{fmt(gatewayFee)}</span>
         </div>
         <div className="border-t border-white/[0.06] pt-1.5 flex justify-between text-sm font-medium">
-          <span className="text-white/70">Total</span>
-          <span className="text-[#D4A574] tabular-nums">{fmt(total)}</span>
+          <span className="text-white/50">You receive</span>
+          <span className="text-[#D4A574] tabular-nums">{fmt(netRevenue)}</span>
         </div>
       </div>
     </div>
@@ -126,7 +163,7 @@ export default function PaymentSettingsTab({ eventId }: PaymentSettingsTabProps)
         payment_window_hours: paymentWindowDays * 24,
         auto_release: autoRelease,
         refund_policy: refundPolicy,
-        refund_policy_text: refundPolicy === "custom" ? refundPolicyText.trim() : null,
+        refund_policy_text: refundPolicyText.trim() || null,
       });
       setOriginal(updated);
       toast.success("Payment settings saved successfully");
@@ -337,7 +374,16 @@ export default function PaymentSettingsTab({ eventId }: PaymentSettingsTabProps)
               <label className="block text-sm font-medium text-white/60">Refund policy</label>
               <select
                 value={refundPolicy}
-                onChange={(e) => setRefundPolicy(e.target.value)}
+                onChange={(e) => {
+                  const newPolicy = e.target.value;
+                  setRefundPolicy(newPolicy);
+                  // Auto-populate text for preset policies
+                  if (REFUND_POLICY_DEFAULTS[newPolicy]) {
+                    setRefundPolicyText(REFUND_POLICY_DEFAULTS[newPolicy]);
+                  } else if (newPolicy === "custom") {
+                    setRefundPolicyText("");
+                  }
+                }}
                 className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:border-white/20 transition-colors appearance-none cursor-pointer"
                 style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`, backgroundPosition: "right 0.5rem center", backgroundRepeat: "no-repeat", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}
               >
@@ -348,21 +394,25 @@ export default function PaymentSettingsTab({ eventId }: PaymentSettingsTabProps)
                 ))}
               </select>
 
-              {/* Custom policy text */}
-              {refundPolicy === "custom" && (
-                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                  <label className="block text-xs text-white/40 mb-2">
-                    Policy text (shown to attendees)
-                  </label>
-                  <textarea
-                    value={refundPolicyText}
-                    onChange={(e) => setRefundPolicyText(e.target.value)}
-                    placeholder="All sales are final. No refunds."
-                    rows={3}
-                    className="w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-white/20 transition-colors resize-none"
-                  />
-                </div>
-              )}
+              {/* Policy text — shown for all options */}
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                <label className="block text-xs text-white/40 mb-2">
+                  Policy text (shown to attendees)
+                </label>
+                <textarea
+                  value={refundPolicyText}
+                  onChange={(e) => setRefundPolicyText(e.target.value)}
+                  placeholder="Describe your refund policy..."
+                  rows={3}
+                  readOnly={refundPolicy !== "custom"}
+                  className={`w-full px-4 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-white/20 transition-colors resize-none ${
+                    refundPolicy !== "custom" ? "opacity-60 cursor-default" : ""
+                  }`}
+                />
+                {refundPolicy !== "custom" && (
+                  <p className="text-xs text-white/30 mt-1">Select &ldquo;Custom&rdquo; to edit this text.</p>
+                )}
+              </div>
             </div>
 
             {/* Save Actions */}

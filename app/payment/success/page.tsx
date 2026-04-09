@@ -3,10 +3,17 @@
 import { Suspense, useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Loader2, Clock } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 import { getPaymentStatus } from "@/lib/api";
 
 type Status = "polling" | "confirmed" | "timeout";
+
+interface EventContext {
+  eventName: string;
+  eventSlug: string;
+  eventDate: string;
+  eventLocation: string;
+}
 
 export default function PaymentSuccessPage() {
   return (
@@ -23,9 +30,21 @@ function PaymentSuccessContent() {
 
   const [status, setStatus] = useState<Status>("polling");
   const [ticketUrl, setTicketUrl] = useState<string | null>(null);
-  const [eventName, setEventName] = useState<string | null>(null);
+  const [eventContext, setEventContext] = useState<EventContext | null>(null);
   const attemptsRef = useRef(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Read event context from sessionStorage
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("whispr_payment_context");
+      if (stored) {
+        setEventContext(JSON.parse(stored));
+      }
+    } catch {
+      // sessionStorage may not be available
+    }
+  }, []);
 
   const poll = useCallback(async () => {
     if (!registrationId) return;
@@ -72,7 +91,7 @@ function PaymentSuccessContent() {
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4">
         <AnimatePresence mode="wait">
-          {/* Polling state */}
+          {/* Polling state — breathing pulse */}
           {status === "polling" && (
             <motion.div
               key="polling"
@@ -82,7 +101,18 @@ function PaymentSuccessContent() {
               className="flex flex-col items-center gap-6 text-center max-w-sm"
             >
               <div className="w-16 h-16 rounded-full bg-[#D4A574]/10 border border-[#D4A574]/20 flex items-center justify-center">
-                <Loader2 size={28} className="text-[#D4A574] animate-spin" />
+                <motion.div
+                  animate={{
+                    scale: [0.9, 1.1, 0.9],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 2.5,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }}
+                  className="w-4 h-4 rounded-full bg-[#D4A574]"
+                />
               </div>
               <div>
                 <h1
@@ -98,7 +128,7 @@ function PaymentSuccessContent() {
             </motion.div>
           )}
 
-          {/* Confirmed state */}
+          {/* Confirmed state — copper checkmark */}
           {status === "confirmed" && (
             <motion.div
               key="confirmed"
@@ -110,9 +140,9 @@ function PaymentSuccessContent() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"
+                className="w-16 h-16 rounded-full bg-[#D4A574]/10 border border-[#D4A574]/20 flex items-center justify-center"
               >
-                <CheckCircle2 size={32} className="text-emerald-400" />
+                <CheckCircle2 size={32} className="text-[#D4A574]" />
               </motion.div>
               <div>
                 <h1
@@ -121,8 +151,17 @@ function PaymentSuccessContent() {
                 >
                   You&apos;re locked in.
                 </h1>
-                {eventName && (
-                  <p className="text-sm text-white/60">{eventName}</p>
+                {eventContext?.eventName && (
+                  <div className="space-y-1">
+                    <p className="text-sm text-white/60">{eventContext.eventName}</p>
+                    {(eventContext.eventDate || eventContext.eventLocation) && (
+                      <p className="text-xs text-white/40">
+                        {[eventContext.eventDate, eventContext.eventLocation]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
               {ticketUrl && (
@@ -165,15 +204,20 @@ function PaymentSuccessContent() {
                   Payment is being confirmed.
                 </h1>
                 <p className="text-sm text-white/40 leading-relaxed">
-                  This usually takes a few seconds but can occasionally take longer.
-                  You&apos;ll receive a WhatsApp confirmation once your ticket is ready.
+                  This can take a moment. You&apos;ll receive a WhatsApp notification once your ticket is ready.
                 </p>
               </div>
               <button
-                onClick={() => router.push("/attendees/dashboard")}
+                onClick={() => {
+                  if (eventContext?.eventSlug) {
+                    router.push(`/attendees/events/${eventContext.eventSlug}`);
+                  } else {
+                    router.push("/attendees/dashboard");
+                  }
+                }}
                 className="px-6 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/70 hover:bg-white/[0.1] transition-all"
               >
-                Back to Dashboard
+                Back to Event
               </button>
             </motion.div>
           )}

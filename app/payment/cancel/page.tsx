@@ -1,9 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { XCircle } from "lucide-react";
+
+interface EventContext {
+  eventName: string;
+  eventSlug: string;
+  eventDate: string;
+  eventLocation: string;
+}
 
 export default function PaymentCancelPage() {
   return (
@@ -17,6 +24,34 @@ function PaymentCancelContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registrationId = searchParams.get("reg");
+  const [eventContext, setEventContext] = useState<EventContext | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("whispr_payment_context");
+      if (stored) {
+        setEventContext(JSON.parse(stored));
+      }
+    } catch {
+      // sessionStorage may not be available
+    }
+  }, []);
+
+  const handleTryAgain = () => {
+    if (eventContext?.eventSlug) {
+      router.push(`/attendees/events/${eventContext.eventSlug}`);
+    } else {
+      router.push("/attendees/dashboard");
+    }
+  };
+
+  const handleBackToEvent = () => {
+    if (eventContext?.eventSlug) {
+      router.push(`/attendees/events/${eventContext.eventSlug}`);
+    } else {
+      router.push("/attendees/dashboard");
+    }
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
@@ -40,27 +75,27 @@ function PaymentCancelContent() {
               className="text-xl font-semibold text-white mb-2"
               style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
             >
-              Payment cancelled.
+              Payment not completed.
             </h1>
             <p className="text-sm text-white/40 leading-relaxed">
-              Your spot is still reserved. You can complete payment any time before your deadline.
+              Your spot is still reserved. You can pay any time before your deadline.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+          <div className="flex flex-col gap-3 w-full max-w-xs">
             {registrationId && (
               <button
-                onClick={() => router.back()}
-                className="flex-1 py-3 rounded-xl bg-[#D4A574] text-[#0A0A0A] font-semibold text-sm hover:bg-[#B8785C] transition-all"
+                onClick={handleTryAgain}
+                className="w-full py-3 rounded-xl bg-[#D4A574] text-[#0A0A0A] font-semibold text-sm hover:bg-[#B8785C] transition-all"
                 style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
               >
                 Try Again
               </button>
             )}
             <button
-              onClick={() => router.push("/attendees/dashboard")}
-              className="flex-1 py-3 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/70 hover:bg-white/[0.1] transition-all"
+              onClick={handleBackToEvent}
+              className="text-sm text-white/40 hover:text-white/60 transition-colors"
             >
-              Back to Dashboard
+              Back to Event
             </button>
           </div>
         </motion.div>
