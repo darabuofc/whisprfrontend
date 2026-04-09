@@ -318,6 +318,13 @@ export default function EventDetailPage() {
           ? { ...prev, user_registered: true, registration: res?.registration || prev.registration }
           : prev
       );
+      // Re-fetch authoritative event data to ensure full registration state
+      try {
+        const freshData = await getEventById(eventId);
+        setEvent(freshData);
+      } catch {
+        // Optimistic state already set above, non-fatal
+      }
     } catch (err: any) {
       setSuccessMsg(`Join failed: ${err.message}`);
       setShowModal(false);
