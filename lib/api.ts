@@ -180,6 +180,7 @@ export interface TicketItem {
   purchase_date?: string | null;
   status: string;
   qr_code?: string | null;
+  ticket_url?: string | null;
 }
 
 // ----------------------------------------------------------
