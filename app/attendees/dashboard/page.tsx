@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Ticket,
   ChevronRight,
+  Download,
   Calendar,
   MapPin,
   LogOut,
@@ -1442,8 +1443,6 @@ const ApplicationsTab = memo(function ApplicationsTab({
 // TICKETS TAB
 // ═══════════════════════════════════════════════════════════
 const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[] }) {
-  const router = useRouter();
-
   const formatEventDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return "TBA";
     try {
@@ -1483,7 +1482,13 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
             className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] hover:border-[#D4A574]/25 hover:shadow-none transition-all duration-300 cursor-pointer group"
-            onClick={() => router.push(`/attendees/tickets/${t.id}`)}
+            onClick={() => {
+              if (t.ticket_url) {
+                window.open(t.ticket_url, "_blank");
+              } else {
+                toast.error("Ticket PDF not available");
+              }
+            }}
           >
             <div className="p-4 flex items-center gap-4">
               {/* Ticket icon */}
@@ -1510,7 +1515,7 @@ const TicketsTab = memo(function TicketsTab({ tickets }: { tickets: TicketItem[]
                 </div>
               </div>
 
-              <ChevronRight
+              <Download
                 size={18}
                 className="text-neutral-600 group-hover:text-[#D4A574] transition-colors flex-shrink-0"
               />
