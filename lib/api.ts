@@ -1311,26 +1311,48 @@ export interface ManualPaymentConfirmResponse {
 }
 
 export interface RevenueTransaction {
-  id: string;
+  txn_id: string;
   attendee_name: string;
+  attendee_email: string;
+  attendee_phone: string;
+  registration_id: string;
   pass_type: string;
   amount: number;
   amount_display: string;
-  net_amount: number | null;
-  net_amount_display: string | null;
+  discount_amount: number | null;
+  discount_amount_display: string | null;
+  organizer_net: number;
+  organizer_net_display: string;
   status: string;
-  method: string;
-  date: string;
+  gateway: string;
+  type: string;
+  completed_at: string | null;
 }
 
-export interface RevenueData {
+export interface RevenueSummary {
   total_revenue: number;
   total_revenue_display: string;
   tickets_sold: number;
+  platform_fees: number;
+  platform_fees_display: string;
   gateway_fees: number;
   gateway_fees_display: string;
+  refunds: number;
+  refunds_display: string;
+  net_revenue: number;
+  net_revenue_display: string;
+  paid_out: number;
+  paid_out_display: string;
   outstanding_balance: number;
   outstanding_balance_display: string;
+  manual_revenue: number;
+  manual_revenue_display: string;
+  online_revenue: number;
+  online_revenue_display: string;
+}
+
+export interface RevenueData {
+  summary: RevenueSummary;
   transactions: RevenueTransaction[];
 }
 
