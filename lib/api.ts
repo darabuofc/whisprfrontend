@@ -1351,8 +1351,11 @@ export async function getPaymentBreakdown(registrationId: string): Promise<Payme
 }
 
 // Attendee: Initiate payment (get Safepay checkout URL)
+// Proxied through Next.js API route to avoid CORS issues on backend error responses
 export async function initiatePayment(registrationId: string): Promise<PaymentInitiateResponse> {
-  const res = await api.post("/payments/initiate", { registration_id: registrationId });
+  const res = await api.post("/api/payments/initiate/", { registration_id: registrationId }, {
+    baseURL: "",
+  });
   return res.data;
 }
 
