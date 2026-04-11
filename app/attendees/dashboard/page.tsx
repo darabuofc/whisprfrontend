@@ -612,9 +612,26 @@ const HeroEventCard = memo(function HeroEventCard({ event }: { event: ExploreEve
             </div>
           )}
           {r?.is_registered && (
-            <div className="px-2.5 py-1 rounded-full bg-[#D4A574]/15 border border-[#D4A574]/20 text-[11px] font-medium text-[#D4A574] shadow-[0_0_10px_rgba(212,165,116,0.2)]">
-              Registered
-            </div>
+            r?.registration?.status === "Paid" ? (
+              <div className="relative rounded-full p-[1.5px] overflow-hidden shadow-[0_0_12px_rgba(212,165,116,0.3)]">
+                <div
+                  className="absolute inset-[-50%] will-change-transform"
+                  style={{
+                    background: "conic-gradient(from 0deg, transparent 0%, #D4A574 10%, #B8785C 20%, transparent 30%, transparent 70%, #D4A574 80%, #B8785C 90%, transparent 100%)",
+                    animation: "spin-glow 3s linear infinite",
+                  }}
+                />
+                <div className="relative rounded-full bg-[#1C1C1E] px-2.5 py-1">
+                  <span className="text-[11px] font-bold text-[#D4A574] drop-shadow-[0_0_6px_rgba(212,165,116,0.4)]">
+                    Paid
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="px-2.5 py-1 rounded-full bg-[#D4A574]/15 border border-[#D4A574]/20 text-[11px] font-medium text-[#D4A574] shadow-[0_0_10px_rgba(212,165,116,0.2)]">
+                {r?.registration?.status ?? "Registered"}
+              </div>
+            )
           )}
         </div>
 
