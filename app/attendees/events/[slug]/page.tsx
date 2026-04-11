@@ -838,7 +838,8 @@ export default function EventDetailPage() {
           </div>
         </motion.section>
 
-        {/* SECTION 2: Event Banner & Info */}
+        {/* SECTION 2: Event Banner & Info — hidden when registered (premium card shows this) */}
+        {!event.user_registered && (
         <motion.section
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -881,6 +882,7 @@ export default function EventDetailPage() {
             )}
           </div>
         </motion.section>
+        )}
 
         {/* SECTION 3: Passes - Main CTA */}
         {!isPaid && (
@@ -1207,47 +1209,7 @@ export default function EventDetailPage() {
             </motion.section>
           )}
 
-        {/* Paid / Ticket Confirmation — shown when status is paid */}
-        {event.user_registered &&
-          event.registration?.status?.toLowerCase() === "paid" && (
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-[#D4A574]/20 bg-[#1C1C1E] p-5"
-            >
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#D4A574]/10 border border-[#D4A574]/20 flex items-center justify-center">
-                  <CheckCircle2 size={24} className="text-[#D4A574]" />
-                </div>
-                <div>
-                  <h3
-                    className="text-base font-semibold text-white mb-1"
-                    style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-                  >
-                    You&apos;re locked in.
-                  </h3>
-                  <p className="text-sm text-white/50">
-                    {event.name}
-                    {(event.date || event.venue) && (
-                      <span className="block text-xs text-white/40 mt-0.5">
-                        {[formatDate(event.date), event.venue].filter(Boolean).join(" · ")}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <button
-                  onClick={() => router.push("/attendees/dashboard")}
-                  className="w-full py-3 rounded-xl bg-[#D4A574] text-[#0A0A0A] font-semibold text-sm hover:bg-[#B8785C] transition-all"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-                >
-                  View Your Ticket
-                </button>
-                <p className="text-xs text-white/30">
-                  A confirmation has been sent to your WhatsApp.
-                </p>
-              </div>
-            </motion.section>
-          )}
+        {/* Paid status is handled by the premium registration card above */}
 
         {/* Payment Expired State */}
         {event.user_registered &&
