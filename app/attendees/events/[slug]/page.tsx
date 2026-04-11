@@ -21,6 +21,8 @@ import {
   AlertTriangle,
   XCircle,
   Loader2,
+  LogOut,
+  Pencil,
 } from "lucide-react";
 import {
   getEventById,
@@ -30,6 +32,8 @@ import {
   validateDiscountCode,
   getEventRegistrationQuestions,
   cancelRegistration,
+  getMe,
+  type Profile,
   type DiscountValidationResult,
   type RegistrationQuestion,
 } from "@/lib/api";
@@ -37,6 +41,8 @@ import { extractEventIdFromSlug } from "@/lib/utils";
 import AddPlusOneSection from "@/components/attendees/AddPlusOneSection";
 import PaymentSection from "@/components/attendees/PaymentSection";
 import { toast } from "sonner";
+import Image from "next/image";
+import NotificationBell from "@/components/organizer/NotificationBell";
 
 interface EventOrganization {
   id: string;
@@ -115,6 +121,10 @@ export default function EventDetailPage() {
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string | string[]>>({});
   const [questionErrors, setQuestionErrors] = useState<Record<string, string>>({});
 
+  // Top bar state
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
 
   // Check authentication status on mount
   useEffect(() => {
@@ -122,14 +132,35 @@ export default function EventDetailPage() {
     setIsAuthenticated(!!token);
   }, []);
 
+  // Fetch user profile when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    (async () => {
+      try {
+        const me = await getMe();
+        setProfile(me);
+      } catch {
+        // Profile fetch failed — non-critical
+      }
+    })();
+  }, [isAuthenticated]);
+
   const handleSignInRedirect = () => {
     const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
     router.push(`/auth?role=attendee&redirect=${encodeURIComponent(currentPath)}`);
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem("whispr_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("whispr_role");
+    router.push("/auth");
+  };
+
   const handleShareRegistration = async () => {
     if (!event) return;
-    const shareText = `Check out ${event.name}!${event.registration?.registration_id ? ` My registration code: ${event.registration.registration_id}` : ""}`;
+    const isSinglePass = event.registration?.pass?.max_members === 1;
+    const shareText = `Check out ${event.name}!${!isSinglePass && event.registration?.registration_id ? ` My registration code: ${event.registration.registration_id}` : ""}`;
     const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
     if (navigator.share) {
@@ -498,6 +529,8 @@ export default function EventDetailPage() {
       </div>
     );
 
+  const isPaid = event?.registration?.status?.toLowerCase() === "paid";
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0A0A0A] text-white">
       {/* Background glows */}
@@ -507,14 +540,190 @@ export default function EventDetailPage() {
         <div className="absolute inset-0 bg-[url('/noise.png')] bg-[length:240px_240px] opacity-[0.08] mix-blend-overlay" />
       </div>
 
+      {/* ─── DESKTOP HEADER ─── */}
+      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-50 h-16 items-center justify-between px-8 bg-[#0A0A0A]/70 backdrop-blur-2xl border-b border-white/[0.06]">
+        <Image
+          src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
+          alt="Whispr"
+          width={100}
+          height={28}
+          className="h-6 w-auto opacity-80 cursor-pointer"
+          onClick={() => router.push("/attendees/dashboard")}
+          priority
+        />
+        <div className="flex items-center gap-3">
+          {isAuthenticated && <NotificationBell />}
+          {isAuthenticated && profile ? (
+            <div className="relative">
+              <button
+                onClick={() => setDesktopMenuOpen(!desktopMenuOpen)}
+                className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-white/[0.08] flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {profile.profilePicture ? (
+                    <img src={profile.profilePicture} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xs font-semibold text-neutral-400">
+                      {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm text-neutral-300 max-w-[120px] truncate">
+                  {profile.fullName || "User"}
+                </span>
+              </button>
+              <AnimatePresence>
+                {desktopMenuOpen && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setDesktopMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
+                    >
+                      <div className="px-3 py-2 mb-1">
+                        <p className="text-sm font-medium truncate">{profile.fullName || "User"}</p>
+                        <p className="text-xs text-neutral-500 truncate">{profile.email}</p>
+                      </div>
+                      <div className="h-px bg-white/[0.06] my-1" />
+                      <button
+                        onClick={() => { setDesktopMenuOpen(false); router.push("/attendees/dashboard?tab=profile"); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                      >
+                        <Pencil size={15} />
+                        Edit Profile
+                      </button>
+                      <div className="h-px bg-white/[0.06] my-1" />
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                      >
+                        <LogOut size={15} />
+                        Sign out
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : !isAuthenticated ? (
+            <button
+              onClick={handleSignInRedirect}
+              className="text-sm text-[#D4A574] hover:text-[#B8785C] transition"
+            >
+              Sign In
+            </button>
+          ) : null}
+        </div>
+      </header>
+
+      {/* ─── MOBILE HEADER ─── */}
+      <header className="lg:hidden sticky top-0 z-40 bg-[#0A0A0A]/70 backdrop-blur-2xl border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 h-14">
+          <Image
+            src="https://whispr-app-storage.s3.eu-north-1.amazonaws.com/events/logotypeface.svg"
+            alt="Whispr"
+            width={90}
+            height={24}
+            className="h-5 w-auto opacity-80 cursor-pointer"
+            onClick={() => router.push("/attendees/dashboard")}
+            priority
+          />
+          <div className="flex items-center gap-2">
+            {isAuthenticated && <NotificationBell />}
+            {isAuthenticated && profile ? (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center overflow-hidden"
+              >
+                {profile.profilePicture ? (
+                  <img src={profile.profilePicture} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs font-semibold text-neutral-400">
+                    {profile.fullName?.charAt(0)?.toUpperCase() || "U"}
+                  </span>
+                )}
+              </button>
+            ) : !isAuthenticated ? (
+              <button
+                onClick={handleSignInRedirect}
+                className="text-sm text-[#D4A574] hover:text-[#B8785C] transition"
+              >
+                Sign In
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-3 top-[58px] w-56 rounded-xl border border-[#2C2C2E] bg-[#1C1C1E]/95 backdrop-blur-xl p-2 shadow-2xl shadow-black/50 z-50"
+              >
+                <div className="px-3 py-2 mb-1">
+                  <p className="text-sm font-medium truncate">{profile?.fullName || "User"}</p>
+                  <p className="text-xs text-neutral-500 truncate">{profile?.email}</p>
+                </div>
+                <div className="h-px bg-white/[0.06] my-1" />
+                <button
+                  onClick={() => { setMobileMenuOpen(false); router.push("/attendees/dashboard?tab=profile"); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                >
+                  <Pencil size={15} />
+                  Edit Profile
+                </button>
+                {profile?.instagramHandle && (
+                  <a
+                    href={`https://instagram.com/${profile.instagramHandle.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  >
+                    <Instagram size={15} />
+                    {profile.instagramHandle.startsWith("@") ? profile.instagramHandle : `@${profile.instagramHandle}`}
+                  </a>
+                )}
+                <div className="h-px bg-white/[0.06] my-1" />
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <LogOut size={15} />
+                  Sign out
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </header>
+
       <motion.main
         initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.05 }}
         className="relative z-10 mx-auto flex max-w-2xl flex-col gap-6 px-4 pb-12 pt-6 sm:px-6"
       >
-        {/* Header with back button and share */}
-        <div className="flex items-center justify-between">
+        {/* Back + Share inline controls */}
+        <div className="flex items-center justify-between lg:pt-16">
           <button
             onClick={() => router.back()}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/40 backdrop-blur transition hover:border-[#D4A574]/60 hover:text-[#D4A574]"
@@ -654,6 +863,7 @@ export default function EventDetailPage() {
         </motion.section>
 
         {/* SECTION 3: Passes - Main CTA */}
+        {!isPaid && (
         <motion.section
           ref={passesRef}
           initial={{ opacity: 0, y: 16 }}
@@ -743,9 +953,10 @@ export default function EventDetailPage() {
             </div>
           )}
         </motion.section>
+        )}
 
         {/* Already Registered — Application Card */}
-        {event.user_registered && (
+        {event.user_registered && !isPaid && (
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -897,7 +1108,7 @@ export default function EventDetailPage() {
                     {event.name}
                     {(event.date || event.venue) && (
                       <span className="block text-xs text-white/40 mt-0.5">
-                        {[event.date, event.venue].filter(Boolean).join(" · ")}
+                        {[formatDate(event.date), event.venue].filter(Boolean).join(" · ")}
                       </span>
                     )}
                   </p>
