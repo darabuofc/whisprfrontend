@@ -208,7 +208,8 @@ export default function EventDetailPage() {
   const registrationStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "approved":
-        return "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/20";
+      case "paid":
+        return "text-emerald-400 bg-emerald-500/15 border-emerald-500/20";
       case "pending":
       case "pending approval":
         return "text-amber-400 bg-amber-500/10 border-amber-500/20";
@@ -220,6 +221,25 @@ export default function EventDetailPage() {
         return "text-orange-400 bg-orange-500/10 border-orange-500/20";
       default:
         return "text-[#D4A574] bg-[#D4A574]/10 border-[#D4A574]/20";
+    }
+  };
+
+  const registrationStatusGlow = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "approved":
+      case "paid":
+        return "0 0 12px rgba(74, 222, 128, 0.4)";
+      case "pending":
+      case "pending approval":
+        return "0 0 12px rgba(251, 191, 36, 0.4)";
+      case "rejected":
+        return "0 0 12px rgba(248, 113, 113, 0.4)";
+      case "cancelled":
+        return "0 0 8px rgba(163, 163, 163, 0.2)";
+      case "incomplete":
+        return "0 0 12px rgba(251, 146, 60, 0.4)";
+      default:
+        return "0 0 12px rgba(212, 165, 116, 0.3)";
     }
   };
 
@@ -955,121 +975,223 @@ export default function EventDetailPage() {
         </motion.section>
         )}
 
-        {/* Already Registered — Application Card */}
-        {event.user_registered && !isPaid && (
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[#2C2C2E] bg-[#1C1C1E] overflow-hidden"
-          >
-            <div className="p-4">
-              {/* Header row */}
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <CheckCircle2 className="text-[#D4A574] flex-shrink-0" size={20} />
-                  <h3 className="font-semibold text-sm">You&apos;re Registered</h3>
-                </div>
+        {/* Already Registered — Premium Registration Card */}
+        {event.user_registered && (() => {
+          const status = event.registration?.status?.toLowerCase();
+          const ctaConfig = (() => {
+            switch (status) {
+              case "paid":
+                return { label: "View Ticket", onClick: () => router.push("/attendees/dashboard"), disabled: false, gradient: true };
+              case "approved":
+                return { label: "Complete Payment", onClick: () => document.getElementById("payment-section")?.scrollIntoView({ behavior: "smooth" }), disabled: false, gradient: true };
+              case "pending":
+              case "pending approval":
+                return { label: "Awaiting Review", onClick: () => {}, disabled: true, gradient: false };
+              case "incomplete":
+                return { label: "Complete Registration", onClick: () => {}, disabled: false, gradient: true };
+              case "rejected":
+                return { label: "Registration Rejected", onClick: () => {}, disabled: true, gradient: false };
+              case "cancelled":
+                return { label: "Browse Events", onClick: () => router.push("/attendees/dashboard"), disabled: false, gradient: false };
+              default:
+                return { label: "View Details", onClick: () => {}, disabled: false, gradient: true };
+            }
+          })();
 
-                {event.registration?.status && (
-                  <span
-                    className={`flex-shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium capitalize border ${registrationStatusColor(event.registration.status)}`}
-                  >
-                    {event.registration.status}
-                  </span>
-                )}
+          return (
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.01, y: -4 }}
+              className="relative overflow-hidden"
+              style={{ borderRadius: 20 }}
+            >
+              {/* Hero Image with Gradient Overlay */}
+              <div className="relative aspect-[2/1] w-full overflow-hidden" style={{ borderRadius: '20px 20px 0 0' }}>
+                <img
+                  src={event.cover || "/event-placeholder.jpg"}
+                  alt={event.name}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.3), transparent)' }}
+                />
               </div>
 
-              {event.registration ? (
-                <>
-                  {/* Gender mismatch warning */}
-                  {event.registration.gender_mismatch && (
-                    <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
-                      <AlertTriangle size={11} />
-                      Gender mismatch
+              {/* Glass Card Container */}
+              <div
+                className="relative -mt-6"
+                style={{
+                  background: 'rgba(20, 20, 25, 0.6)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  borderRadius: 20,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.03)',
+                }}
+              >
+                <div className="p-5">
+                  {/* Status Badge — top-right */}
+                  {event.registration?.status && (
+                    <div className="flex justify-end mb-3">
+                      <span
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold capitalize border ${registrationStatusColor(event.registration.status)}`}
+                        style={{ boxShadow: registrationStatusGlow(event.registration.status) }}
+                      >
+                        {event.registration.status}
+                      </span>
                     </div>
                   )}
 
-                  {/* Pass info row */}
-                  {event.registration.pass?.name && (
-                    <div className="flex items-center justify-between py-2.5 border-t border-white/[0.06] mb-3">
-                      <div>
-                        <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
-                          Pass
-                        </span>
-                        <p className="text-xs font-medium">{event.registration.pass.name}</p>
-                      </div>
-                    </div>
-                  )}
+                  {/* Event Title */}
+                  <h2
+                    className="text-xl sm:text-2xl font-bold text-white mb-2"
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontWeight: 700,
+                      textShadow: "0 0 20px rgba(212,165,116,0.15)",
+                    }}
+                  >
+                    {event.name}
+                  </h2>
 
-                  {/* Member progress for couple/group passes */}
-                  {event.registration.pass && event.registration.pass.max_members > 1 && (
-                    <div className="space-y-2.5 rounded-xl border border-white/[0.06] bg-black/20 p-3 mb-3">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-500">Members Joined</span>
-                        <span className="font-medium">
-                          {event.registration.members?.length ?? 1} / {event.registration.pass.max_members}
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-[#D4A574] transition-all duration-500"
-                          style={{
-                            width: `${((event.registration.members?.length ?? 1) / event.registration.pass.max_members) * 100}%`
+                  {/* Date + Location */}
+                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <span className="inline-flex items-center gap-1.5 text-sm text-white/50">
+                      <Calendar size={14} className="text-white/30" />
+                      {formatDate(event.date)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-sm text-white/50">
+                      <MapPin size={14} className="text-white/30" />
+                      {event.venue || "Venue TBA"}
+                    </span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-px bg-white/[0.06] mb-4" />
+
+                  {event.registration ? (
+                    <>
+                      {/* Gender mismatch warning */}
+                      {event.registration.gender_mismatch && (
+                        <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+                          <AlertTriangle size={11} />
+                          Gender mismatch
+                        </div>
+                      )}
+
+                      {/* Pass info row */}
+                      {event.registration.pass?.name && (
+                        <div className="flex items-center justify-between py-2.5 border-t border-white/[0.06] mb-3">
+                          <div>
+                            <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                              Pass
+                            </span>
+                            <p className="text-xs font-medium">{event.registration.pass.name}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Member progress for couple/group passes */}
+                      {event.registration.pass && event.registration.pass.max_members > 1 && (
+                        <div className="space-y-2.5 rounded-xl border border-white/[0.06] bg-black/20 p-3 mb-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-neutral-500">Members Joined</span>
+                            <span className="font-medium">
+                              {event.registration.members?.length ?? 1} / {event.registration.pass.max_members}
+                            </span>
+                          </div>
+                          <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-[#D4A574] transition-all duration-500"
+                              style={{
+                                width: `${((event.registration.members?.length ?? 1) / event.registration.pass.max_members) * 100}%`
+                              }}
+                            />
+                          </div>
+                          {event.registration.members && event.registration.members.length < event.registration.pass.max_members && (
+                            <p className="text-[11px] text-amber-400/80">
+                              Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Add your +1 section */}
+                      {event.registration.is_complete === false && (event.registration.remaining_slots ?? 0) > 0 && event.registration.join_code && (
+                        <AddPlusOneSection
+                          registrationId={event.registration.registration_id!}
+                          joinCode={event.registration.join_code}
+                          onGuestAdded={async () => {
+                            const data = await getEventById(eventId);
+                            setEvent(data);
                           }}
                         />
-                      </div>
-                      {event.registration.members && event.registration.members.length < event.registration.pass.max_members && (
-                        <p className="text-[11px] text-amber-400/80">
-                          Waiting for {event.registration.pass.max_members - event.registration.members.length} more {event.registration.pass.max_members - event.registration.members.length === 1 ? "person" : "people"} to join
-                        </p>
                       )}
-                    </div>
-                  )}
 
-                  {/* Add your +1 section */}
-                  {event.registration.is_complete === false && (event.registration.remaining_slots ?? 0) > 0 && event.registration.join_code && (
-                    <AddPlusOneSection
-                      registrationId={event.registration.registration_id!}
-                      joinCode={event.registration.join_code}
-                      onGuestAdded={async () => {
-                        const data = await getEventById(eventId);
-                        setEvent(data);
-                      }}
-                    />
-                  )}
-
-                  {/* Action buttons */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleShareRegistration}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 text-xs font-medium transition-all duration-300"
-                    >
-                      <Share2 size={12} />
-                      Share
-                    </button>
-                    {canCancelRegistration(event.registration.status) && (
-                      <button
-                        onClick={() => setCancelConfirmOpen(true)}
-                        className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                      {/* Primary CTA Button */}
+                      <motion.button
+                        whileTap={{ scale: 0.98 }}
+                        whileHover={ctaConfig.gradient ? { boxShadow: '0 10px 30px rgba(255,140,60,0.4)' } : undefined}
+                        onClick={ctaConfig.onClick}
+                        disabled={ctaConfig.disabled}
+                        className="w-full py-3.5 text-sm font-semibold transition-all duration-200 mb-3 mt-2 disabled:cursor-not-allowed"
+                        style={{
+                          background: ctaConfig.gradient
+                            ? 'linear-gradient(135deg, #ffb86b, #ff8a3d)'
+                            : ctaConfig.disabled
+                              ? 'rgba(255,255,255,0.04)'
+                              : 'transparent',
+                          color: ctaConfig.gradient
+                            ? '#0A0A0A'
+                            : ctaConfig.disabled
+                              ? 'rgba(255,255,255,0.3)'
+                              : 'rgba(255,255,255,0.7)',
+                          borderRadius: 12,
+                          border: !ctaConfig.gradient && !ctaConfig.disabled ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                          boxShadow: ctaConfig.gradient ? '0 0 12px rgba(255,184,107,0.2)' : 'none',
+                        }}
                       >
-                        <XCircle size={12} />
-                        Cancel
-                      </button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-white/60">Your registration is being processed.</p>
-              )}
-            </div>
-          </motion.section>
-        )}
+                        {ctaConfig.label}
+                      </motion.button>
+
+                      {/* Secondary actions */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleShareRegistration}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/[0.04] hover:bg-[#D4A574]/[0.08] border border-white/[0.06] hover:border-[#D4A574]/20 text-xs font-medium transition-all duration-300"
+                        >
+                          <Share2 size={12} />
+                          Share
+                        </button>
+                        {canCancelRegistration(event.registration.status) && (
+                          <button
+                            onClick={() => setCancelConfirmOpen(true)}
+                            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-red-400/70 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+                          >
+                            <XCircle size={12} />
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-white/60">Your registration is being processed.</p>
+                  )}
+                </div>
+              </div>
+            </motion.section>
+          );
+        })()}
 
         {/* Payment Section — shown when approved + unpaid */}
         {event.user_registered &&
           event.registration?.status?.toLowerCase() === "approved" &&
           event.registration?.registration_id && (
             <motion.section
+              id="payment-section"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
