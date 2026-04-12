@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import SiteLayout from "@/components/layout/SiteLayout";
+import { generateEventSlug } from "@/lib/utils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -61,9 +62,12 @@ function mapEvent(raw: any): EventData {
     ? orgLogoRaw
     : null;
 
+  const id = raw.id ?? "";
+  const name = fields.Name ?? fields.name ?? raw.name ?? "";
+
   return {
-    slug: raw.slug ?? raw.id ?? "",
-    name: fields.Name ?? fields.name ?? raw.name ?? "",
+    slug: id ? generateEventSlug(name, id) : "",
+    name,
     date: formatEventDate(fields.Date ?? fields.date ?? raw.date),
     rawDate: fields.Date ?? fields.date ?? raw.date ?? "",
     time: fields.Time ?? fields.time ?? raw.time ?? "",
@@ -177,7 +181,7 @@ function EventGridCard({ event }: { event: EventData }) {
 
   return (
     <Link
-      href={`/events/${event.slug}`}
+      href={`/attendees/events/${event.slug}`}
       style={{
         display: "block",
         borderRadius: "12px",
